@@ -1,0 +1,490 @@
+app: scholar_auth
+base_url: https://scholar-auth-jamarrlmayes.replit.app
+version: v2.2
+owner: Backend Engineering + Security Team
+target_score: 4
+generated_at: "2025-10-29T16:45:00Z"
+
+known_blockers:
+  - id: FP-AUTH-JWKS-RS256
+    description: JWKS endpoint returns 500 with 100% failure rate, blocking all token validation ecosystem-wide
+    gate_impact: T+24h Infrastructure Gate + ALL downstream gates
+    severity: P0-CRITICAL
+    current_score: 1/5
+    target_score: 4/5
+
+  - id: FP-AUTH-CANARY-JSON
+    description: Universal /canary endpoint missing (404)
+    gate_impact: T+24h Infrastructure Gate
+    severity: P0
+    current_score: 1/5
+    target_score: 4/5
+
+tasks:
+  - id: FP-AUTH-JWKS-RS256
+    title: Fix JWKS endpoint to return valid RSA keys (RS256)
+    summary: Generate RSA key pair, implement stable JWKS endpoint returning valid JSON with key material for JWT verification
+    priority: P0-CRITICAL
+    estimate_hours: 4-8
+    owner: Backend Engineering + Security
+    
+    root_cause: |
+      JWKS endpoint returns 500 Internal Server Error with 100% failure rate.
+      Most likely causes:
+      1. RSA key pair not generated or not accessible
+      2. JWKS handler not properly initialized
+      3. Missing environment variables or secrets
+      4. Unhandled exceptions in key loading logic
+    
+    changes:
+      - file: server/auth/keys.ts (or equivalent)
+        action: create
+        notes: |
+          Generate and manage RSA key pairs for JWT signing.
+          Use crypto module to generate RS256 keys.
+        
+        code_diff: |
+          import crypto from 'crypto';
+          import fs from 'fs';
+          import path from 'path';
+          
+          const KEY_DIR = process.env.KEY_DIR || '/tmp/jwks';
+          const PRIVATE_KEY_PATH = path.join(KEY_DIR, 'private.pem');
+          const PUBLIC_KEY_PATH = path.join(KEY_DIR, 'public.pem');
+          
+          export interface JWK {
+            kid: string;
+            kty: string;
+            alg: string;
+            use: string;
+            n: string;
+            e: string;
+          }
+          
+          // Generate RSA key pair if not exists
+          export function ensureKeysExist(): void {
+            if (!fs.existsSync(KEY_DIR)) {
+              fs.mkdirSync(KEY_DIR, { recursive: true });
+            }
+            
+            if (!fs.existsSync(PRIVATE_KEY_PATH) || !fs.existsSync(PUBLIC_KEY_PATH)) {
+              console.log('[AUTH] Generating new RSA key pair...');
+              const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
+                modulusLength: 2048,
+                publicKeyEncoding: {
+                  type: 'spki',
+                  format: 'pem'
+                },
+                privateKeyEncoding: {
+                  type: 'pkcs8',
+                  format: 'pem'
+                }
+              });
+              
+              fs.writeFileSync(PRIVATE_KEY_PATH, privateKey);
+              fs.writeFileSync(PUBLIC_KEY_PATH, publicKey);
+              console.log('[AUTH] RSA key pair generated successfully');
+            }
+          }
+          
+          // Convert PEM public key to JWK format
+          export function publicKeyToJWK(kid: string = 'default-2025'): JWK {
+            const publicKeyPem = fs.readFileSync(PUBLIC_KEY_PATH, 'utf8');
+            const publicKey = crypto.createPublicKey(publicKeyPem);
+            const jwk = publicKey.export({ format: 'jwk' }) as any;
+            
+            return {
+              kid,
+              kty: 'RSA',
+              alg: 'RS256',
+              use: 'sig',
+              n: jwk.n,
+              e: jwk.e
+            };
+          }
+          
+          // Get private key for signing
+          export function getPrivateKey(): string {
+            return fs.readFileSync(PRIVATE_KEY_PATH, 'utf8');
+          }
+      
+      - file: server/index.ts (or server/routes.ts)
+        action: add
+        notes: |
+          Add JWKS endpoint BEFORE any SPA catch-all.
+          Must return valid JSON with Content-Type: application/json.
+        
+        code_diff: |
+          import { ensureKeysExist, publicKeyToJWK } from './auth/keys';
+          
+          // Initialize keys on startup
+          ensureKeysExist();
+          
+          // Add BEFORE app.use(express.static(...))
+          app.get('/jwks.json', (req, res) => {
+            try {
+              const jwk = publicKeyToJWK('scholar-auth-2025-01');
+              res.setHeader('Content-Type', 'application/json');
+              res.setHeader('Cache-Control', 'public, max-age=3600');
+              res.status(200).json({
+                keys: [jwk]
+              });
+            } catch (error) {
+              console.error('[AUTH] JWKS endpoint error:', error);
+              res.status(500).json({
+                error: 'internal_error',
+                error_description: 'Failed to generate JWKS'
+              });
+            }
+          });
+          
+          // Also support alternative path
+          app.get('/.well-known/jwks.json', (req, res) => {
+            res.redirect(308, '/jwks.json');
+          });
+      
+      - file: server/auth/tokens.ts (create if needed)
+        action: create
+        notes: |
+          JWT token signing and validation utilities.
+        
+        code_diff: |
+          import jwt from 'jsonwebtoken';
+          import { getPrivateKey, publicKeyToJWK } from './keys';
+          
+          export interface TokenPayload {
+            iss: string;
+            aud: string | string[];
+            sub: string;
+            exp: number;
+            iat: number;
+            scope?: string;
+          }
+          
+          export function signToken(payload: Omit<TokenPayload, 'iat'>): string {
+            const privateKey = getPrivateKey();
+            const jwk = publicKeyToJWK();
+            
+            return jwt.sign(
+              { ...payload, iat: Math.floor(Date.now() / 1000) },
+              privateKey,
+              {
+                algorithm: 'RS256',
+                keyid: jwk.kid
+              }
+            );
+          }
+          
+          export function verifyToken(token: string): TokenPayload {
+            const publicKey = getPrivateKey(); // In production, fetch from JWKS
+            return jwt.verify(token, publicKey, {
+              algorithms: ['RS256']
+            }) as TokenPayload;
+          }
+    
+    verification:
+      - step: "Generate keys on startup"
+        expect: "Keys created in /tmp/jwks/ directory"
+      
+      - step: "curl -s https://scholar-auth-jamarrlmayes.replit.app/jwks.json | jq ."
+        expect: "200 OK with valid JSON"
+      
+      - step: "curl -s https://scholar-auth-jamarrlmayes.replit.app/jwks.json | jq '.keys | length'"
+        expect: "1 (at least one key present)"
+      
+      - step: "curl -s https://scholar-auth-jamarrlmayes.replit.app/jwks.json | jq '.keys[0] | {kid, kty, alg, n, e}'"
+        expect: |
+          {
+            "kid": "scholar-auth-2025-01",
+            "kty": "RSA",
+            "alg": "RS256",
+            "n": "<base64url>",
+            "e": "AQAB"
+          }
+      
+      - step: "curl -I https://scholar-auth-jamarrlmayes.replit.app/jwks.json | grep -i content-type"
+        expect: "content-type: application/json"
+      
+      - step: "3-round P95 test (15 requests/round)"
+        expect: "P95 ≤ 160ms, 0% error rate"
+      
+      - step: "Integration test with scholarship_api"
+        expect: "scholarship_api can fetch JWKS and validate test token"
+    
+    success_criteria:
+      - /jwks.json returns 200 OK
+      - Content-Type: application/json
+      - Response includes keys array with at least one RS256 key
+      - Key includes required fields: kid, kty, alg, use, n, e
+      - 0% error rate across 45 samples (3 rounds of 15)
+      - P95 TTFB ≤ 160ms
+      - Cache-Control header present (public, max-age=3600)
+      - Downstream apps can successfully fetch and parse JWKS
+      - Score increases from 1/5 to ≥3/5 (may reach 4/5 with canary)
+    
+    rollback_plan: |
+      1. Remove /jwks.json route handler
+      2. Delete server/auth/keys.ts file
+      3. Remove key initialization from server startup
+      4. Restart workflow
+      5. Verify /jwks.json returns to previous state (500 or 404)
+      6. Remove /tmp/jwks directory if testing
+    
+    risk: medium-high
+    notes: |
+      - Key generation adds startup time (acceptable)
+      - Key persistence in /tmp is ephemeral; consider secrets manager for production
+      - Key rotation strategy needed (document timeline)
+      - Ensure keys are never logged or exposed in error messages
+      - Test key format compatibility with jwt libraries
+
+  - id: FP-AUTH-CANARY-JSON
+    title: Implement universal /canary endpoint (JSON)
+    summary: Add required /canary endpoint returning JSON health status per global protocol
+    priority: P0
+    estimate_hours: 1
+    owner: Backend Engineering
+    
+    root_cause:
+      /canary endpoint missing (404). Universal requirement for all 8 apps.
+    
+    changes:
+      - file: server/index.ts
+        action: add
+        notes: Add /canary route BEFORE SPA catch-all
+        
+        code_diff: |
+          // Add BEFORE app.use(express.static(...))
+          app.get('/canary', (req, res) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.status(200).json({
+              ok: true,
+              service: 'scholar_auth',
+              base_url: process.env.REPL_SLUG
+                ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`
+                : 'http://localhost:5000',
+              version: 'v2.2',
+              timestamp: new Date().toISOString()
+            });
+          });
+    
+    verification:
+      - step: "curl -s https://scholar-auth-jamarrlmayes.replit.app/canary | jq ."
+        expect: "200 OK with JSON body"
+      
+      - step: "curl -s https://scholar-auth-jamarrlmayes.replit.app/canary | jq '.ok'"
+        expect: "true"
+      
+      - step: "curl -I https://scholar-auth-jamarrlmayes.replit.app/canary | grep -i content-type"
+        expect: "content-type: application/json"
+    
+    success_criteria:
+      - /canary returns 200 OK
+      - Content-Type: application/json
+      - Body includes: ok, service, base_url, version, timestamp
+      - P95 ≤ 160ms
+      - Combined with JWKS fix, score reaches ≥4/5
+    
+    rollback_plan: |
+      1. Remove app.get('/canary', ...) block
+      2. Restart workflow
+    
+    risk: low
+
+  - id: FP-AUTH-OIDC-DISCOVERY
+    title: Implement OIDC discovery document
+    summary: Add /.well-known/openid-configuration for OIDC compliance
+    priority: P1
+    estimate_hours: 2
+    owner: Backend Engineering
+    
+    changes:
+      - file: server/index.ts
+        action: add
+        notes: OIDC discovery endpoint
+        
+        code_diff: |
+          app.get('/.well-known/openid-configuration', (req, res) => {
+            const baseUrl = process.env.REPL_SLUG
+              ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`
+              : 'http://localhost:5000';
+            
+            res.setHeader('Content-Type', 'application/json');
+            res.json({
+              issuer: baseUrl,
+              authorization_endpoint: `${baseUrl}/authorize`,
+              token_endpoint: `${baseUrl}/token`,
+              userinfo_endpoint: `${baseUrl}/userinfo`,
+              jwks_uri: `${baseUrl}/jwks.json`,
+              response_types_supported: ['code', 'token'],
+              grant_types_supported: ['authorization_code', 'client_credentials'],
+              subject_types_supported: ['public'],
+              id_token_signing_alg_values_supported: ['RS256'],
+              scopes_supported: ['openid', 'profile', 'email']
+            });
+          });
+    
+    success_criteria:
+      - Returns valid OIDC discovery document
+      - jwks_uri points to working /jwks.json endpoint
+    
+    risk: low
+
+  - id: FP-AUTH-TOKEN-ISSUANCE
+    title: Implement POST /token endpoint for JWT issuance
+    summary: Add token endpoint supporting client_credentials grant type
+    priority: P1
+    estimate_hours: 3-4
+    owner: Backend Engineering
+    dependencies: [FP-AUTH-JWKS-RS256]
+    
+    changes:
+      - file: server/routes.ts
+        action: add
+        notes: Token issuance endpoint
+        
+        code_diff: |
+          import { signToken } from './auth/tokens';
+          
+          app.post('/token', express.urlencoded({ extended: true }), (req, res) => {
+            const { grant_type, client_id, client_secret } = req.body;
+            
+            if (grant_type !== 'client_credentials') {
+              return res.status(400).json({
+                error: 'unsupported_grant_type'
+              });
+            }
+            
+            // In production: validate client_id and client_secret against database
+            if (!client_id || !client_secret) {
+              return res.status(401).json({
+                error: 'invalid_client'
+              });
+            }
+            
+            const baseUrl = process.env.REPL_SLUG
+              ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`
+              : 'http://localhost:5000';
+            
+            const access_token = signToken({
+              iss: baseUrl,
+              aud: 'scholarship_api',
+              sub: client_id,
+              exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour
+              scope: 'api:read api:write'
+            });
+            
+            res.json({
+              access_token,
+              token_type: 'Bearer',
+              expires_in: 3600
+            });
+          });
+    
+    success_criteria:
+      - Returns access_token for valid credentials
+      - Token can be verified using JWKS
+      - Integration test with scholarship_api succeeds
+    
+    risk: medium
+
+  - id: FP-SEC-HEADERS-6OF6
+    title: Add 6/6 security headers
+    summary: Ensure all required security headers present on all responses
+    priority: P1
+    estimate_hours: 1
+    owner: Backend Engineering
+    
+    changes:
+      - file: server/index.ts
+        action: modify
+        notes: Add security headers middleware
+        
+        code_diff: |
+          import helmet from 'helmet';
+          
+          app.use(helmet({
+            strictTransportSecurity: {
+              maxAge: 31536000,
+              includeSubDomains: true,
+              preload: true
+            },
+            contentSecurityPolicy: {
+              directives: {
+                defaultSrc: ["'self'"],
+                frameAncestors: ["'none'"],
+                upgradeInsecureRequests: []
+              }
+            },
+            frameguard: { action: 'deny' },
+            referrerPolicy: { policy: 'no-referrer' },
+            permissionsPolicy: {
+              features: {
+                camera: ["'none'"],
+                microphone: ["'none'"],
+                geolocation: ["'none'"]
+              }
+            }
+          }));
+    
+    success_criteria:
+      - All 6 headers present on all routes
+      - Headers comply with security best practices
+    
+    risk: low
+
+quick_wins:
+  - description: Add /canary JSON endpoint
+    eta_minutes: 30
+    impact: Meets universal requirement, improves score 1/5 → 2/5
+  
+  - description: Fix JWKS endpoint (if simple config issue)
+    eta_minutes: 60-120
+    impact: Unblocks entire ecosystem, 2/5 → 4/5
+
+dependencies:
+  - app: ALL (scholarship_api, student_pilot, provider_register, etc.)
+    reason: All apps depend on scholar_auth for JWT validation
+    blocking: true
+    notes: |
+      - This is THE critical path blocker for revenue
+      - Must be fixed before any other app can function in authenticated mode
+      - Parallel work on other apps possible, but integration testing blocked
+
+phased_rollout:
+  phase_1:
+    name: JWKS Restoration (P0-CRITICAL)
+    tasks: [FP-AUTH-JWKS-RS256, FP-AUTH-CANARY-JSON]
+    eta_hours: 4-8
+    gate_unblocked: Partial T+24h (enables downstream apps to start integration)
+  
+  phase_2:
+    name: Full OIDC Compliance (P1)
+    tasks: [FP-AUTH-OIDC-DISCOVERY, FP-AUTH-TOKEN-ISSUANCE]
+    eta_hours: 3-4
+    gate_unblocked: Full T+24h Infrastructure
+  
+  phase_3:
+    name: Security Hardening (P1)
+    tasks: [FP-SEC-HEADERS-6OF6]
+    eta_hours: 1
+
+total_eta_to_ready: 8-16 hours
+total_eta_to_4of5: 5-9 hours (Phase 1 + Phase 2)
+total_eta_to_start_generating_revenue: 10-18 hours (includes student_pilot integration)
+
+ecosystem_timeline_contribution:
+  parallel_work: false
+  critical_path: true
+  dependencies_resolved: N/A (this app has no dependencies)
+  blocks_all_revenue: true
+  eta_to_unblock_ecosystem: 4-8 hours (Phase 1)
+  eta_to_start_generating_revenue: 10-18 hours (scholar_auth + student_pilot)
+
+security_considerations:
+  - RSA key storage: Use environment variables or secrets manager in production
+  - Key rotation: Implement 90-day rotation policy
+  - Key exposure: Never log private keys or expose in error messages
+  - Token lifetime: Keep short (1 hour) with refresh token support
+  - Client credentials: Store hashed in database with bcrypt
+  - Rate limiting: Add to /token endpoint (10 requests/minute per client)

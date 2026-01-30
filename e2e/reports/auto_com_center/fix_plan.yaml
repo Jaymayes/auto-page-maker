@@ -1,0 +1,669 @@
+# AGENT3 v2.2 Fix Plan — auto_com_center
+# Executive Command Center Remediation Plan
+# Date: October 29, 2025
+# Current Readiness: 4/5
+# Target Readiness: 5/5 (Full T+72h clearance)
+
+meta:
+  app: auto_com_center
+  current_score: 4
+  target_score: 5
+  total_estimated_hours: 3.5
+  priority: medium
+  gate_impact: T+72h conditional → full clearance
+  
+# NO CRITICAL BLOCKERS (P0)
+# All fixes are optimization for production excellence
+
+fixes:
+  # ==============================================
+  # P1: HIGH PRIORITY (Required for 5/5)
+  # ==============================================
+  
+  - id: FIX-001
+    priority: P1
+    title: "Reduce Memory Usage (Currently 97%)"
+    issue: "Memory heap utilization at 97%, causing /healthz to return 503 degraded"
+    impact: "Blocks full T+72h clearance; risk of OOM crashes under load"
+    estimated_hours: 2.0
+    risk: medium
+    
+    diagnosis:
+      current_state: "heapUsedPercent: 97% (195MB used / 201MB total)"
+      target_state: "heapUsedPercent: <80% with headroom for traffic spikes"
+      root_cause: "Likely causes: excessive caching, memory leaks, large in-memory datasets"
+      
+    investigation_steps:
+      - "Profile heap snapshots using Node.js inspector"
+      - "Check TanStack Query cache size and retention policies"
+      - "Review in-memory landing pages cache (2,101 pages loaded)"
+      - "Analyze business events telemetry buffer size"
+      - "Check for circular references or detached DOM nodes"
+      
+    remediation_steps:
+      - step: 1
+        action: "Profile current memory usage"
+        command: "node --inspect server/index.ts"
+        description: "Connect Chrome DevTools to capture heap snapshot"
+        
+      - step: 2
+        action: "Analyze landing pages cache"
+        file: "server/storage.ts"
+        changes: |
+          // Review LandingPageCache implementation
+          // Consider reducing cache retention or implementing LRU eviction
+          // Example: Limit cache to 500 most-accessed pages instead of all 2,101
+          
+      - step: 3
+        action: "Optimize TanStack Query cache"
+        file: "client/src/lib/queryClient.ts"
+        changes: |
+          export const queryClient = new QueryClient({
+            defaultOptions: {
+              queries: {
+                staleTime: 5 * 60 * 1000, // 5 minutes
+                gcTime: 10 * 60 * 1000,   // Reduce from default 30 min
+                // Add maximum cache size limits
+              },
+            },
+          });
+          
+      - step: 4
+        action: "Review business events buffer"
+        file: "server/lib/business-events.ts"
+        changes: |
+          // Ensure fire-and-forget pattern doesn't accumulate events
+          // Implement immediate flush after event emission
+          // Check PostgreSQL connection pool size (may hold memory)
+          
+      - step: 5
+        action: "Increase Node heap size as temporary measure"
+        file: "package.json"
+        changes: |
+          {
+            "scripts": {
+              "dev": "NODE_ENV=development NODE_OPTIONS='--max-old-space-size=512' tsx server/index.ts"
+            }
+          }
+        note: "Doubles heap from ~200MB to 512MB; buys time while optimizing"
+        
+      - step: 6
+        action: "Verify fix"
+        command: "curl -s http://localhost:5000/healthz | jq '.checks.memory'"
+        expected: "heapUsedPercent < 80"
+        
+    validation:
+      - "GET /healthz returns 200 (not 503)"
+      - "heapUsedPercent < 80%"
+      - "No OOM crashes under sustained traffic"
+      
+    rollback:
+      - "Revert NODE_OPTIONS change if issues arise"
+      - "Restore original cache configurations"
+      
+  # ==============================================
+  
+  - id: FIX-002
+    priority: P1
+    title: "Optimize KPI History Endpoint (Currently 261ms, Target ≤120ms)"
+    issue: "/api/executive/kpi/history TTFB is 261ms, 2.2x over 120ms target"
+    impact: "Affects executive dashboard UX; blocks 5/5 score"
+    estimated_hours: 1.5
+    risk: low
+    
+    diagnosis:
+      current_state: "P95 TTFB: 261ms (measured over 5 samples)"
+      target_state: "P95 TTFB: ≤120ms"
+      root_cause: "Missing database indexes + no query result caching"
+      
+    remediation_steps:
+      - step: 1
+        action: "Add database index on snapshot_date"
+        file: "shared/schema.ts"
+        changes: |
+          export const dailyKpiSnapshots = pgTable('daily_kpi_snapshots', {
+            id: serial('id').primaryKey(),
+            createdAt: timestamp('created_at').defaultNow().notNull(),
+            snapshotDate: date('snapshot_date').notNull(),
+            kpiData: jsonb('kpi_data').notNull(),
+            sourceHash: text('source_hash'),
+            generatedBy: text('generated_by').default('automated').notNull(),
+            requestId: text('request_id')
+          }, (table) => ({
+            // Add index for common query pattern
+            snapshotDateIdx: index('snapshot_date_idx').on(table.snapshotDate),
+            createdAtIdx: index('created_at_idx').on(table.createdAt)
+          }));
+          
+      - step: 2
+        action: "Push schema changes to database"
+        command: "npm run db:push"
+        note: "Creates indexes without data loss"
+        
+      - step: 3
+        action: "Implement query result caching"
+        file: "server/storage.ts"
+        changes: |
+          // Add simple in-memory cache with TTL
+          class DbStorage implements IStorage {
+            private kpiHistoryCache: {
+              data: KpiSnapshot[];
+              expiry: number;
+            } | null = null;
+            
+            async getKpiHistory(limit: number = 30): Promise<KpiSnapshot[]> {
+              // Check cache first
+              if (this.kpiHistoryCache && Date.now() < this.kpiHistoryCache.expiry) {
+                return this.kpiHistoryCache.data.slice(0, limit);
+              }
+              
+              // Query database
+              const results = await db.select()
+                .from(dailyKpiSnapshots)
+                .orderBy(desc(dailyKpiSnapshots.snapshotDate))
+                .limit(100); // Cache more than requested
+                
+              // Update cache with 5-minute TTL
+              this.kpiHistoryCache = {
+                data: results,
+                expiry: Date.now() + 5 * 60 * 1000
+              };
+              
+              return results.slice(0, limit);
+            }
+          }
+          
+      - step: 4
+        action: "Add cache invalidation on new snapshot creation"
+        file: "server/storage.ts"
+        changes: |
+          async createKpiSnapshot(data: InsertKpiSnapshot): Promise<KpiSnapshot> {
+            const result = await db.insert(dailyKpiSnapshots)
+              .values(data)
+              .returning();
+              
+            // Invalidate cache
+            this.kpiHistoryCache = null;
+            
+            return result[0];
+          }
+          
+      - step: 5
+        action: "Verify performance improvement"
+        command: |
+          # Warm up cache
+          curl -s http://localhost:5000/api/executive/kpi/history > /dev/null
+          
+          # Measure 10 requests
+          for i in {1..10}; do
+            curl -s -w "%{time_total}\n" -o /dev/null http://localhost:5000/api/executive/kpi/history
+          done | awk '{sum+=$1; if($1>max) max=$1} END {print "Avg:", sum/NR*1000, "ms | Max:", max*1000, "ms"}'
+        expected: "Avg < 100ms, Max < 120ms"
+        
+    validation:
+      - "GET /api/executive/kpi/history TTFB ≤ 120ms (P95)"
+      - "Database indexes created successfully"
+      - "Cache invalidation works on new snapshot creation"
+      
+    rollback:
+      - "Indexes can remain (no harm)"
+      - "Remove caching code if issues arise"
+      
+  # ==============================================
+  
+  - id: FIX-003
+    priority: P1
+    title: "Cache Sitemap.xml Generation (Currently 1411ms)"
+    issue: "/sitemap.xml TTFB is 1411ms, way over 120ms target"
+    impact: "Low priority (SEO crawlers tolerant of slow sitemaps), but polish for 5/5"
+    estimated_hours: 0.5
+    risk: low
+    
+    diagnosis:
+      current_state: "Dynamic generation on every request: 1411ms TTFB"
+      target_state: "Cached response: <100ms TTFB"
+      root_cause: "Queries 2,101 landing pages + generates XML on every request"
+      
+    remediation_steps:
+      - step: 1
+        action: "Add Cache-Control header"
+        file: "server/routes.ts"
+        changes: |
+          app.get("/sitemap.xml", async (req, res) => {
+            try {
+              const { SitemapGenerator } = await import("./services/sitemapGenerator.js");
+              const generator = new SitemapGenerator();
+              const sitemap = await generator.generateSitemap();
+              
+              res.setHeader('Content-Type', 'application/xml');
+              res.setHeader('Cache-Control', 'public, max-age=3600'); // Already present!
+              res.setHeader('X-Sitemap-Generated', new Date().toISOString()); // Add timestamp
+              res.send(sitemap);
+            } catch (error) {
+              console.error("Sitemap generation failed:", error);
+              res.status(500).send("Sitemap generation failed");
+            }
+          });
+          
+        note: "Cache-Control already set to 1 hour - issue may be client-side"
+        
+      - step: 2
+        action: "Implement server-side caching"
+        file: "server/services/sitemapGenerator.ts"
+        changes: |
+          export class SitemapGenerator {
+            private static cachedSitemap: string | null = null;
+            private static cacheExpiry: number = 0;
+            
+            async generateSitemap(): Promise<string> {
+              // Return cached sitemap if still valid
+              if (SitemapGenerator.cachedSitemap && Date.now() < SitemapGenerator.cacheExpiry) {
+                return SitemapGenerator.cachedSitemap;
+              }
+              
+              // Generate new sitemap
+              const sitemap = await this._generateFresh();
+              
+              // Cache for 1 hour
+              SitemapGenerator.cachedSitemap = sitemap;
+              SitemapGenerator.cacheExpiry = Date.now() + 60 * 60 * 1000;
+              
+              return sitemap;
+            }
+            
+            private async _generateFresh(): Promise<string> {
+              // Existing generation logic...
+            }
+            
+            // Add method to invalidate cache when new pages added
+            static invalidateCache(): void {
+              this.cachedSitemap = null;
+              this.cacheExpiry = 0;
+            }
+          }
+          
+      - step: 3
+        action: "Verify caching works"
+        command: |
+          # First request (cache miss) - will be slow
+          time curl -s http://localhost:5000/sitemap.xml > /dev/null
+          
+          # Second request (cache hit) - should be fast
+          time curl -s http://localhost:5000/sitemap.xml > /dev/null
+        expected: "Second request < 100ms"
+        
+    validation:
+      - "First request generates sitemap (may be slow)"
+      - "Subsequent requests < 100ms from cache"
+      - "Cache invalidates properly when new landing pages created"
+      
+    rollback:
+      - "Remove caching code"
+      - "Fallback to dynamic generation"
+      
+  # ==============================================
+  # P2: MEDIUM PRIORITY (Recommended but not blocking)
+  # ==============================================
+  
+  - id: FIX-004
+    priority: P2
+    title: "Create funnelEvents Table (Currently Missing)"
+    issue: "v2.2 known issue - funnelEvents table not created in database"
+    impact: "Low - Dashboard handles missing table gracefully, but full functionality better"
+    estimated_hours: 0.25
+    risk: low
+    
+    diagnosis:
+      current_state: "Table missing; endpoints handle gracefully with try/catch"
+      target_state: "Table exists for full event tracking functionality"
+      root_cause: "Table not defined in schema.ts or migration not run"
+      
+    remediation_steps:
+      - step: 1
+        action: "Add table to schema"
+        file: "shared/schema.ts"
+        changes: |
+          export const funnelEvents = pgTable('funnel_events', {
+            id: serial('id').primaryKey(),
+            ts: timestamp('ts').defaultNow().notNull(),
+            app: text('app').notNull(),
+            event: text('event').notNull(),
+            meta: jsonb('meta').notNull().default({})
+          }, (table) => ({
+            // Indexes for common queries
+            appIdx: index('funnel_events_app_idx').on(table.app),
+            tsIdx: index('funnel_events_ts_idx').on(table.ts),
+            eventIdx: index('funnel_events_event_idx').on(table.event)
+          }));
+          
+          export type FunnelEvent = typeof funnelEvents.$inferSelect;
+          export type InsertFunnelEvent = typeof funnelEvents.$inferInsert;
+          
+      - step: 2
+        action: "Push schema to database"
+        command: "npm run db:push"
+        note: "Creates table with indexes"
+        
+      - step: 3
+        action: "Verify table creation"
+        command: |
+          psql $DATABASE_URL -c "\d funnel_events"
+        expected: "Table structure displayed"
+        
+      - step: 4
+        action: "Update storage interface (if needed)"
+        file: "server/storage.ts"
+        changes: |
+          interface IStorage {
+            // Existing methods...
+            
+            // Add funnel event tracking
+            logFunnelEvent(event: InsertFunnelEvent): Promise<FunnelEvent>;
+            getFunnelEvents(filters: { app?: string; event?: string; limit?: number }): Promise<FunnelEvent[]>;
+          }
+          
+    validation:
+      - "Table exists in database"
+      - "Can insert and query funnel events"
+      - "Dashboard endpoints use table if available"
+      
+    rollback:
+      - "Can drop table safely: DROP TABLE funnel_events;"
+      
+  # ==============================================
+  
+  - id: FIX-005
+    priority: P2
+    title: "Fix Agent Bridge POST Endpoint Routing"
+    issue: "/agent/register and /agent/heartbeat return HTML instead of JSON"
+    impact: "Low - External command center 404 is expected; cosmetic issue"
+    estimated_hours: 0.5
+    risk: low
+    
+    diagnosis:
+      current_state: "POST endpoints return Vite dev page HTML (SPA fallback)"
+      target_state: "POST endpoints return JSON API responses"
+      root_cause: "Vite SPA catchall route precedes API routes in middleware chain"
+      
+    remediation_steps:
+      - step: 1
+        action: "Verify route registration order"
+        file: "server/index.ts"
+        changes: |
+          // Ensure API routes registered BEFORE Vite middleware
+          
+          // 1. First: API routes
+          await registerRoutes(app, storage);
+          
+          // 2. Last: Vite SPA fallback (only in development)
+          if (process.env.NODE_ENV === 'development') {
+            const vite = await setupVite(app, server);
+          }
+          
+        note: "Verify this order is correct in server/index.ts"
+        
+      - step: 2
+        action: "Add explicit API route prefix protection"
+        file: "server/vite.ts"
+        changes: |
+          export async function setupVite(app: Express, server: Server) {
+            // ... existing setup ...
+            
+            // Only handle non-API routes
+            app.use((req, res, next) => {
+              // Skip Vite for API and agent routes
+              if (req.path.startsWith('/api/') || 
+                  req.path.startsWith('/agent/') ||
+                  req.path.startsWith('/healthz')) {
+                return next();
+              }
+              
+              // Let Vite handle frontend routes
+              return vite.middlewares(req, res, next);
+            });
+          }
+          
+      - step: 3
+        action: "Test POST endpoints return JSON"
+        command: |
+          curl -X POST http://localhost:5000/agent/register \
+            -H "Content-Type: application/json" \
+            -w "\nContent-Type: %{content_type}\n"
+        expected: "Content-Type: application/json (not text/html)"
+        
+    validation:
+      - "POST /agent/register returns JSON (not HTML)"
+      - "POST /agent/heartbeat returns JSON (not HTML)"
+      - "Frontend SPA routing still works for non-API routes"
+      
+    rollback:
+      - "Revert middleware order changes"
+      
+  # ==============================================
+  # P3: LOW PRIORITY (Nice-to-have, not blocking)
+  # ==============================================
+  
+  - id: FIX-006
+    priority: P3
+    title: "Implement Feature Flags Endpoint (Currently 404)"
+    issue: "/api/feature-flags returns 404 - endpoint not implemented"
+    impact: "Very low - Only needed if feature flags are part of MVP"
+    estimated_hours: 1.0
+    risk: low
+    
+    diagnosis:
+      current_state: "Endpoint returns 404"
+      target_state: "Endpoint returns 200 with feature flag configuration"
+      root_cause: "Feature flags system not implemented"
+      
+    remediation_steps:
+      - step: 1
+        action: "Decide if feature flags are needed"
+        decision: |
+          Options:
+          A) Implement full feature flag system (1 hour)
+          B) Return stub/empty response (15 minutes)
+          C) Document as "not required for MVP" (5 minutes)
+          
+      - step: 2
+        action: "Option B: Add stub endpoint"
+        file: "server/routes.ts"
+        changes: |
+          app.get("/api/feature-flags", (req, res) => {
+            res.json({
+              flags: {
+                // Add flags as needed
+                agent_bridge_enabled: !!config.SHARED_SECRET,
+                kpi_dashboard_public: true,
+                executive_reports_enabled: true
+              },
+              environment: process.env.NODE_ENV,
+              timestamp: new Date().toISOString()
+            });
+          });
+          
+      - step: 3
+        action: "Verify endpoint returns 200"
+        command: "curl -s http://localhost:5000/api/feature-flags | jq"
+        expected: "Valid JSON with flags object"
+        
+    validation:
+      - "GET /api/feature-flags returns 200"
+      - "Response is valid JSON"
+      
+    rollback:
+      - "Remove endpoint if not needed"
+      
+  # ==============================================
+  
+  - id: FIX-007
+    priority: P3
+    title: "Add Authentication to KPI Endpoints (Production Security)"
+    issue: "KPI/dashboard endpoints unauthenticated (by design for beta)"
+    impact: "Security consideration for production deployment"
+    estimated_hours: 2.0
+    risk: medium
+    
+    diagnosis:
+      current_state: "Endpoints publicly accessible without auth"
+      target_state: "Endpoints require authentication (JWT or API key)"
+      root_cause: "By design for beta; reconsider for production"
+      
+    remediation_steps:
+      - step: 1
+        action: "Document auth strategy"
+        decision: |
+          Options for production:
+          A) JWT authentication (integrate with scholar_auth)
+          B) API key authentication (simpler for exec dashboard)
+          C) IP allowlist (restrict to corporate network)
+          D) Keep public but add rate limiting
+          
+        recommendation: "Option B (API key) for executive dashboard use case"
+        
+      - step: 2
+        action: "Implement API key middleware"
+        file: "server/middleware/api-key-auth.ts"
+        changes: |
+          export function requireApiKey(req: Request, res: Response, next: NextFunction) {
+            const apiKey = req.headers['x-api-key'];
+            const validKey = process.env.EXECUTIVE_DASHBOARD_API_KEY;
+            
+            if (!validKey) {
+              // Dev mode: skip auth if key not configured
+              if (process.env.NODE_ENV === 'development') {
+                return next();
+              }
+              return res.status(503).json({ 
+                error: 'API key authentication not configured' 
+              });
+            }
+            
+            if (apiKey !== validKey) {
+              return res.status(401).json({ 
+                error: 'Invalid or missing API key' 
+              });
+            }
+            
+            next();
+          }
+          
+      - step: 3
+        action: "Apply middleware to KPI endpoints"
+        file: "server/routes.ts"
+        changes: |
+          import { requireApiKey } from './middleware/api-key-auth.js';
+          
+          // Protect KPI endpoints
+          app.get('/api/executive/kpi/latest', requireApiKey, async (req, res) => {
+            // Existing implementation
+          });
+          
+          app.get('/api/executive/kpi/history', requireApiKey, async (req, res) => {
+            // Existing implementation
+          });
+          
+          app.get('/api/monitoring/dashboard', requireApiKey, async (req, res) => {
+            // Existing implementation
+          });
+          
+      - step: 4
+        action: "Add secret to environment"
+        command: |
+          # Generate secure API key
+          openssl rand -hex 32
+          
+          # Add to .env
+          echo "EXECUTIVE_DASHBOARD_API_KEY=<generated_key>" >> .env
+          
+      - step: 5
+        action: "Test authentication"
+        command: |
+          # Should fail without key
+          curl -s -w "%{http_code}\n" http://localhost:5000/api/executive/kpi/latest
+          
+          # Should succeed with key
+          curl -s -w "%{http_code}\n" \
+            -H "X-API-Key: $EXECUTIVE_DASHBOARD_API_KEY" \
+            http://localhost:5000/api/executive/kpi/latest
+        expected: "401 without key, 200 with key"
+        
+    validation:
+      - "Endpoints return 401 without API key (in production)"
+      - "Endpoints return 200 with valid API key"
+      - "Dev mode works without key (for development ease)"
+      
+    rollback:
+      - "Remove middleware from routes"
+      - "Revert to public access"
+      
+    note: "DEFER TO POST-LAUNCH - Not needed for beta phase"
+
+# ==============================================
+# Summary
+# ==============================================
+
+summary:
+  total_fixes: 7
+  p0_critical: 0
+  p1_high: 3
+  p2_medium: 2
+  p3_low: 2
+  
+  total_estimated_hours: 7.75
+  minimum_for_5_5: 4.0  # P1 fixes only
+  
+  immediate_action_required:
+    - "FIX-001: Reduce memory usage (2 hours)"
+    - "FIX-002: Optimize KPI history endpoint (1.5 hours)"
+    - "FIX-003: Cache sitemap generation (0.5 hours)"
+    
+  defer_to_post_launch:
+    - "FIX-007: Add authentication to KPI endpoints"
+    
+  eta_to_5_5: "4 hours (P1 fixes only)"
+  eta_to_full_polish: "7.75 hours (all fixes)"
+  
+  deployment_readiness:
+    t24h_gate: "PASS (4/5 exceeds 4/5 minimum)"
+    t48h_gate: "PASS (revenue-neutral app)"
+    t72h_gate: "CONDITIONAL (4/5; optimize to 5/5 for full clearance)"
+
+# ==============================================
+# Next Steps
+# ==============================================
+
+next_steps:
+  - "Review and approve fix plan with stakeholders"
+  - "Execute P1 fixes (FIX-001, FIX-002, FIX-003) within 4-hour window"
+  - "Re-run AGENT3 v2.2 validation to confirm 5/5 score"
+  - "Update ecosystem_readiness_matrix.csv with new score"
+  - "Proceed to validate other apps in ecosystem (scholar_auth, student_pilot, etc.)"
+  - "Execute Universal Read-Only E2E Test Prompt v2.1 across all apps"
+  
+# ==============================================
+# Risk Assessment
+# ==============================================
+
+risks:
+  low:
+    - "All P1 fixes are optimization-focused, not architecture changes"
+    - "Rollback paths are simple and well-defined"
+    - "No data migration or schema breaking changes"
+    
+  medium:
+    - "Memory optimization requires profiling and may reveal deeper issues"
+    - "Database index creation may briefly lock table during push"
+    
+  high:
+    - "None identified"
+    
+  mitigation:
+    - "Test all fixes in development environment first"
+    - "Deploy during low-traffic window"
+    - "Have rollback scripts ready"
+    - "Monitor logs and metrics closely post-deployment"
+
+# ==============================================
+# End of Fix Plan
+# ==============================================

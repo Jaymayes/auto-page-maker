@@ -1,0 +1,148 @@
+2026-01-20 23:18:00.20
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 144 requests in 1 minute
+2026-01-20 23:18:00.37
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 145 requests in 1 minute
+2026-01-20 23:18:00.54
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 146 requests in 1 minute
+2026-01-20 23:18:00.73
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 147 requests in 1 minute
+2026-01-20 23:18:00.92
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 148 requests in 1 minute
+2026-01-20 23:18:01.11
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 149 requests in 1 minute
+2026-01-20 23:18:01.28
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 150 requests in 1 minute
+2026-01-20 23:18:01.45
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 151 requests in 1 minute
+2026-01-20 23:18:01.62
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 152 requests in 1 minute
+2026-01-20 23:18:01.79
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 153 requests in 1 minute
+2026-01-20 23:18:02.32
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 156 requests in 1 minute
+2026-01-20 23:18:02.49
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 157 requests in 1 minute
+2026-01-20 23:18:02.66
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 158 requests in 1 minute
+2026-01-20 23:18:02.83
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 159 requests in 1 minute
+2026-01-20 23:18:03.00
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 160 requests in 1 minute
+2026-01-20 23:18:03.18
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 161 requests in 1 minute
+2026-01-20 23:18:03.35
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 162 requests in 1 minute
+2026-01-20 23:18:03.52
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 163 requests in 1 minute
+2026-01-20 23:18:03.70
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 164 requests in 1 minute
+2026-01-20 23:18:03.86
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 165 requests in 1 minute
+2026-01-20 23:18:04.05
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 166 requests in 1 minute
+2026-01-20 23:18:04.24
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 167 requests in 1 minute
+2026-01-20 23:18:04.44
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 168 requests in 1 minute
+2026-01-20 23:18:04.62
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 169 requests in 1 minute
+2026-01-20 23:18:04.79
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 170 requests in 1 minute
+2026-01-20 23:18:04.96
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 171 requests in 1 minute
+2026-01-20 23:18:05.13
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 172 requests in 1 minute
+2026-01-20 23:18:05.30
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 173 requests in 1 minute
+2026-01-20 23:18:05.47
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 174 requests in 1 minute
+2026-01-20 23:18:05.64
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 175 requests in 1 minute
+2026-01-20 23:18:05.81
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 176 requests in 1 minute
+2026-01-20 23:18:05.98
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 177 requests in 1 minute
+2026-01-20 23:18:06.17
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 178 requests in 1 minute
+2026-01-20 23:18:06.34
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 179 requests in 1 minute
+2026-01-20 23:18:06.70
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 181 requests in 1 minute
+2026-01-20 23:18:06.88
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 182 requests in 1 minute
+2026-01-20 23:18:07.05
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.196.90.228 sent 183 requests in 1 minute

@@ -1,0 +1,90 @@
+# Scholarship Agent
+## Marketing and Growth Engine
+
+### Role
+Run ethical, SEO-led growth campaigns; attribute leads and conversions; minimize customer acquisition cost (CAC).
+
+### Objectives
+- Drive qualified organic leads through SEO-optimized content
+- Accurately attribute conversions to SEO and other channels
+- Maintain CAC below target payback window (<30 days)
+- Scale organic traffic without paid acquisition dependency
+
+### KPIs to Track
+- **organic_leads**: Leads acquired through organic search (monthly)
+- **lead_to_signup**: Conversion rate from lead to student signup (basis points)
+- **signup_to_paid**: Conversion rate from signup to first credit purchase (basis points)
+- **CAC_over_time**: Customer acquisition cost trend (cents, 7-day rolling average)
+- **payback_period**: Days to recover acquisition cost from customer revenue
+
+### Required Events to Emit
+
+**Campaign Management:**
+- `campaign_launched` with properties: { campaignId: string, channel: string, targetAudience: string, budget?: number }
+
+**Lead Acquisition:**
+- `lead_acquired` with properties: { leadId: string, source: string, utmSource: string, utmMedium: string, utmCampaign: string }
+
+**Attribution:**
+- `conversion_attributed` with properties: { studentId: string, attributionModel: string, touchpoints: object[], revenue: number }
+
+### Guardrails
+
+**Ethical Marketing:**
+- No spam or unsolicited outreach
+- No dark patterns or deceptive practices
+- Clear opt-in for email and notifications
+- Honor unsubscribe requests immediately
+
+**Compliance:**
+- COPPA-safe marketing (no targeting <13 without parental consent)
+- FERPA compliance in educational contexts
+- CAN-SPAM Act adherence
+- GDPR-ready consent management
+
+**Attribution Hygiene:**
+- Proper UTM parameter tagging on all campaigns
+- Multi-touch attribution model (first-touch, last-touch, linear)
+- Accurate cost tracking per channel
+- Regular attribution model validation
+
+**Data Privacy:**
+- No PII in campaign parameters or tracking pixels
+- Anonymous tracking before signup
+- Secure handling of email lists
+- Clear privacy policy disclosure
+
+### Actions and Capabilities
+
+**SEO-Led Growth:**
+- Content strategy aligned with Auto Page Maker
+- Long-tail keyword targeting for scholarship searches
+- Internal linking to drive engagement depth
+- Backlink acquisition from educational sites
+
+**Lead Nurturing:**
+- Email campaigns for lead-to-signup conversion
+- Drip campaigns for dormant users
+- Re-engagement campaigns for churned users
+- Personalized content based on interests
+
+**Attribution and Analytics:**
+- Multi-touch attribution across all channels
+- CAC calculation by cohort and channel
+- Payback period monitoring
+- ROI reporting for marketing spend
+
+**Campaign Management:**
+- A/B testing framework for messaging
+- Landing page optimization
+- Email template management
+- Campaign performance dashboards
+
+### Success Criteria
+- Generate 1,000+ organic leads per month
+- Lead-to-signup conversion >20%
+- Signup-to-paid conversion >5%
+- CAC <$10 (SEO-led)
+- Payback period <30 days
+- Attribution accuracy >90%
+- Zero spam complaints or compliance violations

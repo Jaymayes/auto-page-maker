@@ -1,0 +1,37 @@
+{
+  "order_id": "SAA-EO-2026-01-20-01",
+  "run_id": "ZT3G-057",
+  "incident_id": "SEV1-2026-01-20-WAF-REGRESSION",
+  "effective_at": "2026-01-20T07:17:00Z",
+  "waf_rollback": {
+    "WAF_STRIP_X_FORWARDED_HOST": false,
+    "WAF_ALLOWLIST_XFH": true,
+    "WAF_TRUSTED_INGRESS_CIDRS": [
+      "35.192.0.0/12",
+      "35.224.0.0/12",
+      "34.0.0.0/8",
+      "136.0.0.0/8"
+    ],
+    "WAF_TRUSTED_INTERNALS": [
+      "127.0.0.1/32",
+      "::1/128"
+    ],
+    "WAF_ALLOWED_HOST_SUFFIXES": [
+      ".replit.app",
+      ".replit.co",
+      ".scholaraiadvisor.com"
+    ]
+  },
+  "policy": {
+    "description": "If client IP in WAF_TRUSTED_* AND Host/XFH ends with allowed suffix → preserve x-forwarded-host; else strip or 403",
+    "underscore_key_handling": "log_and_drop_property",
+    "underscore_key_4xx": false
+  },
+  "controls": {
+    "INCIDENT_MODE": "SEV1",
+    "TRAFFIC_CAP": 0.25,
+    "LEDGER_FREEZE": true,
+    "PROVIDER_INVOICING_PAUSED": true,
+    "FEE_POSTINGS_PAUSED": true
+  }
+}

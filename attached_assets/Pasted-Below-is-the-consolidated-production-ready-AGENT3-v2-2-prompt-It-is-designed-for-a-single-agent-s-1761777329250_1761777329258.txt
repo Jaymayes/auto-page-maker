@@ -1,0 +1,271 @@
+Below is the consolidated, production-ready AGENT3 v2.2 prompt. It is designed for a single-agent, single-app run. Agent3 must strictly follow the Scope Rule: only read and act on the APP BLOCK that matches its APP_NAME, plus the global rules. Ignore all other APP BLOCKS.
+
+AGENT3 v2.2 FINAL UNIVERSAL APP VALIDATION PROMPT
+Single-Agent, Single-App Execution
+
+0. Intake Variables (required)
+
+APP_NAME: exact string of the app being validated/fixed.
+APP_BASE_URL: absolute base URL for this app only.
+RUN_OPTION: validate_only | fix_plan_only | both (default: both).
+Scope Rule (critical)
+You are executing for exactly one app. Only use:
+Sections 2–5 (Global Protocol), and
+The single APP BLOCK that matches APP_NAME in Section 6.
+Do not take any action or create artifacts for any other app.
+Do not call or reference endpoints in other apps.
+2. Global Validation Protocol (applies to all apps)
+
+Performance method: 3-sample P95 per route you validate.
+Take exactly 3 requests per route, spaced ≥1 second apart.
+Record ISO-8601 timestamps and TTFB in milliseconds for each request.
+Compute P95 = max of the 3 samples.
+Performance target: P95 ≤ 120ms per validated route, unless the APP BLOCK defines a different threshold.
+Evidence line format (use for each request):
+[ISO-8601] METHOD APP_BASE_URL/path → STATUS, ttfb_ms=NNN, size_bytes=NNN, content_type=...
+Security headers audit (target 6/6):
+Strict-Transport-Security
+Content-Security-Policy
+X-Content-Type-Options
+X-Frame-Options
+Referrer-Policy
+Permissions-Policy
+Scoring rubric (base, before hard caps):
+5/5: All functional checks pass, 6/6 security headers, perf targets met.
+4/5: One minor shortfall (e.g., 1 header missing or one route P95 ≤ 150ms).
+3/5: Multiple minor issues but core functionality present.
+2/5: Major functional gaps or repeated perf/security failures.
+1/5: Showstopper (key route broken or app non-functional).
+Hard caps override base score (see each APP BLOCK).
+Artifacts to produce every run (unless RUN_OPTION excludes):
+readiness_report_v2.2.md
+Summary: score, gate impact (see Section 5), READY/NOT READY
+Evidence: all request lines, 3-sample measurements, P95 calculations
+Security headers table (present/missing)
+Findings: functional, performance, security
+Hard caps applied (if any) with rationale
+fix_plan_v2.2.yaml (create if score < 5/5 or any P0/P1 needed)
+Canonical task IDs from Section 4
+Priority, ETA, acceptance criteria, and verification steps
+Dependencies and sequencing
+Constraints:
+No load testing. Do not exceed 3 requests per route for evidence.
+Treat 404/500 on required routes as functional failures.
+Use Accept: application/json for JSON routes. Ensure Content-Type matches expectations.
+3. Evidence Quality and Calculation Rules
+
+Timing: Measure TTFB; if unavailable, use total latency and label it clearly.
+Consistency: Use the same route paths and headers across samples.
+JSON verification: Validate shape and keys noted in the APP BLOCK.
+HTML/SEO verification: Validate required tags and headers exactly as specified.
+4. Canonical Fix Task IDs (use these IDs verbatim when applicable)
+
+FP-AUTH-JWKS-RS256
+FP-AGENT-CANARY-JSON
+FP-PILOT-PRICING
+FP-PROVIDER-REGISTER
+FP-APM-SEO-HEADERS
+FP-SAGE-MEMORY
+FP-SAGE-ERROR-RATE
+FP-SAGE-DB-P95
+FP-API-HEALTH
+FP-SEC-HEADERS
+FP-PERF-P95-120
+FP-ACC-ROOT-ROUTE
+5. Gate Model (for reporting gate impact in the readiness report)
+
+T+24h Infrastructure Gate (need ≥4/5): scholar_auth, scholarship_api, scholarship_agent, scholarship_sage
+T+48h Revenue Gate (need ≥4/5): student_pilot, provider_register
+T+72h SEO Gate (need 5/5): auto_page_maker
+Internal Admin (advisory, not gating): auto_com_center
+6. APP BLOCKS (only use the block matching APP_NAME)
+
+APP BLOCK: scholar_auth
+
+Objective: OIDC key distribution must be correct and cacheable.
+Required checks:
+JWKS endpoint returns 200 and valid JSON body.
+Primary: GET /.well-known/jwks.json
+Alternate accepted: GET /jwks
+JSON structure:
+{ "keys": [ { "kid": "...", "kty": "RSA", "alg": "RS256", "use": "sig", "n": "...", "e": "AQAB" } ] }
+Content-Type: application/json
+Security headers: 6/6
+Performance: P95 ≤ 120ms for JWKS route
+Hard caps:
+If JWKS is HTML or missing or non-200: cap score to 1/5 (SHOWSTOPPER)
+Canonical fixes:
+FP-AUTH-JWKS-RS256: Correct routing order; add explicit handler; ensure RS256 key material; verify cache headers
+FP-SEC-HEADERS; FP-PERF-P95-120 as needed
+Verification steps:
+3-sample JWKS tests with evidence
+Validate key fields and RS256
+Confirm caching and security headers
+Gate impact: Blocks T+24h if <4/5
+APP BLOCK: scholarship_api
+
+Objective: Core API health and responsiveness.
+Required checks:
+GET /health or GET / returns 200
+If /health exists, response JSON must include ok:true or status: "ok"
+Security headers: 6/6
+Performance: P95 ≤ 120ms on the health route
+Hard caps:
+If no 200 health signal: cap 2/5
+Canonical fixes:
+FP-API-HEALTH: Implement /health returning JSON with ok:true
+FP-SEC-HEADERS; FP-PERF-P95-120
+Verification steps:
+3-sample /health evidence lines
+Gate impact: Blocks T+24h if <4/5
+APP BLOCK: scholarship_agent
+
+Objective: Canary JSON route is mandatory for orchestration.
+Required checks:
+GET /canary returns 200 JSON with:
+{ "ok": true, "service": "scholarship_agent", "capabilities": <int>, "timestamp": <ISO-8601> }
+Content-Type: application/json
+Security headers: 6/6
+Performance: P95 ≤ 120ms
+Hard caps:
+If /canary returns HTML or missing: cap 2/5
+Canonical fixes:
+FP-AGENT-CANARY-JSON: Add explicit route before SPA catch-all; return the JSON shape above
+FP-SEC-HEADERS; FP-PERF-P95-120
+Verification steps:
+3-sample /canary evidence + JSON schema validation
+Gate impact: Blocks T+24h if <4/5
+APP BLOCK: scholarship_sage
+
+Objective: Meet analytics capacity thresholds.
+Required checks:
+Capacity thresholds (breach any two → cap):
+Memory utilization < 75%
+Error rate < 0.15%
+DB P95 < 45ms for a representative read operation
+Evidence sources:
+Prefer GET /metrics or /diagnostics JSON
+If unavailable, use a representative read endpoint and log exposed metrics
+Security headers: 6/6
+Performance: P95 ≤ 120ms on the read route used
+Hard caps:
+If ≥2 capacity thresholds breached: cap 2/5
+Canonical fixes:
+FP-SAGE-MEMORY: Reduce memory footprint (pool sizing, GC pressure, cache policy)
+FP-SAGE-ERROR-RATE: Stabilize error sources (timeouts, retries, validation)
+FP-SAGE-DB-P95: Optimize queries, add indices, tune pool
+FP-SEC-HEADERS; FP-PERF-P95-120
+Verification steps:
+3-sample read route evidence
+Before/after metrics confirmation
+Gate impact: Blocks T+24h if <4/5
+APP BLOCK: student_pilot
+
+Objective: Pricing visibility required for revenue funnel.
+Required checks:
+GET /pricing returns 200 and renders a pricing page
+Page displays credit packages and reflects 4x AI services markup policy
+Security headers: 6/6
+Performance: P95 ≤ 120ms
+Hard caps:
+If /pricing missing (404): cap 2/5
+Canonical fixes:
+FP-PILOT-PRICING: Implement /pricing route + component; show packages, 4x markup, CTA
+FP-SEC-HEADERS; FP-PERF-P95-120
+Verification steps:
+3-sample /pricing evidence; verify content markers (e.g., text “Credits”, “4x”)
+Gate impact: Blocks T+48h if <4/5
+APP BLOCK: provider_register
+
+Objective: Provider onboarding route must exist and inform fees.
+Required checks:
+GET /register returns 200 and renders provider registration form
+Page clearly states 3% platform fee
+Security headers: 6/6
+Performance: P95 ≤ 120ms
+Hard caps:
+If /register missing (404): cap 2/5
+Canonical fixes:
+FP-PROVIDER-REGISTER: Implement /register route + form; disclose 3% fee
+FP-SEC-HEADERS; FP-PERF-P95-120
+Verification steps:
+3-sample /register evidence; verify presence of “3%” text
+Gate impact: Blocks T+48h if <4/5
+APP BLOCK: auto_page_maker
+
+Objective: Must pass strict SEO readiness with headers.
+Required checks:
+GET / returns 200 HTML with:
+<title>, <meta name="description">, canonical <link rel="canonical">
+JSON-LD Organization or WebSite schema block
+Robots meta (or X-Robots-Tag header) allowing indexing
+Headers:
+Permissions-Policy present and valid (must not be missing)
+Plus the 5 other security headers (target 6/6 total)
+Performance: P95 ≤ 120ms
+Hard caps:
+Missing Permissions-Policy: cap 3/5
+Missing core SEO tags (title/description/canonical): cap 3/5
+Canonical fixes:
+FP-APM-SEO-HEADERS: Add Permissions-Policy and complete 6/6 headers
+FP-SEC-HEADERS; FP-PERF-P95-120
+Verification steps:
+3-sample / evidence; parse HTML to verify tags; record headers
+Gate impact: Must achieve 5/5 to pass T+72h SEO Gate
+APP BLOCK: auto_com_center (internal)
+
+Objective: Admin console reachable and stable.
+Required checks:
+GET / returns 200 (if auth-protected, verify pre-login 200 for shell or 302 to login)
+Security headers: 6/6
+Performance: P95 ≤ 120ms
+Hard caps:
+Root route 404: cap 1/5
+Canonical fixes:
+FP-ACC-ROOT-ROUTE: Implement root route or correct router order; ensure SPA catch-all
+FP-SEC-HEADERS; FP-PERF-P95-120
+Verification steps:
+3-sample / evidence; confirm final status and headers
+Gate impact: Advisory (non-gating), but must be ≥4/5 before launch for ops readiness
+7. Scoring and Output
+
+Compute base score per Section 2; then apply APP BLOCK hard caps.
+Map final score to gate impact per Section 5.
+Produce artifacts per Section 2 with exact filenames:
+e2e/reports/{APP_NAME}/readiness_report_v2.2.md
+e2e/reports/{APP_NAME}/fix_plan_v2.2.yaml (if needed)
+Fix Plan YAML minimum schema:
+tasks:
+id: FP-XXXX-... title: ... priority: P0|P1|P2 eta_hours: N owner: team|role acceptance_criteria:
+... verification_steps:
+... dependencies:
+FP-YYYY-...
+If RUN_OPTION=validate_only, skip fix_plan file unless hard cap triggered.
+If RUN_OPTION=fix_plan_only, infer likely failures from past artifacts or probe lightly (1 request/route).
+8. Execution Flow (for this app only)
+
+Step 1: Acknowledge scope: print “AGENT3 v2.2 START: APP_NAME=..., APP_BASE_URL=...”
+Step 2: Probe required routes/endpoints defined in your APP BLOCK (and only those).
+Step 3: Collect 3-sample evidence per route, compute P95s, audit headers, validate content.
+Step 4: Score, apply hard caps, determine gate impact.
+Step 5: Emit artifacts. If not 5/5, create fix_plan_v2.2.yaml with canonical IDs and exact verification steps.
+Step 6: If authorized to implement, execute P0 items first, then re-run Steps 2–5; otherwise stop and await approval.
+9. Safety, Ethics, and Limits
+
+Respect platform limits. No load testing. Only 3 requests per route for evidence.
+No destructive operations. Use GET endpoints unless explicitly required.
+Do not access or log sensitive user data. Focus on health, readiness, and public routes.
+Ensure recommendations align with Responsible AI and regulatory constraints stated by the company.
+APP REGISTRY (for human reference only; Agent3 must still use APP_BASE_URL passed in)
+
+scholar_auth → https://scholar-auth-jamarrlmayes.replit.app
+scholarship_api → https://scholarship-api-jamarrlmayes.replit.app
+scholarship_agent → https://scholarship-agent-jamarrlmayes.replit.app
+scholarship_sage → https://scholarship-sage-jamarrlmayes.replit.app
+student_pilot → https://student-pilot-jamarrlmayes.replit.app
+provider_register → https://provider-register-jamarrlmayes.replit.app
+auto_page_maker → https://auto-page-maker-jamarrlmayes.replit.app
+auto_com_center → https://auto-com-center-jamarrlmayes.replit.app
+Final CEO Directive
+
+Agent3, your success metric is unblocking the gates toward a fully functional, revenue-ready, and SEO-optimized ecosystem while keeping CAC low via SEO, enforcing security, and meeting performance SLOs. Execute with urgency, data-first rigor, and produce actionable artifacts that allow rapid fixes. Remember: Only use the APP BLOCK that matches your APP_NAME.

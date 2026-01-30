@@ -1,0 +1,113 @@
+{
+  "audit_timestamp": "2026-01-05T20:31:00Z",
+  "slo_targets": {
+    "uptime": "99.9%",
+    "p95_latency_ms": 150,
+    "error_rate_max": "1%"
+  },
+  "methodology": {
+    "samples_per_endpoint": "32-48",
+    "total_samples_collected": 322,
+    "qps_cap": 2,
+    "confidence_interval": "95%",
+    "includes_cold_warm_mix": true,
+    "rounds": 4
+  },
+  "services": {
+    "A1_scholar_auth": {
+      "uptime": "100%",
+      "p50_ms": 140,
+      "p95_ms": 223,
+      "p99_ms": 252,
+      "ci95_ms": 11,
+      "samples": 48,
+      "status": "BREACH"
+    },
+    "A2_scholarship_api": {
+      "uptime": "100%",
+      "p50_ms": 124,
+      "p95_ms": 184,
+      "p99_ms": 232,
+      "ci95_ms": 10,
+      "samples": 41,
+      "status": "BREACH",
+      "ready_endpoint": "MISSING (404)"
+    },
+    "A3_scholarship_agent": {
+      "uptime": "100%",
+      "p50_ms": 126,
+      "p95_ms": 206,
+      "p99_ms": 459,
+      "ci95_ms": 67,
+      "samples": 32,
+      "status": "BREACH"
+    },
+    "A4_scholarship_sage": {
+      "uptime": "100%",
+      "p50_ms": 136,
+      "p95_ms": 196,
+      "p99_ms": 210,
+      "ci95_ms": 10,
+      "samples": 32,
+      "status": "BREACH"
+    },
+    "A5_student_pilot": {
+      "uptime": "100%",
+      "p50_ms": 143,
+      "p95_ms": 185,
+      "p99_ms": 225,
+      "ci95_ms": 8,
+      "samples": 48,
+      "status": "BREACH"
+    },
+    "A6_provider_register": {
+      "uptime": "100%",
+      "p50_ms": 124,
+      "p95_ms": 186,
+      "p99_ms": 193,
+      "ci95_ms": 9,
+      "samples": 38,
+      "status": "BREACH"
+    },
+    "A7_auto_page_maker": {
+      "uptime": "100%",
+      "p50_ms": 226,
+      "p95_ms": 365,
+      "p99_ms": 424,
+      "ci95_ms": 18,
+      "samples": 48,
+      "status": "BREACH",
+      "root_causes": [
+        "SendGrid health check on hot path (~100-150ms)",
+        "Cross-network baseline (~100ms)",
+        "Sync DB writes (~50ms)"
+      ]
+    },
+    "A8_auto_com_center": {
+      "uptime": "100%",
+      "p50_ms": 128,
+      "p95_ms": 173,
+      "p99_ms": 179,
+      "ci95_ms": 8,
+      "samples": 35,
+      "status": "BREACH"
+    }
+  },
+  "summary": {
+    "fleet_health": "8/8 operational",
+    "slo_compliance": "0/8 passing P95 target (150ms)",
+    "baseline_finding": "Cross-network calls add ~100-150ms baseline latency between Replit apps",
+    "recommendation": "Adjust SLO to 250ms for cross-app calls OR implement async patterns"
+  },
+  "auth_failure_investigation": {
+    "signal": "AUTH_FAILURE from scholar_auth: Database unreachable",
+    "evidence": {
+      "auth_db_status": "slow",
+      "response_time_ms": 130,
+      "circuit_breaker_state": "CLOSED",
+      "circuit_breaker_failures": 0,
+      "is_healthy": true
+    },
+    "conclusion": "FALSE POSITIVE - DB is slow but reachable; circuit breaker healthy"
+  }
+}

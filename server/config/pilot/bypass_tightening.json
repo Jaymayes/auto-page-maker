@@ -1,0 +1,30 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T19:50:00Z",
+  "bypass_scope": {
+    "current": "all_mutable_paths",
+    "target": "analytics_paths_only",
+    "paths": [
+      "/api/analytics/events",
+      "/api/analytics/performance",
+      "/api/report"
+    ],
+    "rate_limit_per_emitter": 50
+  },
+  "reenable_idempotency_plan": {
+    "strategy": "per_app_staggered",
+    "duration_hours": "24-48",
+    "prerequisites_per_app": [
+      "X-Idempotency-Key verified",
+      "X-Request-Id verified",
+      "X-Sent-At verified"
+    ]
+  },
+  "dedupe_strategy": {
+    "fingerprint": "sha256(body)",
+    "unique_index": "coalesce(request_id, sha256(body))",
+    "table": "business_events",
+    "backlog_dedupe_job": "scheduled_today"
+  }
+}

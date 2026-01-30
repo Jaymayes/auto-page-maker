@@ -1,0 +1,76 @@
+Executive summary
+Excellent work. This staging setup aligns with our low-CAC, SEO-first growth engine and protects production discoverability. From a strategy standpoint, this enables faster iteration on Auto Page Maker without risking index pollution or data integrity. Proceed to external E2E validation with the guardrails below.
+
+Go decision: Approved with conditions
+Pre-flight (must confirm before sharing with Agent 3)
+
+Noindex enforcement: STAGING=true confirmed; X-Robots-Tag and robots.txt Disallow active.
+Access containment: Prefer Basic Auth or IP allowlist on staging. If not feasible on Replit, use an unguessable subdomain slug and share privately. Do not add staging to Search Console.
+DB access: Read-only role created; time-bound to match the testing window. Align to 48 hours (not 72) or set a hard expiry and calendar reminder for revocation.
+Secrets hygiene: GA4 uses staging-only property; no production keys present. Verify no third-party webhooks point to staging.
+Write paths off: Any mutation endpoints disabled or require privileged tokens in staging. Ensure no background jobs (indexers, outbound crawlers) run from staging.
+Success criteria (gates)
+
+Functional: ≥99% of 3,216 sitemap URLs return 200; zero 5xx spikes during test.
+Performance: P95 ≤120ms across HTML/API; stats API ≤50ms with caching.
+Security: All 6/6 headers present; CORS locked; zero sensitive headers or secrets in HTML/JS.
+SEO (staging): X-Robots-Tag and robots.txt Disallow verified. Canonical tags should point to production when STAGING=true to prevent accidental duplication if crawled.
+Data quality: Random samples confirm 2,060 landing pages and 1,200 scholarships are accurate, de-duplicated, and correctly templated.
+Load: Sustain 200 RPS for 10–15 minutes with error rate <0.1% and no degradation in P95.
+What to capture during the run (evidence pack)
+
+Automated Postman results: Export JUnit/HTML reports and HAR files for failing cases.
+Latency/error budget: Time-series snapshots of p50/p95/p99, 4xx/5xx, CPU/mem.
+SEO proof: curl headers, robots.txt snapshot, sample HTML with canonical and noindex.
+Data validation: Sampled page checksums and JSON-LD validation outputs.
+Operational checklist
+
+Publish: Create validation deployment with STAGING=true, APP_BASE_URL set to staging URL, and staging GA4 ID.
+Verify quickly:
+curl -I https://<staging>/ | grep -i x-robots-tag => expect “noindex, nofollow, noarchive”
+curl https://<staging>/robots.txt => expect “Disallow: /”
+curl https://<staging>/sitemap.xml | grep -c "<url>" => expect 3216
+DB: Provision agent3_readonly; verify GRANT SELECT only on landing_pages, scholarships, business_events, daily_kpi_snapshots; set revoke-at timestamp.
+Monitoring: Turn on access logs; set low alert thresholds for 5xx, latency, and rate limits to avoid cost spikes from synthetic traffic.
+Communication to Agent 3 (copy/paste template)
+Subject: Scholar AI Advisor – Staging E2E Validation Access (48h Window)
+
+Hello Agent 3,
+
+You now have access to our staging environment for E2E validation.
+
+Scope and acceptance criteria:
+
+Functional: ≥99% of sitemap URLs return 200
+Performance: P95 ≤120ms; stats API ≤50ms cached
+Security: 6/6 security headers; CORS enforced
+SEO: X-Robots-Tag noindex + robots Disallow; JSON-LD valid
+Data quality: Page and scholarship counts verified
+Load: Sustain 200 RPS for 10–15m; error rate <0.1%
+Access details:
+
+URL: https://<staging-url>
+Read-only DB: <connection-string> (expires in 48h)
+Docs: evidence/AGENT3_VALIDATION_SETUP.md, evidence/AGENT3_POSTMAN_COLLECTION.json, evidence/AGENT3_QUICK_START.md
+Testing window: <start> to <end> (48h)
+Primary contact: <name, Slack/email>
+Incident process:
+
+Report Sev-1 immediately via <channel>; include timestamp, URL, request ID, and reproduction steps.
+Thank you.
+
+Post-test teardown (mandatory)
+
+Revoke agent3_readonly and flush any cached credentials.
+Remove staging secrets and shut down the validation deployment.
+Archive all evidence, export GA4 staging data, and file a retro with pass/fail against each gate plus remediation owners and due dates.
+Strategic note
+
+This preserves organic growth by eliminating index leakage from staging, directly protecting our Auto Page Maker flywheel and CAC targets. The E2E run is a prerequisite for scaling content velocity with confidence.
+Send me:
+
+Final staging URL
+Confirmation of Basic Auth or chosen access containment
+Exact expiry timestamp for DB credentials
+The quick pass/fail snapshot after initial verification commands
+Once I have those, I’ll greenlight notifying our partners and proceeding with the 48-hour E2E window.

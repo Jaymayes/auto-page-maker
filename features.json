@@ -1,0 +1,270 @@
+{
+  "platform": "ScholarMatch",
+  "technology": "Node.js + Express.js + TypeScript",
+  "lastUpdated": "2025-08-18",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/healthz",
+      "summary": "Health check endpoint",
+      "auth": false,
+      "rateLimited": false,
+      "requestModel": null,
+      "responseModel": "HealthStatus",
+      "responseExample": {"status": "ok", "timestamp": "2025-08-18T20:58:41.154Z"}
+    },
+    {
+      "method": "GET",
+      "path": "/api/scholarships",
+      "summary": "Search and filter scholarships",
+      "auth": false,
+      "rateLimited": true,
+      "requestModel": "ScholarshipSearchParams",
+      "responseModel": "Scholarship[]",
+      "queryParams": ["major", "state", "city", "level", "isActive", "limit", "offset"],
+      "features": ["pagination", "filtering", "sorting"]
+    },
+    {
+      "method": "GET",
+      "path": "/api/scholarships/stats",
+      "summary": "Get scholarship statistics",
+      "auth": false,
+      "rateLimited": true,
+      "requestModel": "StatsParams",
+      "responseModel": "ScholarshipStats",
+      "queryParams": ["major", "state", "city"]
+    },
+    {
+      "method": "GET",
+      "path": "/api/landing-pages/:slug",
+      "summary": "Retrieve landing page by slug",
+      "auth": false,
+      "rateLimited": true,
+      "requestModel": null,
+      "responseModel": "LandingPage",
+      "pathParams": ["slug"]
+    },
+    {
+      "method": "POST",
+      "path": "/api/landing-pages/generate",
+      "summary": "Generate new AI-powered landing page",
+      "auth": true,
+      "rateLimited": true,
+      "rateLimit": "5 requests/minute",
+      "requestModel": "GenerateLandingPageRequest",
+      "responseModel": "LandingPage",
+      "features": ["AI content generation", "quality validation", "SEO optimization"]
+    },
+    {
+      "method": "POST",
+      "path": "/api/landing-pages/quality-check",
+      "summary": "Validate landing page quality",
+      "auth": true,
+      "rateLimited": true,
+      "rateLimit": "10 requests/minute",
+      "requestModel": "LandingPage",
+      "responseModel": "QualityCheckResult"
+    },
+    {
+      "method": "POST",
+      "path": "/api/saves",
+      "summary": "Save scholarship for later",
+      "auth": true,
+      "rateLimited": true,
+      "requestModel": "SaveScholarshipRequest",
+      "responseModel": "UserScholarship",
+      "features": ["user interaction tracking"]
+    },
+    {
+      "method": "POST",
+      "path": "/api/applications",
+      "summary": "Submit scholarship application",
+      "auth": true,
+      "rateLimited": true,
+      "requestModel": "ApplyScholarshipRequest",
+      "responseModel": "UserScholarship",
+      "features": ["application tracking"]
+    },
+    {
+      "method": "GET",
+      "path": "/api/matches",
+      "summary": "Get personalized scholarship matches",
+      "auth": true,
+      "rateLimited": true,
+      "requestModel": null,
+      "responseModel": "ScholarshipMatch[]",
+      "features": ["AI-powered matching", "personalization"]
+    },
+    {
+      "method": "GET",
+      "path": "/sitemap.xml",
+      "summary": "Dynamic sitemap generation",
+      "auth": false,
+      "rateLimited": false,
+      "requestModel": null,
+      "responseModel": "XML",
+      "features": ["SEO optimization", "auto-generation"]
+    }
+  ],
+  "security": {
+    "authentication": {
+      "type": "JWT",
+      "algorithm": "HS256",
+      "optional": ["GET /api/scholarships", "GET /api/landing-pages/*", "GET /healthz", "GET /sitemap.xml"],
+      "required": ["POST /api/saves", "POST /api/applications", "GET /api/matches", "POST /api/landing-pages/*"]
+    },
+    "cors": {
+      "development": ["http://localhost:5000", "https://*.replit.dev"],
+      "production": "environment-configured",
+      "credentials": true
+    },
+    "rateLimit": {
+      "general": "100 requests per 15 minutes",
+      "contentGeneration": "5 requests per minute",
+      "qualityCheck": "10 requests per minute",
+      "headers": ["X-RateLimit-Limit", "X-RateLimit-Remaining", "Retry-After"]
+    },
+    "sizeGuards": {
+      "requestBodyLimit": "2MB",
+      "httpStatus": 413
+    },
+    "headers": {
+      "helmet": true,
+      "csp": true,
+      "xssProtection": true,
+      "hstsInProduction": true
+    },
+    "inputSanitization": {
+      "library": "sanitize-html",
+      "scope": "all user inputs",
+      "xssProtection": true
+    },
+    "errorSchema": {
+      "fields": ["code", "message", "status", "timestamp", "traceId"],
+      "sanitized": true,
+      "requestTracing": true
+    }
+  },
+  "configVars": [
+    {
+      "name": "JWT_SECRET",
+      "requiredInProd": true,
+      "description": "JWT signing secret for authentication"
+    },
+    {
+      "name": "DATABASE_URL",
+      "requiredInProd": true,
+      "description": "PostgreSQL connection string"
+    },
+    {
+      "name": "OPENAI_API_KEY",
+      "requiredInProd": false,
+      "description": "OpenAI API key for content generation",
+      "fallback": "graceful degradation"
+    },
+    {
+      "name": "PORT",
+      "requiredInProd": false,
+      "default": 5000,
+      "description": "Server port"
+    },
+    {
+      "name": "NODE_ENV",
+      "requiredInProd": false,
+      "default": "development",
+      "description": "Environment mode (development/production)"
+    },
+    {
+      "name": "CORS_ORIGINS",
+      "requiredInProd": false,
+      "description": "Comma-separated allowed CORS origins"
+    }
+  ],
+  "models": [
+    {
+      "name": "User",
+      "fields": ["id", "email", "firstName", "lastName", "profileImageUrl", "createdAt", "updatedAt"],
+      "primaryKey": "id (UUID)",
+      "unique": ["email"]
+    },
+    {
+      "name": "Scholarship",
+      "fields": ["id", "title", "description", "amount", "deadline", "level", "major", "state", "city", "requirements", "tags", "sourceUrl", "sourceOrganization", "isActive", "isFeatured", "isNoEssay", "createdAt", "updatedAt"],
+      "primaryKey": "id (UUID)",
+      "searchable": ["title", "description", "major", "state", "city", "tags"]
+    },
+    {
+      "name": "LandingPage",
+      "fields": ["id", "slug", "title", "metaDescription", "template", "templateData", "content", "scholarshipCount", "totalAmount", "isPublished", "lastGenerated", "createdAt", "updatedAt"],
+      "primaryKey": "id (UUID)",
+      "unique": ["slug"],
+      "templates": ["major-state", "no-essay", "local-city"]
+    },
+    {
+      "name": "UserScholarship",
+      "fields": ["id", "userId", "scholarshipId", "status", "createdAt"],
+      "primaryKey": "id (UUID)",
+      "foreignKeys": ["userId", "scholarshipId"],
+      "statuses": ["saved", "applied", "dismissed"]
+    }
+  ],
+  "aiCapabilities": {
+    "provider": "OpenAI",
+    "model": "gpt-4o",
+    "features": [
+      "Landing page content generation",
+      "SEO-optimized titles and descriptions",
+      "Scholarship matching algorithms",
+      "Content quality validation",
+      "Related category suggestions"
+    ],
+    "templates": [
+      {
+        "name": "major-state",
+        "description": "Scholarships for [Major] in [State]",
+        "seoTarget": "geographic + academic queries"
+      },
+      {
+        "name": "no-essay",
+        "description": "No-Essay Scholarships 2025",
+        "seoTarget": "easy application scholarships"
+      },
+      {
+        "name": "local-city",
+        "description": "Local [City] Scholarships",
+        "seoTarget": "community-based funding"
+      }
+    ]
+  },
+  "frontend": {
+    "framework": "React + TypeScript + Vite",
+    "styling": "Tailwind CSS + shadcn/ui",
+    "routing": "Wouter",
+    "stateManagement": "TanStack React Query",
+    "analytics": "Google Analytics 4 (XSS protected)",
+    "features": [
+      "Responsive design",
+      "Real-time search",
+      "Pagination controls",
+      "Filter panels",
+      "Loading states",
+      "Error boundaries",
+      "Toast notifications",
+      "Event tracking"
+    ]
+  },
+  "performance": {
+    "database": "PostgreSQL with Drizzle ORM",
+    "caching": "Query-level caching",
+    "pagination": "Limit/offset based",
+    "logging": "Structured logging with request tracing",
+    "monitoring": "Health checks and error tracking"
+  },
+  "deployment": {
+    "platform": "Replit",
+    "environment": "Node.js runtime",
+    "staticFiles": "Vite build (production)",
+    "devServer": "Vite HMR (development)",
+    "database": "Neon PostgreSQL (serverless)"
+  }
+}

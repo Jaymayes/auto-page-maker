@@ -1,0 +1,437 @@
+{
+  "info": {
+    "name": "auto_page_maker Validation API",
+    "description": "API endpoints for Agent 3 external E2E validation testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "auto_page_maker_v1"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://validation-auto-page-maker.replit.app",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & Monitoring",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Comprehensive health check including database, email provider, and service dependencies"
+          },
+          "response": []
+        },
+        {
+          "name": "Readiness Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/readyz",
+              "host": ["{{baseUrl}}"],
+              "path": ["readyz"]
+            },
+            "description": "Fast readiness check (<10ms) for load balancer health probes"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Scholarships",
+      "item": [
+        {
+          "name": "List Scholarships",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/scholarships?limit=10&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scholarships"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of results (max 100)"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Pagination offset"
+                }
+              ]
+            },
+            "description": "Get paginated list of scholarships"
+          },
+          "response": []
+        },
+        {
+          "name": "List Scholarships - Filtered by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/scholarships?limit=10&category=computer-science",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scholarships"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "category",
+                  "value": "computer-science",
+                  "description": "Filter by category"
+                }
+              ]
+            },
+            "description": "Get scholarships filtered by category"
+          },
+          "response": []
+        },
+        {
+          "name": "List Scholarships - Filtered by State",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/scholarships?limit=10&state=california",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scholarships"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "state",
+                  "value": "california",
+                  "description": "Filter by state"
+                }
+              ]
+            },
+            "description": "Get scholarships filtered by state"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Scholarship by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/scholarships/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scholarships", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Scholarship ID (get from list endpoint)"
+                }
+              ]
+            },
+            "description": "Get detailed scholarship information by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Scholarship Statistics (Cached)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/scholarships/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scholarships", "stats"]
+            },
+            "description": "Get platform statistics (cached with 120s TTL). Check X-Cache header for HIT/MISS"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Landing Pages",
+      "item": [
+        {
+          "name": "Get Landing Page - Computer Science California",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/landing-pages/computer-science-california",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "landing-pages", "computer-science-california"]
+            },
+            "description": "Get landing page data by slug"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Landing Page - Nursing Texas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/landing-pages/nursing-texas",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "landing-pages", "nursing-texas"]
+            },
+            "description": "Get landing page data by slug"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Landing Page - Engineering New York",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/landing-pages/engineering-new-york",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "landing-pages", "engineering-new-york"]
+            },
+            "description": "Get landing page data by slug"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "SEO & Sitemap",
+      "item": [
+        {
+          "name": "Get Sitemap (XML)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sitemap.xml",
+              "host": ["{{baseUrl}}"],
+              "path": ["sitemap.xml"]
+            },
+            "description": "Get full sitemap (3,216 URLs: 1 homepage + 2,015 landing pages + 1,200 scholarships)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Robots.txt",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/robots.txt",
+              "host": ["{{baseUrl}}"],
+              "path": ["robots.txt"]
+            },
+            "description": "Get robots.txt file. In staging mode, shows Disallow: /"
+          },
+          "response": []
+        },
+        {
+          "name": "Get RSS Feed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rss.xml",
+              "host": ["{{baseUrl}}"],
+              "path": ["rss.xml"]
+            },
+            "description": "Get RSS feed of 50 most recent landing pages"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Frontend Pages (Browser)",
+      "item": [
+        {
+          "name": "Homepage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Homepage - Verify SEO meta tags and X-Robots-Tag header"
+          },
+          "response": []
+        },
+        {
+          "name": "Landing Page - Computer Science California",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/scholarships/computer-science-california",
+              "host": ["{{baseUrl}}"],
+              "path": ["scholarships", "computer-science-california"]
+            },
+            "description": "Landing page - Verify SEO meta tags, JSON-LD structured data"
+          },
+          "response": []
+        },
+        {
+          "name": "Scholarship Detail Page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/scholarship/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["scholarship", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "Scholarship ID (get from /api/scholarships)"
+                }
+              ]
+            },
+            "description": "Scholarship detail page - Verify SEO meta tags, JSON-LD structured data"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Security Headers Test",
+      "item": [
+        {
+          "name": "Verify X-Robots-Tag (Staging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Check response headers for X-Robots-Tag: noindex, nofollow, noarchive"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"X-Robots-Tag header present\", function () {",
+                  "    pm.response.to.have.header(\"X-Robots-Tag\");",
+                  "});",
+                  "",
+                  "pm.test(\"X-Robots-Tag contains noindex\", function () {",
+                  "    var robotsTag = pm.response.headers.get(\"X-Robots-Tag\");",
+                  "    pm.expect(robotsTag).to.include(\"noindex\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify Security Headers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Verify all 6 required security headers are present"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Strict-Transport-Security header\", function () {",
+                  "    pm.response.to.have.header(\"Strict-Transport-Security\");",
+                  "});",
+                  "",
+                  "pm.test(\"X-Content-Type-Options header\", function () {",
+                  "    pm.response.to.have.header(\"X-Content-Type-Options\");",
+                  "});",
+                  "",
+                  "pm.test(\"Referrer-Policy header\", function () {",
+                  "    pm.response.to.have.header(\"Referrer-Policy\");",
+                  "});",
+                  "",
+                  "pm.test(\"Permissions-Policy header\", function () {",
+                  "    pm.response.to.have.header(\"Permissions-Policy\");",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Security-Policy header\", function () {",
+                  "    pm.response.to.have.header(\"Content-Security-Policy\");",
+                  "});",
+                  "",
+                  "pm.test(\"X-Frame-Options header\", function () {",
+                  "    pm.response.to.have.header(\"X-Frame-Options\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Performance Tests",
+      "item": [
+        {
+          "name": "Stats API - Cache Performance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/scholarships/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scholarships", "stats"]
+            },
+            "description": "Test stats API caching. First call: MISS, subsequent calls: HIT (<50ms target)"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response time is acceptable\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(600); // 600ms max",
+                  "});",
+                  "",
+                  "pm.test(\"X-Cache header present\", function () {",
+                  "    pm.response.to.have.header(\"X-Cache\");",
+                  "});",
+                  "",
+                  "console.log(\"Cache Status:\", pm.response.headers.get(\"X-Cache\"));",
+                  "console.log(\"Response Time:\", pm.response.responseTime + \"ms\");"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

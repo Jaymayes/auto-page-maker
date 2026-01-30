@@ -1,0 +1,38 @@
+{
+  "event_type": "AUDIT_STATUS",
+  "timestamp": "2026-01-06T18:59:26Z",
+  "namespace": "simulated_audit",
+  "version": "msp_v3",
+  "app_display": "Principal SRE Auditor",
+  "display": {
+    "tile_id": "audit.status",
+    "priority": 1,
+    "ttl_sec": 86400
+  },
+  "meta": {
+    "environment": "staging",
+    "version": "msp_v3",
+    "correlation_id": "audit-20260106185926"
+  },
+  "payload": {
+    "audit_date": "2026-01-06",
+    "egrs_score": 71,
+    "grade": "Not Ready",
+    "services_healthy": 7,
+    "services_down": 1,
+    "critical_blocker": "A6 provider-register DOWN (500)",
+    "tests_passed": 5,
+    "tests_blocked": 2,
+    "artifact_path": "reports/scholar_audit/20260106-1852",
+    "top_risks": [
+      "A6 returning 500 on all endpoints - B2B blocked",
+      "A1 auth_db slow (247ms > 150ms target)",
+      "Some OIDC authorization errors reported"
+    ],
+    "recommended_actions": [
+      "CRITICAL: Access A6 and diagnose startup crash",
+      "Optimize A1 database connection pooling",
+      "Audit OIDC client configurations"
+    ]
+  }
+}

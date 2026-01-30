@@ -1,0 +1,215 @@
+{
+  "version": "1.2.0",
+  "created_at": "2026-01-19T22:30:00Z",
+  "updated_at": "2026-01-19T23:30:00Z",
+  "ceo_approval": "CEO-20260119-OCA-AUTO-GO-5PCT",
+  "feature": "one_click_apply",
+  "status": "CANARY_STAGED",
+  "auto_go": {
+    "enabled": true,
+    "gates_required": ["a6_provider_service", "legal_signoff"],
+    "on_gates_green": "promote_to_CANARY_5"
+  },
+  "traffic_pct": 0,
+  "canary_schedule": {
+    "phase_1": {
+      "traffic_pct": 5,
+      "duration_hours": 24,
+      "max_exposures": 1000,
+      "gate": "all_kpis_green"
+    },
+    "phase_2": {
+      "traffic_pct": 10,
+      "duration_days": 7,
+      "gate": "promotion_criteria_met"
+    }
+  },
+  "max_traffic_pct": 10,
+  "principle": "Editor/Coach, not Ghostwriter",
+  "ab_test": {
+    "enabled": true,
+    "split": "50/50",
+    "variants": {
+      "a": {
+        "subject": "Apply to {{scholarship_name}} in seconds — you write the essay",
+        "cta": "Review application",
+        "template": "student-email-variant-a.html"
+      },
+      "b": {
+        "subject": "Fast-Track your {{scholarship_name}} application (no AI essays, ever)",
+        "cta": "Open fast-track review",
+        "template": "student-email-variant-b.html"
+      }
+    },
+    "success_gate": {
+      "ctr_lift_pct": 10,
+      "submit_rate_lift_pct": 5,
+      "no_increase_in": ["refunds", "complaints"]
+    }
+  },
+  "campaign_ids": {
+    "student": "oca_canary_student_v1",
+    "provider": "oca_canary_provider_v1"
+  },
+  "utm_params": {
+    "required": ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"],
+    "a8_params": ["x-a8-cid", "x-a8-eid"]
+  },
+  "scope": {
+    "allowed_prefill": [
+      "profile_name",
+      "profile_email",
+      "profile_dob",
+      "eligibility_gpa",
+      "eligibility_major",
+      "eligibility_year",
+      "reusable_awards",
+      "reusable_activities"
+    ],
+    "never_prefill": [
+      "essays",
+      "personal_statements",
+      "creative_prompts",
+      "recommendation_letters"
+    ]
+  },
+  "ux": {
+    "pre_submit_modal": {
+      "show_prefilled_fields": true,
+      "show_untouched_fields": true,
+      "show_provider_terms": true,
+      "integrity_checkbox_text": "I wrote the attached essay myself and meet the eligibility criteria.",
+      "consent_checkbox_text": "I authorize submission of my profile data and attached documents to {{provider_name}}.",
+      "what_we_wont_do_link": true
+    },
+    "academic_integrity_notice": {
+      "show_at_coach": true,
+      "show_at_submit": true,
+      "prominent_line": "We will never write your essay."
+    },
+    "review_flow": {
+      "default_focus": "review",
+      "view_edit_required": true,
+      "no_auto_submit": true
+    }
+  },
+  "rate_limits": {
+    "submissions_per_user_per_day": 5,
+    "human_confirmation_required": true
+  },
+  "telemetry": {
+    "events": [
+      "oca_canary_started",
+      "oca_email_sent",
+      "oca_email_open",
+      "oca_email_click",
+      "oca_modal_viewed",
+      "oca_doc_selected",
+      "oca_consent_checked",
+      "oca_integrity_checked",
+      "oca_submit_clicked",
+      "oca_submit_result",
+      "oca_integrity_policy_viewed",
+      "provider_issue_reported",
+      "oca_feature_killed"
+    ],
+    "submit_result_outcomes": ["success", "blocked_eligibility", "blocked_rate_limit", "blocked_missing_doc", "blocked_consent", "error"],
+    "issue_reason_codes": ["spam", "quality", "integrity", "unauthorized", "other"]
+  },
+  "refusal_message": "I can't write or complete scholarship essays for you. I can help you organize your ideas, improve clarity, and check structure. Upload your draft and I'll coach you on edits.",
+  "privacy": {
+    "coppa": {
+      "age_gate_years": 13,
+      "under_age_state": "Pending_Parent_Auth",
+      "block_feature": true
+    },
+    "ferpa": {
+      "cross_student_access": "deny_403",
+      "log_unauthorized_attempts": true
+    },
+    "pii_in_logs": false,
+    "suppression": {
+      "under_13": true,
+      "without_consent": true
+    }
+  },
+  "provider_safeguards": {
+    "honor_provider_rules": true,
+    "oca_header_in_packet": "Prepared via Scholar AI Advisor OCA — Admin data verified; essay attested by student.",
+    "audit_log_link": true,
+    "report_issue_workflow": {
+      "enabled": true,
+      "auto_disable_on_submit": true,
+      "microcopy": "Report Issue — opens ticket with auto-disable on submit; shows what will happen next."
+    },
+    "complaint_kill_switch": {
+      "threshold": 1,
+      "action": "immediate_disable"
+    }
+  },
+  "kpis": {
+    "students": {
+      "open_rate_min_pct": 35,
+      "ctr_min_pct": 8,
+      "modal_completion_min_pct": 70,
+      "submit_success_min_pct": 50
+    },
+    "providers": {
+      "complaint_rate_max": 0,
+      "time_to_review": "unchanged_or_faster"
+    },
+    "integrity_ops": {
+      "ghostwriting_refusal_pass_rate_pct": 100,
+      "refund_delta_max_pp": 0.25,
+      "refund_max_24h_pct": 2.0,
+      "p95_max_ms": 1500,
+      "runtime_error_max_pct": 1.0
+    }
+  },
+  "slos": {
+    "api_p95_ms": 1500,
+    "queue_depth_max": 30,
+    "breach_window_min": 15,
+    "breach_action": "throttle_50pct_non_revenue"
+  },
+  "guardrails": {
+    "refund_rate_max_pct": 2.0,
+    "refund_delta_max_pp": 0.25,
+    "on_refund_breach": "auto_revert",
+    "academic_integrity_violation": "immediate_disable"
+  },
+  "kill_switches": [
+    {"trigger": "provider_complaint >= 1", "action": "immediate_disable", "response_time_sec": 60},
+    {"trigger": "integrity_violation >= 1", "action": "immediate_disable", "response_time_sec": 60},
+    {"trigger": "p95 > 1500ms for 5min", "action": "immediate_disable", "response_time_sec": 60},
+    {"trigger": "error_rate >= 1.0% for 5min", "action": "immediate_disable", "response_time_sec": 60},
+    {"trigger": "refund_rate > 2.0%", "action": "auto_revert", "response_time_sec": 60},
+    {"trigger": "refund_delta > 0.25pp", "action": "auto_revert", "response_time_sec": 60}
+  ],
+  "code_freeze": {
+    "enabled": true,
+    "scope": "oca_touching_repos",
+    "duration_hours": 24
+  },
+  "budget": {
+    "canary_cap_usd": 500,
+    "t1_spend_usd": 45
+  },
+  "dependencies": {
+    "a6_provider_service": {
+      "status": "PENDING",
+      "owner": "Engineering Lead",
+      "deadline_hours": 12
+    },
+    "legal_signoff": {
+      "status": "PENDING",
+      "owner": "General Counsel",
+      "deadline_hours": 4
+    }
+  },
+  "go_no_go": {
+    "t1_dry_run": "COMPLETE",
+    "canary_5pct": "STAGED_AUTO_GO",
+    "canary_10pct": "pending_24h_clean"
+  }
+}

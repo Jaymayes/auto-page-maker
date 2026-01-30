@@ -1,0 +1,71 @@
+{
+  "workstream_id": "PERF-001-HYPERCARE",
+  "created_at": "2026-01-16T00:30:00Z",
+  "updated_at": "2026-01-16T04:30:00Z",
+  "deadline": "T+48h (2026-01-17T22:30:00Z)",
+  "target": ">=20% P95 reduction for each top 5 endpoint",
+  "deliverables_at_t24h": [
+    "Before/after latency profiles",
+    "Regression guard (no accuracy drop on match quality)"
+  ],
+  "endpoints": [
+    {
+      "rank": 1,
+      "endpoint": "POST /api/scholarships/:id/apply",
+      "current_p95_ms": 412,
+      "target_p95_ms": 330,
+      "optimizations": [
+        "Stream response with early headers < 300ms",
+        "Cache prompt templates",
+        "Async essay validation"
+      ]
+    },
+    {
+      "rank": 2,
+      "endpoint": "POST /api/documents/analyze",
+      "current_p95_ms": 378,
+      "target_p95_ms": 302,
+      "optimizations": [
+        "Batch embeddings",
+        "Async extraction pipeline",
+        "Return streaming response with early headers < 300ms"
+      ]
+    },
+    {
+      "rank": 3,
+      "endpoint": "GET /api/scholarships/match",
+      "current_p95_ms": 298,
+      "target_p95_ms": 238,
+      "optimizations": [
+        "Pre-compute and cache match candidates (Bloom/bitmap or materialized view)",
+        "Refresh every 5 minutes",
+        "Pre-warm embeddings cache"
+      ]
+    },
+    {
+      "rank": 4,
+      "endpoint": "POST /api/verify/essay",
+      "current_p95_ms": 278,
+      "target_p95_ms": 222,
+      "optimizations": [
+        "Parallel rubric checks",
+        "Early-exit on fail"
+      ]
+    },
+    {
+      "rank": 5,
+      "endpoint": "GET /api/providers/:id/listings",
+      "current_p95_ms": 215,
+      "target_p95_ms": 172,
+      "optimizations": [
+        "Materialized view",
+        "Cursor pagination"
+      ]
+    }
+  ],
+  "regression_guard": {
+    "match_quality_test": "accuracy >= baseline",
+    "test_dataset": "golden_matches_v1",
+    "threshold": 0.0
+  }
+}

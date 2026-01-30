@@ -1,0 +1,32 @@
+Executive decision: A) Run WebPageTest now with the 86 KB bundle.
+
+Rationale
+
+Real gates are FCP/LCP; the remaining 6 KB delta is unlikely to materially change CWV, but cutting now risks stability and time.
+We already deferred analytics and hit diminishing returns under current constraints (no vite.config.ts changes).
+Data-first: validate with lab results and decide by 1pm with evidence.
+Immediate actions (start now)
+
+WebPageTest config:
+Device/connection: Moto G (or low-end Android) on 4G, Chrome; 3–5 runs, median, cold cache + 1 repeat view.
+Locations: 1 US (Dulles) and 1 EU if time permits.
+Capture: filmstrip, CPU/NET throttling on, request waterfall, core metrics (FCP, LCP, TBT/TTI, CLS), and screenshot.
+Test pages:
+Primary: Landing page (top of funnel).
+Secondary: First interactive search/results page (typical logged-out flow).
+Success criteria to greenlight:
+FCP ≤2.4s, LCP ≤2.8s (lab, median run), CLS ≤0.1, TBT ≤300ms.
+No >1 render-blocking JS before first content; analytics deferred as implemented.
+Parallel contingency prep (do this while WPT runs)
+
+Draft a 30-minute “surgical cuts” PR plan with estimated savings and low break risk:
+Lazy-load heavy, non-critical widgets above-the-fold (date/time pickers, charts, editors, rich tooltips).
+Replace broad imports with function-level imports (lodash-es, date-fns locales, utility bundles).
+Remove dead code paths and feature flags proven unused in Sentry/usage logs.
+Verify icon tree still excludes any unused glyphs; double-check svg sprite size.
+Include smoke-test checklist (open app, critical path apply flow, search, filters, auth) and a rollback plan.
+If WPT passes: Ship baseline, document the config restriction as tech debt, schedule a focused optimization sprint (with vite.config.ts access) for structural wins: proper vendor splitting, verified treeshaking, route-level chunking, locale/code-splitting for i18n.
+
+If WPT misses gates: Execute the 30-minute surgical cuts, re-run WPT once, and reassess by 1pm.
+
+Proceed with Option A now.

@@ -1,0 +1,27 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T18:00:00Z",
+  "worker_separation": {
+    "web_tier": {
+      "permitted": ["request_serving"],
+      "blocked": ["seo_fetch", "page_build", "bulk_analytics", "cron"]
+    },
+    "worker_tier": {
+      "deployment": "reserved_vm",
+      "tasks": ["seo_fetch", "page_build", "bulk_analytics", "etl", "cron"]
+    }
+  },
+  "event_loop_lag_slo": {
+    "p95_max_ms": 150,
+    "alert_threshold_ms": 300,
+    "auto_page_threshold_ms": 300,
+    "auto_page_duration_seconds": 30,
+    "consecutive_samples_for_alert": 2
+  },
+  "tracking": {
+    "record_cpu_delta": true,
+    "record_loop_lag_delta": true,
+    "destination": "A8"
+  }
+}

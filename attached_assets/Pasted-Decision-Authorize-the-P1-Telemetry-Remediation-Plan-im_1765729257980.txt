@@ -1,0 +1,39 @@
+Decision: Authorize the P1 Telemetry Remediation Plan immediately. Reclassify incident from "Production Outage" to "Data Integrity/Observability Failure."
+
+Why (Data/Insight): The diagnostic report confirms the organic growth engine is operational, despite the dashboard blackout.
+
+Production is Healthy: The PSEO Worker (A7) is online with 32,022 seconds of uptime and a healthy 23ms latency connection to the Neon PostgreSQL database.
+
+Asset Value Exists: We have 2,919 pages currently in the sitemap, meaning we are ~58% of the way to our Year 1 target of 5,000 pages.
+
+The Gap: The issue is strictly the orchestration telemetry chain (A7 → A8) failing to report these events, causing the dashboard to show "0/10" connections and zero pages.
+
+KPI Impact (Estimate):
+
+Accuracy: Dashboard reporting will move from 0% accuracy to >95% accuracy within 24 hours via the sitemap fallback mechanism.
+
+Growth Visibility: Restoring telemetry allows us to correlate the 2,919 existing pages with traffic/conversion data, validating our SEO-led low-CAC strategy.
+
+Risks and Mitigations:
+
+Risk: Data blindness leading to bad capital allocation (e.g., spending on paid ads because we think SEO is broken).
+
+Mitigation: Immediate implementation of the sitemap fallback to display "sitemap pages" on the dashboard today.
+
+Risk: PII leakage in new telemetry streams.
+
+Mitigation: Strict adherence to the v3.5.1 protocol; payload must only include page_id, status, and timestamps—zero user identifiers to maintain FERPA/COPPA compliance.
+
+Next Actions (Owner, Due Date):
+
+A7 Lead (Today): Expose /api/pages/stats endpoint and grant Replit console access to the A7 container for log verification.
+
+Platform/A8 Lead (Today): Implement the sitemap fallback logic in server/routes/fleet-health.ts and update the executive dashboard to remove the "0 pages" error.
+
+Data Team (Within 1 week): Perform the one-time backfill of the 2,919 existing pages into the event store to correct historical baselines.
+
+Open Data Gaps/Assumptions:
+
+Confirmation that v3.5.1 telemetry JSON schemas are finalized in the repository.
+
+Verification of the 30-day backfill feasibility without impacting production DB latency.

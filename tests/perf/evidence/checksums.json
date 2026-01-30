@@ -1,0 +1,21 @@
+{
+  "run_id": "CEOSPRINT-20260123-EXEC-ZT3G-FIX-AUTH-009",
+  "generated_at": "2026-01-23T12:32:10Z",
+  "files": {
+    "a1_db_ping.md": "25f3b7baa3484e285d2d9cdc5cf38322a5f09cf12f8fc4382d4c50f14484b9f2",
+    "a1_env_validation.md": "e24e9ab04f8a379270fa3a7642f227c6b67778fc1c31574b8e85dd396937272b",
+    "b2b_funnel_verdict.md": "7b2e434ba50d7e3f250e36bc66cb8d2ee33f47faadfc47f3acf14c1ea10a96cb",
+    "b2c_funnel_verdict.md": "405cdd5f85e648ef2d59af1582f567cb60c91d20ed56d9b1dccdda2117e76a99",
+    "client_env_validation.md": "1438244a430225fce7e07321f4a059cb4ae97bdf36407cd6f0c2bf156fda38d3",
+    "ecosystem_double_confirm.md": "64ff50478437af399afc883ded23164b6896a29f7379a7c0fd023e001587c8d5",
+    "manual_intervention_manifest.md": "bc8f80fd9a5f8e24f155f10ec431133757ddc308d73b89b4ef38a037e3b85ff5",
+    "perf_summary.md": "05862222f1424e9ca35181bcf4840e49a66fd74d035b28d36f043316e0f7e7dd",
+    "security_headers_report.md": "361c1ce315e66ec0a2858c9bec89930a7ec31d83f68cc7339ae340b865b2977c",
+    "seo_verdict.md": "256c067cb356c1f47f2071a4d2b3ac1892a0f8392fd7cf554364da6b7650a918",
+    "ui_ux_integrity_matrix.md": "33e7b5cee89b8891205c8f5fe78b1c572b4539b27d34b2608d867bbe3d5d2173",
+    "a1_health.json": "25e9a811dd93ddebfcd314097f1bb121fbbc66313a2c4cfe1ba9a09f921267cd",
+    "system_map.json": "3f29e1a834e42712498576e3fde3c4374b223314e19ee8eac5f2fdf9c95099d0",
+    "version_manifest.json": "8ffbb4c60e657b910d3e73c083680486c348bc777164645c7de9108c24f34a84",
+    "raw_curl_evidence.txt": "b7f53060acb4f821ff98b00efcaa3921d277ddb8d66930a8b9c1e37755a7d0b1"
+  }
+}

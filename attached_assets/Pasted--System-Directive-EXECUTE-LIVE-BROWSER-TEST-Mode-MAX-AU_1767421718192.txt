@@ -1,0 +1,70 @@
+@System_Directive: EXECUTE_LIVE_BROWSER_TEST
+@Mode: MAX_AUTONOMOUS (Runtime Verification)
+@Context: User requires VISUAL/LOG PROOF that the button works.
+
+**Role:** Automation Engineer
+**Current Location:** A7 Repository (`auto_page_maker`)
+**Objective:** Launch a real browser instance (Headless Chrome), navigate to the live site, click the "Get Matches" button, and capture the result in real-time logs.
+
+## 1. Setup (The Browser Engine)
+* **Action:** Install Puppeteer immediately.
+    * `npm install puppeteer`
+    * (If on Replit, ensure `nix` packages for chromium/libnss are present, or use the standard puppeteer build).
+
+## 2. The Test Script (`tests/live_click.js`)
+* **Action:** Write and run this script:
+    ```javascript
+    const puppeteer = require('puppeteer');
+
+    (async () => {
+      console.log("🔵 1. Launching Headless Browser...");
+      const browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      const page = await browser.newPage();
+
+      console.log("🔵 2. Navigating to [https://scholaraiadvisor.com](https://scholaraiadvisor.com)...");
+      await page.goto('[https://scholaraiadvisor.com](https://scholaraiadvisor.com)', { waitUntil: 'networkidle0' });
+
+      // Take a screenshot before clicking (Evidence)
+      await page.screenshot({ path: 'before_click.png' });
+      console.log("📸 Screenshot saved: before_click.png");
+
+      // Find the button (Look for the CTA link)
+      const selector = 'a[href*="student-pilot"]';
+      console.log(`🔵 3. Searching for button with selector: ${selector}`);
+      
+      try {
+        await page.waitForSelector(selector, { timeout: 5000 });
+        const href = await page.$eval(selector, el => el.href);
+        console.log(`✅ FOUND BUTTON. Target: ${href}`);
+
+        console.log("🔵 4. CLICKING BUTTON NOW...");
+        await Promise.all([
+          page.waitForNavigation(), // Wait for URL to change
+          page.click(selector),
+        ]);
+
+        const finalUrl = page.url();
+        console.log(`🏁 5. NAVIGATION COMPLETE.`);
+        console.log(`👉 FINAL URL: ${finalUrl}`);
+
+        if (finalUrl.includes("student-pilot") && finalUrl.includes("utm_source")) {
+          console.log("✅ SUCCESS: Redirected correctly with tracking.");
+        } else {
+          console.error("❌ FAILURE: URL did not match expected pattern.");
+        }
+
+      } catch (error) {
+        console.error("❌ ERROR:", error.message);
+      }
+
+      await browser.close();
+    })();
+    ```
+
+## 3. Execution
+* **Command:** `node tests/live_click.js`
+* **Output:** Stream the logs to the console so I can see the "Blue Dots" (steps) happening live.
+
+**COMMAND:** RUN THE LIVE BROWSER TEST NOW.

@@ -1,0 +1,178 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-15T06:45:00Z",
+  "status": "READ_ONLY_APPROVED",
+  "scope": "no_changes",
+  "executive_context": {
+    "current_mode": "provider_only_failover",
+    "student_surfaces": "suppressed_by_design",
+    "expected_b2c_zero": true,
+    "purpose": "Diagnose whether zero is solely due to failover or if additional structural issues exist"
+  },
+  "diagnostic_tracks": {
+    "A_platform_sanity": {
+      "tests": [
+        {
+          "id": "A1",
+          "name": "A8 ingestion health",
+          "what": "Verify last 7 days event counts by stream",
+          "streams": ["traffic/session", "funnel", "monetization", "provider", "incident/kill"],
+          "pass": "Non-zero event flow per stream; no schema mismatch spikes",
+          "owner": ["Ops/SRE", "Data"]
+        },
+        {
+          "id": "A2",
+          "name": "SLO snapshot vs budget",
+          "what": "P95, error rate, queue depth, uptime; hourly spend vs $500 cap",
+          "pass": "P95<1.2s normal/<1.5s canary; error<1%; queue≤30; spend≤80%",
+          "owner": ["Ops/SRE"]
+        },
+        {
+          "id": "A3",
+          "name": "Suppression and gating footprint",
+          "what": "Share of traffic suppressed: under_13, no_consent, unsubscribed; cohort assignment",
+          "pass": "Suppression within historical bands; holdout near 10%±0.5pp",
+          "owner": ["Data", "Legal"]
+        }
+      ]
+    },
+    "B_b2c_acquisition_activation": {
+      "tests": [
+        {
+          "id": "B4",
+          "name": "Organic acquisition (SEO)",
+          "what": "Indexability audit: canonical, robots, sitemap, schema.org, page load, lighthouse, 404/500",
+          "pass": "Indexable pages, no noindex, CWV LCP<2.5s @75th, 0 major crawl errors",
+          "owner": ["Growth", "Web"]
+        },
+        {
+          "id": "B5",
+          "name": "Traffic attribution integrity",
+          "what": "Sessions by source/medium/UTM; landing-page to event linkage",
+          "pass": "≥95% sessions carry source/medium; UTMs resolve to A8 sessions",
+          "owner": ["Growth", "Data"]
+        },
+        {
+          "id": "B6",
+          "name": "Activation funnel integrity",
+          "what": "Rate per step: landing→CTA→signup→doc_upload_start→doc_upload_complete",
+          "pass": "Each step records events; benchmarks met",
+          "owner": ["Product", "Data"]
+        },
+        {
+          "id": "B7",
+          "name": "Payments readiness (B2C)",
+          "what": "Stripe mode, errors, purchase counts, refund rate",
+          "pass": "Live mode; non-zero success in historical; refund<2% and ≤baseline+0.25pp",
+          "owner": ["Finance", "Engineering"]
+        }
+      ]
+    },
+    "C_b2b_provider_funnel": {
+      "tests": [
+        {
+          "id": "C8",
+          "name": "Provider activity and value",
+          "what": "Logins/session length; tasks created/completed; TTR; acceptance rate",
+          "pass": "No>20% drop vs baseline; acceptance≥baseline",
+          "owner": ["Growth", "Product"]
+        },
+        {
+          "id": "C9",
+          "name": "Provider acquisition funnel",
+          "what": "onboard_start→onboard_complete→first_posting→first_review",
+          "pass": ">60% onboard completion; >40% posting; median TTR within baseline",
+          "owner": ["Sales Ops", "Product"]
+        },
+        {
+          "id": "C10",
+          "name": "Compliance guardrails",
+          "what": "No student data in provider views during failover; audit log samples; PII checks",
+          "pass": "0 violations; complete audit trail",
+          "owner": ["Legal", "Security"]
+        }
+      ]
+    },
+    "D_experiment_messaging": {
+      "tests": [
+        {
+          "id": "D11",
+          "name": "Variant and control hygiene",
+          "what": "Allocation drift; correct messaging; event parity across A/B/control",
+          "pass": "Drift≤0.5pp; compliance text present; schemas consistent",
+          "owner": ["Ops/SRE", "Growth"]
+        },
+        {
+          "id": "D12",
+          "name": "Incident and kill-trigger audit",
+          "what": "Kill events, near-misses, escalations; RCA presence",
+          "pass": "No un-RCA'd incidents; MTTD<1min; MTTR<30min",
+          "owner": ["SRE"]
+        }
+      ]
+    }
+  },
+  "outputs": {
+    "gap_map": {
+      "name": "Lead and Revenue Gap Map",
+      "contents": ["traffic", "conversion", "SLO", "top_3_defects", "owner"]
+    },
+    "blocking_analysis": {
+      "name": "What's blocking revenue",
+      "dimensions": ["acquisition", "activation", "monetization", "provider_value", "compliance"]
+    },
+    "effort_estimate": {
+      "name": "Effort to green",
+      "includes": ["dependencies", "timeline", "owner"]
+    }
+  },
+  "likely_root_causes": [
+    "B2C zeroed by failover (expected)",
+    "SEO pages not indexed or slow",
+    "Attribution gaps",
+    "Suppression too aggressive",
+    "Payments not in live mode",
+    "Latency/error spikes at key steps",
+    "Provider acceptance/backlog issues"
+  ],
+  "timeline": {
+    "diagnostic_sprint": {
+      "days": "1-3",
+      "scope": "read_only",
+      "activities": [
+        "A8 and Stripe readouts",
+        "SLO and budget traces",
+        "Suppression/holdout analysis",
+        "Provider activity metrics",
+        "Incident review",
+        "SEO technical audit"
+      ],
+      "deliverable": "Gap Map & Executive Readout"
+    },
+    "remediation_tier1": {
+      "weeks": "1-2",
+      "scope": "requires_approval",
+      "focus": ["payments_config", "onboarding_friction", "attribution_patch", "variant_copy", "SEO_indexability"],
+      "parallel": "stabilize_SLOs"
+    },
+    "remediation_tier2": {
+      "weeks": "2-4",
+      "scope": "structural",
+      "focus": ["activation_UX", "doc_upload_reliability", "schema_refinements", "provider_tooling"]
+    },
+    "ongoing": {
+      "cadence": "weekly",
+      "activities": ["A/B_cost_telemetry_governance", "24/7_SLO_watch", "quarterly_SEO_refresh"]
+    }
+  },
+  "requirements_to_kickoff": [
+    "A8 read access for events and dashboards",
+    "Read-only access to Stripe",
+    "Read-only access to Search Console/Analytics",
+    "Current baselines for SLOs, acceptance, and key funnel rates"
+  ],
+  "delivery": {
+    "gap_map_eta": "3 business days from data access",
+    "includes": "executive recommendation on where to invest first"
+  }
+}

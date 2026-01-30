@@ -1,0 +1,93 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-15T05:55:00Z",
+  "status": "DEGRADED_PROVIDER_ONLY",
+  "failover_reason": "Gate 2 (legal_copy_signed) missed at 02:11:13Z",
+  "lock_event_id": "evt_1768428673887_yfharrqcg",
+  "provider_only_mode": {
+    "enabled": true,
+    "activated_at": "2026-01-15T02:11:13Z",
+    "provider_only_banner_active": true,
+    "student_notifications_suppressed": true,
+    "student_queue_status": {
+      "action": "purge_or_hard_hold",
+      "queue_count": 0,
+      "sends_after_deadline": 0
+    }
+  },
+  "launch_condition": {
+    "gate_required": "a6_health_window_ok",
+    "deadline_utc": "2026-01-15T10:11:13Z",
+    "on_receive": {
+      "action": "auto_launch_provider_only",
+      "emit": "oca_canary_started",
+      "mode": "provider_only"
+    }
+  },
+  "capacity_sizing": {
+    "expected_traffic_pct": 10,
+    "note": "~10% of original expectation (provider-only)"
+  },
+  "guardrails": {
+    "budget_cap_usd": 500,
+    "kill_triggers_unchanged": true,
+    "throttle_policy_unchanged": true,
+    "code_freeze": "absolute",
+    "integrity_line": "No AI essays. Students write; we only assist."
+  },
+  "t2h_packet_provider_only": {
+    "slos": ["p95", "error", "queue"],
+    "provider_funnel": [
+      "banner_impressions",
+      "clicks",
+      "onboard_start",
+      "verification_task_created",
+      "acceptance"
+    ],
+    "safety": {
+      "complaints": 0,
+      "violations": 0
+    },
+    "integrity": {
+      "oca_header_present": true,
+      "no_pii_in_logs": true
+    },
+    "cost_telemetry": [
+      "cost_per_notified",
+      "cost_per_started",
+      "cost_per_completed",
+      "compute_per_completion"
+    ],
+    "provider_metrics": [
+      "acceptance_vs_baseline",
+      "time_to_first_review",
+      "decline_reasons_top5"
+    ],
+    "evidence": [
+      "kill_drill_proof",
+      "provider_banner_screenshots",
+      "student_suppression_confirmation_post_0211Z"
+    ]
+  },
+  "t24h_decision_provider_only": {
+    "no_student_promotion": true,
+    "success_criteria": {
+      "provider_acceptance": {"comparison": "gte_baseline"},
+      "incidents_complaints": 0,
+      "slos": "within_thresholds",
+      "refunds_chargebacks": 0,
+      "compute_per_completion": "within_margin",
+      "ltv_cac_trajectory": {"min": 4.0, "scope": "provider_side"}
+    }
+  },
+  "postmortem_required": {
+    "owner": "General Counsel",
+    "brief_points": [
+      "root_cause",
+      "why_detection_failed_before_t3h45",
+      "containment",
+      "corrective_actions",
+      "new_signoff_path_with_auto_reminders"
+    ]
+  }
+}

@@ -1,0 +1,143 @@
+Role
+You are the QA/E2E automation engineer. Execute a read‑only verification of the Auto Page Maker (SEO Engine) in staging or a safe canary. Do not modify configs or production data. Your goal is to validate SEO correctness, SPA fallback safety, performance telemetry, conversion tracking, and expiry hygiene behavior.
+
+Test inputs
+
+Base URL: https://scholarmatch.com
+Generated slugs (10):
+art-scholarships-florida
+business-scholarships-massachusetts
+chicago-local-scholarships
+computer-science-scholarships-california
+engineering-scholarships-new-york
+liberal-arts-scholarships-washington
+medicine-scholarships-georgia
+no-essay-scholarships-2025
+nursing-scholarships-texas
+stem-scholarships-2025
+Legacy routes to validate (read‑only):
+/scholarships/:category/:location (choose 2 actual combos present in data)
+Static routes:
+/, /get-started
+Invalid routes (expect 404):
+/non-existent-page, /invalid/nested/paths, /scholarships/unknown/unknown, /this-should-404.html
+Tools
+
+Browser: Chrome latest (desktop + mobile emulation)
+API: curl or Postman for headers and sitemaps
+Automation: Playwright or Cypress for E2E; Lighthouse CLI for CWV
+Optional: Pa11y for quick accessibility smoke
+Test suites and assertions
+
+A) Canonicalization and Metadata
+
+Canonical tags
+For each slug, assert:
+<link rel="canonical" href="https://scholarmatch.com/{slug}">
+No duplicate canonicals; only one canonical tag present
+2. Robots.txt
+
+GET /robots.txt
+Assert: has User-agent, Allow, and sitemap reference to /sitemap.xml
+3. Sitemap.xml
+
+GET /sitemap.xml
+Assert: valid XML + namespace; includes all 10 pages and homepage (11 total entries)
+lastmod present and ISO‑8601
+4. Schema.org JSON‑LD
+
+For each slug, extract JSON‑LD
+Assert: valid JSON; @context, @type, name, description, url present
+Organization/educational schema elements present (if applicable)
+B) SPA Fallback Control and Route Validation (SEO‑safe)
+
+Valid routes (serve SPA)
+/, each slug, selected legacy routes, and static routes
+Assert: 200 OK; correct content; no dev artifacts; Title/H1 present
+2. Invalid routes (return 404)
+
+Each invalid path above
+Assert: 404 status; HTML includes meta robots noindex,nofollow
+Headers: Cache-Control prevents caching; Content-Type text/html
+Body contains helpful navigation back to homepage
+3. Content negotiation
+
+For invalid paths with Accept: application/json
+Assert: 404 JSON payload (if supported) OR HTML 404 with correct status
+4. Security fingerprint
+
+On any route, assert absence of dev artifacts:
+No /@vite/client, react-refresh, createHotContext, or HMR references
+C) Performance and Core Web Vitals (read‑only)
+
+Page load metrics
+Run Lighthouse on 5 slugs (desktop + mobile)
+Assert: LCP passes CWV (Green), CLS ≤0.1, FID/INP within good thresholds
+2. TTFB sampling
+
+Measure TTFB for all 10 slugs (3 samples each)
+Assert: median TTFB within target band; record P95
+3. Generation performance claim
+
+Confirm current generation pipeline doesn’t impact live request latency
+Assert: no regressions; steady p95 across runs
+D) Crawlability and Indexing Signals
+
+Robots and indexability
+Confirm valid pages: no meta robots disallowing indexing
+Confirm 404 pages: meta robots noindex,nofollow present
+2. Canonical integrity
+
+Ensure no conflicting canonical across a sample of 3 internal navigation paths to the same slug
+E) Conversion and Attribution Instrumentation (non‑PII)
+
+Event tracking smoke
+For 3 slugs, simulate:
+Page view → click “Get started” → reach signup start
+Save scholarship; begin application flow
+Assert: events fire (network beacons), include UTM if present, and session attribution fields; no PII in payloads
+2. Funnel markers
+
+Assert: unique IDs/correlation fields present to stitch page → signup → save/application
+F) Expiry Hygiene (read‑only verification)
+Note: No writes. If staging provides fixture data, use those. Otherwise, validate behavior by probing endpoints that the system marks as expired (if any exist).
+
+Expired route behavior
+For 1–2 known expired scholarships (if present):
+Assert: returns 404 for recently expired; 410 Gone for older
+HTML 404/410 includes noindex,nofollow; helpful navigation present
+2. Sitemap exclusion
+
+Assert: expired pages are absent from /sitemap.xml
+3. Discovery control
+
+Assert: no internal links surface an expired page in primary navigation or listing pages
+G) Regression guard: Legacy routes and static assets
+
+Confirm legacy routes still resolve normally (200)
+Confirm static assets served with long cache headers; HTML pages not cached unintentionally
+H) Headers and compliance quick checks
+
+For valid pages:
+Assert: Security headers present (HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, CSP if enforced)
+For 404/410 pages:
+Assert: same baseline headers; status codes correct
+Execution notes
+
+Read‑only validation. Do not change flags, env vars, or data in production.
+Prefer staging/canary; if testing on production, throttle requests and respect robots directives.
+Capture HARs and Lighthouse reports for 3 representative slugs and 2 invalid routes.
+Output format
+Provide a single report with:
+
+Summary table: Suite A–H, pass/fail, key metrics (LCP, TTFB med/P95), and notable findings
+Evidence: URLs tested, headers (key-value), snippets/screens for canonical, JSON‑LD, and 404 meta robots
+Risks/blockers: Any 404 returning 200, dev artifact traces, or SEO meta anomalies
+Go/No‑Go recommendation for Auto Page Maker only, with specific fixes if any assertion fails
+Success criteria
+
+100% pass on A, B, D, G, H
+C: CWV “Good” on majority paths; TTFB within target band
+E: Event instrumentation verified on sampled flows; no PII leakage
+F: If fixtures exist, 100% correct 404/410 and sitemap exclusion; if none present, document “not applicable (no expired fixtures available)” and include probe evidence
+End of prompt.

@@ -1,0 +1,30 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T17:30:00Z",
+  "synthetic_test": {
+    "name": "Provider Login Flow",
+    "flow": ["Login", "Dashboard", "Applicant List"],
+    "interval_minutes": 5,
+    "duration_hours": 2,
+    "total_samples": 24
+  },
+  "thresholds": {
+    "p95_max_ms": 500,
+    "auth_5xx_tolerance": 0
+  },
+  "on_failure": {
+    "severity": "SEV-1",
+    "action": "immediate_b2c_pause",
+    "traffic_cap": 0,
+    "notify": ["exec-channel", "on-call"]
+  },
+  "metrics_to_collect": [
+    "p50_ms",
+    "p95_ms",
+    "p99_ms",
+    "error_rate",
+    "sample_size",
+    "auth_5xx_count"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "cohort_id": "B2C-PILOT-001",
+  "target_cohort": {
+    "filter": "pilot_only=true",
+    "source": "A7 SEO pages",
+    "slugs": "intent-qualified"
+  },
+  "refunds": {
+    "automatic": true,
+    "immediate": true,
+    "slo_minutes": 10
+  },
+  "success_criteria": {
+    "payments": {
+      "auth_success_rate": 0.97,
+      "refund_settlement_minutes": 10,
+      "refund_rate": 1.0
+    },
+    "trust": {
+      "fpr_max": 0.035,
+      "precision_min": 0.95,
+      "recall_min": 0.75
+    },
+    "performance": {
+      "p95_core_ms": 120,
+      "p95_aux_ms": 200
+    },
+    "funnel": {
+      "visitor_to_signup": 0.05,
+      "signup_to_credit_purchase": 0.02
+    }
+  },
+  "ramp_path": {
+    "gate_1": {
+      "trigger": "T+24h",
+      "traffic": 0.05,
+      "charge_usd": 1.00,
+      "refund": "full"
+    },
+    "gate_2": {
+      "trigger": "T+72h",
+      "traffic": 0.25,
+      "charge_usd": 1.00,
+      "refund_usd": 0.50,
+      "complaint_rate_max": 0.005
+    },
+    "gate_3": {
+      "trigger": "D+7",
+      "traffic": 1.0,
+      "safety_lock": "targeted_controls"
+    }
+  }
+}

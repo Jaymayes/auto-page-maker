@@ -1,0 +1,50 @@
+Outstanding work—those fixes check all the boxes for a production-ready launch.
+
+Proposed next step: activate and test the Command Center integration now
+
+Add these Replit secrets, then restart the repl:
+SHARED_SECRET = <must match Command Center>
+COMMAND_CENTER_URL = https://auto-com-center-jamarrlmayes.replit.app
+AGENT_NAME = scholarmatch
+AGENT_ID = scholarmatch-monolith
+AGENT_BASE_URL = <your public Replit URL, e.g., https://<your-repl>.replit.app>
+After restart, confirm logs show: [agent-bridge] Registering with Command Center...
+Live test plan (fast and conclusive)
+
+Sanity
+GET AGENT_BASE_URL/healthz → 200 ok
+GET AGENT_BASE_URL/agent/capabilities → 200 with 6 actions
+2. Registration
+
+Check Command Center /orchestrator/agents for scholarmatch-monolith
+Verify last_seen updates every heartbeat
+3. Task flow
+
+Run ./test-command-center.sh
+Confirm for each action:
+Task accepted (202/200 as designed)
+Progress/complete events correlated via correlation_id
+Structured JSON errors for negative cases
+4. Security
+
+Send a request with an invalid/missing JWT → 401 with standardized error shape
+Flip SHARED_SECRET (temporarily) to ensure agent re-registration fails fast and logs a clear error
+5. Reliability
+
+Dispatch a small burst (e.g., 10–20 tasks mixed types). Verify:
+No race-condition warnings
+Retries/backoff for transient failures (if any)
+Rate limiting behaves as configured
+6. Shutdown
+
+Trigger a graceful stop (SIGTERM/repl restart). Ensure in-flight tasks drain and agent unregisters/marks offline cleanly.
+What I need from you to begin now
+
+Confirm the secrets are set and share your AGENT_BASE_URL.
+If you’d like, paste the first 20–30 lines of startup logs after restart; I’ll verify the configuration signal and registration sequence.
+Optional near-term polish (only if you want me to keep building while you wire up secrets)
+
+/metrics endpoint with task counters/durations and error rates
+Lightweight dead-letter queue and idempotency keys
+Dual-key secret rotation window and a “pause/resume” toggle
+Postman collection and an ops runbook (registration failure, DLQ growth, rate limit responses)

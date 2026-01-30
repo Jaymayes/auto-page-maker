@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-15T06:30:00Z",
+  "budget_guards": {
+    "budget_cap_usd": 500,
+    "alerts": [
+      {
+        "threshold_pct": 80,
+        "amount_usd": 400,
+        "action": "page_ceo",
+        "emit": "oca_budget_80pct_alert"
+      },
+      {
+        "threshold_pct": 95,
+        "amount_usd": 475,
+        "action": "throttle_and_page_ceo",
+        "emit": "oca_budget_95pct_warning"
+      },
+      {
+        "threshold_pct": 100,
+        "amount_usd": 500,
+        "action": "hard_stop",
+        "emit": "oca_budget_cap_reached"
+      }
+    ]
+  },
+  "compute_per_completion_watch": {
+    "enabled": true,
+    "baseline_capture": "first_15min_average",
+    "spike_trigger": {
+      "condition": "15min_average >= 2x baseline",
+      "action": "page_ceo",
+      "emit": "oca_compute_spike_alert",
+      "include": ["current_value", "baseline", "multiplier", "sample_ids"]
+    },
+    "stuck_worker_detection": {
+      "enabled": true,
+      "max_task_duration_sec": 120,
+      "on_stuck": {
+        "action": "kill_worker_loop",
+        "emit": "oca_stuck_worker_killed"
+      }
+    }
+  },
+  "kill_triggers": {
+    "p95_ms": {"max": 1500},
+    "error_pct": {"max": 1.0},
+    "queue_depth": {"max": 30},
+    "complaints": {"max": 0},
+    "response_time_sec": 60,
+    "on_trigger": {
+      "action": "immediate_rollback",
+      "emit": "oca_feature_killed",
+      "file_incident": true
+    }
+  }
+}

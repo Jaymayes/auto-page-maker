@@ -1,0 +1,109 @@
+Executive Decisions: Go-Live Direction and Gates
+
+Context: You’ve delivered a comprehensive, multi-app readiness update. As CEO, I’m issuing the final go/no-go decisions, gates, and contingencies to protect SLOs, compliance, and ARR ignition while preserving our low-CAC growth engine.
+
+scholar_auth Status: CONDITIONAL GO (pre-soak) maintained Decision:
+Performance gate stands: Hit ≤120ms P95 by Nov 12, 20:00 UTC. No downstream FULL GO beyond current approvals if auth degrades.
+MFA policy: Implement MFA before GREEN for Admin and Provider roles only. Student MFA is optional until post-freeze.
+Scope for the next 48 hours: Performance remediation only plus MFA for Admin/Provider. No additional feature scope.
+Checkpoints: T+12/T+24/T+36/T+48 performance reports; daily 06:00 UTC summary. Immediate alert if P95 >180ms for 15 minutes.
+Required actions by Nov 12, 20:00 UTC:
+
+Ship MFA for Admin/Provider; verify backup codes and TOTP; enforce step-up MFA on sensitive actions.
+Performance remediation plan with quantified deltas (e.g., JWKS cache TTL, DB pool sizing, session store latency, CDN headers, cold-start mitigation) and target contributions needed to close the 145ms gap.
+2. scholarship_api
+Status: FULL GO affirmed
+Decision:
+
+Maintain freeze through Nov 12, 20:00 UTC.
+Add protective controls now: basic rate limiting, request size limits, and WAF rules (OWASP top 10) without functional changes.
+Continue request_id tracing and audit log production.
+SLA reporting: include uptime, P95, error rate daily at 06:00 UTC.
+3. auto_com_center
+Status: PARTIAL GO maintained; email blocked pending DNS
+Decision:
+
+Proceed with reserved VM deployment immediately (approved).
+Deliverability gate: If Postmark DNS not verified by Nov 11, 20:00 UTC, fail the gate and activate contingency:
+Contingency path: In-app notifications for student_pilot and provider_register; queue email jobs but do not send; provide resend-on-verify capability.
+Rollback: Keep <5-minute rollback “big red button” documented and tested.
+4. auto_page_maker
+Status: GO-LIVE READY, frozen through Nov 12 affirmed
+Decision:
+
+Maintain freeze; continue daily KPI rollups (indexation ≥95%, CWV p75 GREEN, P95 ≈100ms, zero publish errors).
+Add read-only export of daily KPIs to scholarship_sage for centralized visibility (no schema change; file- or API-fed read-only tile is acceptable).
+5. provider_register
+Status: CONDITIONAL GO in waitlist mode maintained
+Gates to FULL GO:
+
+Stripe PASS confirmation by Finance: Deadline Nov 11, 18:00 UTC.
+auto_com_center deliverability GREEN: Nov 11, 20:00 UTC or contingency ready.
+scholar_auth P95 ≤120ms: Nov 12, 20:00 UTC. Decision:
+Run pre-soak Nov 11 01:45–02:45 UTC; deliver T+30 evidence at 03:15 UTC.
+Stay in waitlist mode until all gates clear. No payments/live awards prior to that.
+6. scholarship_agent
+Status: GO-LIVE READY (observer/frozen) affirmed
+Decision:
+
+Maintain observer mode until student_pilot FULL GO.
+Fairness telemetry shows selection parity violations: Prepare post-freeze remediation plan with measurable targets and guardrails (e.g., parity ratio bands, sample size minima, escalation workflow), due Nov 13, 18:00 UTC.
+7. scholarship_sage
+Status: Dashboards active for 5/6 metrics; fairness tile missing
+Decision:
+
+Choose A + C from your options:
+A) Test and verify current dashboards end-to-end today (no code changes).
+C) Document current state; defer fairness telemetry integration until freeze lifts.
+After Nov 12, add a read-only fairness tile that consumes scholarship_agent’s rollups without introducing new PII pipelines.
+8. student_pilot
+Status: Pending GO/NO-GO on Nov 13, 16:00 UTC
+Gates:
+
+scholar_auth GREEN (≤120ms P95).
+auto_com_center deliverability GREEN or in-app notification contingency live.
+scholarship_api remains FULL GO. Decision:
+If scholar_auth meets P95 target and notifications path is available, proceed with phased FULL GO for student_pilot on Nov 13, 16:00 UTC.
+Set opening KPI targets:
+Activation (first document upload): ≥35% in week 1.
+Free→Paid credit conversion: ≥8% in first 7 days, trending to ≥12% by day 21.
+Credit ARPU: ≥$12 in week 1 cohort (4× AI markup intact).
+Refund/chargeback rate: ≤1.0%.
+Cross-Cutting Orders and Compliance
+
+Security and Compliance
+
+RBAC and token/session hygiene are mandatory across apps; continue audit logging with request_id correlation.
+Data: TLS 1.3 and HSTS enforced; confirm at-rest encryption for any datastore holding PII by Nov 12, 18:00 UTC.
+Privacy: Reconfirm FERPA/COPPA posture and data retention windows by Nov 12, 18:00 UTC; name the DPO/contact of record in evidence bundles.
+Reliability and DR
+
+99.9% uptime and ≤120ms P95 are our SLOs. Any app breaching P95 >180ms for 15 minutes triggers an immediate CEO page and potential traffic throttle.
+DR: Maintain <5-minute rollback across Replit checkpoints. Document last verified rollback timestamp in each Section V report.
+Observability
+
+Daily report cadence: 06:00 UTC for all apps, with P50/P95/P99, error rate, uptime, and key business KPIs as applicable.
+Incident protocol: Post a P0/P1 summary within 60 minutes with request_id samples and user impact.
+Growth and ARR Plan
+
+ARR ignition timeline (subject to gates):
+
+Nov 11, 20:00 UTC: auto_com_center deliverability gate. If fail, contingency in-app notifications must be live the same hour.
+Nov 12, 20:00 UTC: scholar_auth performance and MFA (Admin/Provider) gate. This is the critical path.
+Nov 13, 16:00 UTC: student_pilot phased FULL GO if both gates pass; initiate Scholarship Agent campaign approvals at that point.
+Nov 14: provider_register FULL GO decision, contingent on Stripe PASS + above gates.
+KPI accountability (starting Nov 11, 06:00 UTC):
+
+B2C funnel: sessions (auto_page_maker), sign-ups and activation (student_pilot), free→paid conversion and credit ARPU (student_pilot).
+B2B funnel: active providers, listings, GMV (scholarship_api + provider_register), 3% platform fee revenue (provider_register).
+Platform SLOs: uptime, P95 latency, error rate (each app).
+Answers to direct questions
+
+scholar_auth MFA timing: Implement MFA now for Admin and Provider roles prior to GREEN; defer student MFA to post-freeze. Proceed with current performance-focused plan plus this limited MFA scope.
+scholarship_sage fairness telemetry: Do not change schema during freeze. Verify current dashboards now and document; integrate fairness telemetry post-freeze using read-only ingestion of scholarship_agent outputs.
+Final reminders
+
+All Section V reports must begin with APPLICATION NAME and APP_BASE_URL and include a Status line.
+Maintain change freeze through Nov 12, 20:00 UTC for apps already declared frozen.
+Raise any scope-risking changes to me before execution; we will not trade SLOs or compliance for scope creep.
+Execute the above decisively and report back at 06:00 UTC with the first cross-app daily rollup and any gate risks.

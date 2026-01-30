@@ -1,0 +1,50 @@
+This is excellent—thanks for the thorough QA. Based on your findings, here’s a tight remediation plan plus next‑step options.
+
+Immediate next steps
+
+I can help you test the Command Center integration as soon as you add the secrets and restart.
+In parallel (or right after), I can address the critical/high‑priority items with small, targeted changes.
+Remediation plan (concise and actionable)
+
+URL construction + config fallbacks
+Centralize config in a single module with a schema; no silent fallbacks.
+Use URL parsing for any base/endpoint composition to avoid malformed URLs.
+Behavior: in production, missing required vars is a hard fail; in dev, log a clear warning and disable dependent features.
+Add required: SHARED_SECRET, COMMAND_CENTER_URL (url), AGENT_BASE_URL (url), AGENT_NAME, AGENT_ID; optional: OPENAI_API_KEY (required only if generation is enabled).
+2. Silent security failures (SHARED_SECRET)
+
+On boot: if SHARED_SECRET is missing and NODE_ENV=production, throw and exit.
+If dev: log a prominent warning and reject all JWT‑protected endpoints with 503 SecurityNotConfigured until the secret is present.
+3. Race condition protection for concurrent ops
+
+If you’re single‑process: add an in‑process per‑resource mutex (Map<resourceId, Mutex>) around write paths.
+If multi‑instance or future‑proofing: add optimistic locking (version/etag) and reject stale writes; make writes idempotent with operation keys.
+DB‑level guardrails: unique constraints where applicable and transactional writes.
+Add tests that attempt concurrent updates to the same entity; assert only one commit succeeds.
+4. OpenAI error handling and resilience
+
+Detect missing OPENAI_API_KEY at startup; if missing, mark content generation capability as unavailable and return 503 with a consistent error payload.
+Wrap calls with timeouts, retry with exponential backoff + jitter for rate limits/5xx, and map known error classes to stable error codes (e.g., OPENAI_RATE_LIMIT, OPENAI_TIMEOUT).
+Add a circuit breaker to prevent cascading failures during outages.
+5. Typed agent payloads
+
+Define Zod schemas per action and infer types (z.infer) for handlers.
+Use a typed dispatcher: a TaskMap keyed by action name so payloads are strongly typed at compile time.
+Add runtime validation with Zod at the boundary; inside handlers rely on inferred types.
+6. Consistent error responses
+
+Global error middleware that always returns JSON with fields: error_code, message, details, correlation_id, status.
+Content negotiation: only return HTML for browser UI routes; APIs always JSON.
+Ensure 4xx vs 5xx are accurately set; log the same correlation_id you return.
+7. Observability quick wins
+
+Correlation ID propagation in every incoming request and every Command Center call.
+Counters and histograms for tasks by type, duration, and outcomes; expose at /metrics.
+Redact PII fields in logs by default.
+Lightweight implementation sketch (TypeScript)
+
+Config schema (Zod) with strict required/optional fields; production hard‑fail on missing required config.
+URL-safe join for AGENT_BASE_URL and routes via new URL(path, base).
+Mutex for write operations or optimistic locking (if you have a DB with a version column).
+Error middleware returning JSON with a standard shape and correlation ID.
+Typed task registry: const TaskMap = { search: z.object(...), ... } with z.infer for handler signatures.

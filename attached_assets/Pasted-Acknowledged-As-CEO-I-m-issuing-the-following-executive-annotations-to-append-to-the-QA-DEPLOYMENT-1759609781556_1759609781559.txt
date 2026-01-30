@@ -1,0 +1,70 @@
+Acknowledged. As CEO, I’m issuing the following executive annotations to append to the QA_DEPLOYMENT_READINESS_REPORT.md. These set unambiguous acceptance criteria, align gates with ARR objectives, and define decision rights, owners, and deadlines.
+
+Executive stance and go/no‑go policy
+
+Objective: Protect the SEO-led B2C funnel while unblocking B2B revenue within 6 weeks. We will run “safe mode” until Gate 2 passes: discovery open; signups waitlisted; provider pilot only.
+Go/no‑go rule: No public signups or provider self-serve until Gates 0, 1, and 2 meet acceptance criteria and incident drills pass.
+Gate 0 (Week 0) – Preconditions before any public exposure
+Acceptance criteria:
+
+Access posture: “Safe mode” enabled. Public pages for SEO allowed; all account creation, write APIs, and admin paths gated behind waitlist or provider allowlist. For any non-public surface or staging, prefer infrastructure-level access control (e.g., private deployments) to remove auth code paths from risk in early hardening .
+Observability baseline: Centralized logs visible with error filtering and search; dashboards show request volumes, HTTP status distribution, and request durations by route so we can track P95 explicitly .
+Legal and policy stubs: Draft Privacy Policy, Terms, and Data Map ready for counsel review; breach response playbook outlined. Decision: No go-live of signups until Gate 0 is green. Owner: Eng Lead + Legal. Due: immediate.
+Gate 1 (Week 1) – Identity, auth, and health
+Acceptance criteria:
+
+Auth enforcement: All protected routes use the existing middleware; RBAC enforced for student vs. provider vs. admin; credential storage in vault/secrets (no keys in code); rate limiting enabled on auth endpoints .
+Security logging: Auth successes/failures, privilege changes, and admin actions logged and queryable in production logs .
+Health endpoints: /healthz and /ready return dependency-specific checks (database, outbound email, payment provider). Alerts wired for failing checks to on-call. Dashboards show 200/4xx/5xx and latency distributions by endpoint .
+KPI guardrails: P95 <= 120ms on read endpoints; error rate <1% overall; initial uptime SLO 99.9% with alerting thresholds aligned to error budget. Decision: Proceed to Gate 2 only after passing synthetic and manual auth tests and stable /healthz for 72 hours. Owner: Eng Lead. Due: end of Week 1.
+Gate 2 (Week 2) – Compliance foundation and operational readiness
+Acceptance criteria:
+
+Policies live: Final Privacy Policy + Terms published; FERPA/CCPA compliance controls documented (data inventory, encryption in transit/at rest, retention, DSR workflow). External counsel review complete (budgeted) .
+Secrets and data: All credentials in secrets manager; no secrets in repo; persistent data paths documented and isolated from ephemeral filesystem to match deployment architecture best practice .
+On-call and runbooks: Pager coverage, severity matrix, incident comms template; dashboards for logs, CPU/memory, and latency in place; MTTR tracked via production logs and incident tickets .
+Test coverage baseline: Unit + integration suites run on each change; smoke tests for top workflows; failures block merges (see CI/CD expectations below) . Decision: If Gate 2 is green for 7 days with no Sev-1 incidents, we may open student signups behind waitlist caps. Owner: Eng + Legal. Due: end of Week 2.
+Gate 3 (Weeks 2–3) – CI/CD and quality engineering maturity
+Acceptance criteria:
+
+Pipeline: Trunk-based CI with automated unit/integration tests at merge; required checks and branch protections; lead time for changes <1 day; release notes auto-generated .
+Continuous testing: Pipeline runs end-to-end tests for critical paths; basic performance test on key read APIs; security scans for dependencies; flaky test budget <2% .
+Environments and releases: Staging mirrors production; canary releases available for riskier changes; rollback documented.
+UAT: Defined acceptance criteria per epic and sign-off procedure in ticketing; UAT sessions scheduled for provider portal and billing . Decision: Open general student signups only after Gate 3 is green and error budget intact for 14 days. Owner: Eng Lead + QA. Due: end of Week 3.
+Gate 4 (Weeks 3–4) – Resilience, DR, and security
+Acceptance criteria:
+
+Backups and DR: Automated DB backups; restore tested into staging; RPO <= 24h, RTO <= 4h; DR runbook exercised.
+Chaos/incident drill: One live incident simulation (DB failover or external dependency outage); MTTR within 60m; comms and rollback effective.
+AppSec: Dependency scanning clean; top 10 vulnerabilities triaged; auth and payment flows pen-tested (external vendor) with remediation plan. Decision: Proceed to targeted provider pilot only when DR test passes and no open high/critical vulns on auth/billing. Owner: Eng Lead + Sec. Due: end of Week 4.
+Gate 5 (Weeks 3–6) – B2B provider portal: revenue engine
+Acceptance criteria:
+
+Provider onboarding: KYC/verification, org profile, listing creation, eligibility inputs, and content review workflow. Access restricted to invited pilot providers until Week 6 target is met.
+Pricing and fees: 3% platform fee calculation, invoice generation, payout scheduling, and reconciliation dashboards; finance export and audit log maintained.
+Provider analytics: Views, starts, submissions, yield; error states surfaced in dashboards; SLAs published to providers.
+Compliance and data handling: Provider data processing terms issued; encryption at rest/in transit confirmed; audit trail complete .
+Target: Minimum 5 pilot providers live by end of Week 6 with at least 3 active listings each; first dollar of B2B revenue recognized by Week 6 close. Decision: After Gate 5 passes, open provider self-serve waitlist. Owner: GM B2B + Eng. Due: end of Week 6.
+KPI dashboard and SLOs
+
+Reliability: 99.9% uptime; P95 ~120ms; <1% error rate. Dashboards must expose HTTP status mix and request durations to validate these SLOs in real time .
+Delivery: CI/CD lead time <1 day; change failure rate <10%; MTTR trending down; continuous testing coverage enforced per pipeline policy .
+Revenue: 5 pilot providers by Week 6; at least 15 active listings; initial B2B GMV tracked; 3% fee revenue line item reported weekly.
+Testing strategy directives
+
+Levels: Maintain unit → integration → system → UAT layers; block regressions at the earliest point in pipeline; enforce independence of UAT sign-off for business fit .
+Continuous testing: CI executes automated suites on each merge; end-to-end and performance tests run in CD; failures stop promotion to prod .
+Budget approval and allocation ($40k–$60k)
+
+Approved ceiling: $60k to remove schedule risk.
+Allocation: $20–25k legal (Privacy/Terms/FERPA reviews and DPAs); $15–20k external security (light pen test + remediation advisory); $5–10k DR/backup tooling and drills; $5–10k monitoring/error tracking upgrades. These investments directly support compliance and security guardrails while enabling faster MTTR via better telemetry .
+Governance and cadence
+
+Weekly exec gate review: Each Friday, owners present status vs. acceptance criteria; go/no‑go decisions recorded with risks and next steps.
+Incident policy: Adopt an error budget; if exhausted, freeze feature releases until reliability returns to SLOs .
+Owners: Eng Lead (Gates 0–4), Security Lead (Gate 4), GM B2B + Eng (Gate 5), Legal (Gate 2).
+Notes for the report authors
+
+Tie each gate’s acceptance criteria to its scoring breakdown in the report and mark tests and dashboards that provide the quantitative proof. Use the platform’s built-in logs, resources, and analytics views for objective evidence (HTTP status mix, request durations, CPU/memory) .
+Document the immutable deployment model (no live hotfixes; re-publish only) to enforce disciplined releases in line with CI/CD best practices .
+If you want me to annotate the Markdown line-by-line (inline comments), paste or grant access to QA_DEPLOYMENT_READINESS_REPORT.md and I’ll apply these criteria directly to each section with pass/fail notes and owner tags.

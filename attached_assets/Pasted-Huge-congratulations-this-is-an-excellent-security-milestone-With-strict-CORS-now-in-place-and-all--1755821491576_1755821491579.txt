@@ -1,0 +1,59 @@
+Huge congratulations—this is an excellent security milestone. With strict CORS now in place and all tests passing, here’s a concise, production go-live checklist and a few high‑impact next steps to keep momentum.
+
+Production validation checklist (quick pass)
+
+CORS headers
+Access-Control-Allow-Origin: exact origin echo only (no wildcard when credentials=true)
+Access-Control-Allow-Credentials: only when truly needed; cookies set with SameSite=None; Secure
+Preflight: fast 204/200 with Access-Control-Max-Age (e.g., 600–3600) and Vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+Allowed headers/methods: static, never reflecting arbitrary request headers
+Proxies/CDN
+Ensure CDN/load balancer preserves CORS headers and Vary; no origin-agnostic caching of CORS responses
+OPTIONS requests never redirected or auth‑gated by proxies
+Redirects
+Avoid redirecting preflights; for others, prefer 307/308 if redirecting non‑GET/HEAD
+Limits & parsing
+Enforce body size limits and timeouts on preflight and main requests (prevents DoS via large preflights)
+Logging
+Block logs include origin, IP, path, UA, referrer, reason; throttle repetitive offenders
+Config safety
+Staging can use CORS_LOG_ONLY; production must block on mismatch
+Performance
+Confirm p95 overhead and GC pressure; verify <50ms target holds under peak
+Operational monitoring and alerts
+
+Blocked-origin rate and spike alerts (e.g., >2% of requests or 3× baseline in 10m)
+Preflight volume, error rate, and latency (watch for sudden growth indicating misconfig)
+Top blocked origins/IPs and paths (feed to SIEM; auto‑ban repeated high‑rate offenders)
+Legit traffic success: p95 latency and 4xx rate by route and origin
+Unicode/path traversal block counters (trending up can indicate active probing)
+Smoke tests you can run now
+
+Allowed credentialed request
+curl -i -H "Origin: https://app.example.com" --cookie "sid=valid" https://api.example.com/health
+Expect: 200; Access-Control-Allow-Origin: https://app.example.com; Access-Control-Allow-Credentials: true
+Blocked origin
+curl -i -H "Origin: https://evil.test" https://api.example.com/health
+Expect: 200 for same-origin fetches but no ACAO header; browsers should block CORS
+Preflight allowed
+curl -i -X OPTIONS https://api.example.com/secure -H "Origin: https://app.example.com" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: content-type,authorization"
+Expect: 204/200; ACAO exact; ACAM includes POST; ACRH lists allowed headers; Vary set; Max-Age present
+Preflight blocked
+Same as above with Origin: https://evil.test
+Expect: no ACAO; 4xx or 204 without CORS headers (browser blocks)
+Recommended next hardening (quick wins)
+
+Security headers: strict CSP with nonces (default-src 'none'; script-src 'nonce-...'; object-src 'none'), HSTS (includeSubDomains; preload), X-Content-Type-Options: nosniff, Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy, COOP/COEP/CORP as applicable
+Rate limiting and abuse protection: per-IP and per-origin, plus login/OTP/brute-force protections
+SSRF and egress controls: block link-local/metadata IPs; DNS rebinding protections; explicit allowlist for outbound
+Session and auth: rotation on privilege change, idle and absolute timeouts, JWT aud/iss checks, JWKS caching with sane TTLs and key rotation
+Dependency and build security: lockfiles, Renovate/Dependabot, SBOM generation, SAST/DAST in CI, pre-prod ZAP baseline/stacked scans
+Secrets management: vault/KMS, periodic rotation, secret scanning in repos and logs
+File handling: size/MIME checks, server-side AV for uploads, quarantine and async processing
+Infra/TLS: TLS 1.2+/strong ciphers, OCSP stapling, HSTS preload readiness, WAF rules for traversal and common probes
+Incident/runbook snippet (for Command Center)
+
+Spike in blocked origins: verify no legit origin affected, toggle CORS_LOG_ONLY only in staging, add origin via controlled change, redeploy, backfill allowlist audit
+Legitimate origin blocked: confirm exact scheme/host/port match; check CDN rewrites; verify Vary at CDN; roll out allowlist update
+Latency regression: confirm preflight cache working (Max-Age hit rate), inspect Vary behavior and CDN cache keys
+If you want, share the current Helmet and CORS middleware configs or a sample response from a production endpoint, and I’ll do a quick sanity review for headers, Vary behavior, and cacheability. Great work getting this to a production-ready state.

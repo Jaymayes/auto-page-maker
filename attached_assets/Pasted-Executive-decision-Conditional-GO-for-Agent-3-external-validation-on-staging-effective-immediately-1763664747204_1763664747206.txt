@@ -1,0 +1,43 @@
+Executive decision: Conditional GO for Agent 3 external validation on staging, effective immediately, under the conditions below. Your implementation addresses the key risks I flagged (canonicalization, noindex, access containment, secrets hygiene). This aligns with our priority on organic, SEO-led growth while keeping operational risk low and reversible during validation. Replit’s snapshot-based “publish” model further limits blast radius while you iterate on staging, which is exactly what we want at this phase .
+
+Required conditions to proceed now
+
+Share verification outputs (paste into this thread) from the five checks on the staging URL you provision:
+X-Robots-Tag header present and set to noindex, nofollow
+robots.txt disallowing all
+/sitemap.xml either disabled or returning only production URLs
+/health returns status: ok
+A content page’s <link rel="canonical"> points to production
+Data containment and least privilege
+Use a synthetic dataset only; no real student PII during external validation (FERPA/COPPA risk).
+DB role must be SELECT-only and time-boxed to 48h via VALID UNTIL, as you proposed; confirm grants and that no write privileges exist.
+Secrets hygiene
+Confirm all environment keys are injected via Replit Secrets and that staging uses only staging analytics and test credentials (no prod keys), consistent with platform best practice for sensitive configuration .
+Access control
+Keep staging shared privately via an unguessable URL; if feasible, consider Replit’s Private Deployments path for tighter access during the window and document your decision rationale .
+Observability and SLO checks during the run
+Expose /health (already done) and report P95 latency and 5xx rate daily. For validation, target P95 ≤ 200 ms and 5xx < 0.5%. Replit’s deploy/publish isolation helps keep this stable while we test .
+Teardown plan locked in calendar
+At T+48h: expire the DB role, unpublish the staging app, and revoke any staging-only secrets. Post a short teardown summary confirming all controls were removed.
+SEO and canonical strategy directives
+
+Canonical tags must point to the canonical production host that we intend to build long-term authority on. For validation, your production Replit app is acceptable; however, before any scale-up, we will migrate production to a custom domain under scholaraiadvisor.com and update all canonicals and sitemaps to that host to concentrate domain authority .
+Continue to ensure staging is fully noindex and that any structured data (Organization, Breadcrumb, Article) references the production host only.
+Reporting and KPIs required for CEO sign-off to roll forward
+
+Please attach the quick verification outputs (the five curl checks) and a one-pager with:
+Page sample: 3 canonicalized URLs demonstrating correct tags
+Sitemap behavior on staging (screenshot or response snippet)
+24–48h ops summary: uptime, P95, 5xx rate, and any errors found/fixed
+Monetization alignment: a brief note on how Auto Page Maker output pages will funnel to Essay Coach credits and B2B provider acquisition (recall, our GTM emphasizes SEO-led acquisition as a core growth lever)
+Post-validation path (pre-approve in principle)
+
+Custom domain cutover: map production to a scholaraiadvisor.com subdomain on Replit and republish; then update canonical tags and sitemap to the custom domain to maximize SEO equity .
+Secrets and config segregation: keep staging and production secrets separate in Replit Secrets across environments .
+Publishing discipline: maintain the snapshot-based publish cadence to ensure stable releases and reversible rollbacks as we scale page volume .
+Notes on your ARR claim
+
+You referenced $424.5K Year 1 ARR. For approval to include this in the executive summary, attach the model with assumptions (indexed pages/month, CTR from organic, conversion to Essay Coach credits, ARPU, provider fee revenue). Our decisions must remain data-first and tied to our dual-engine growth model and 5-year $10M profitable ARR objective.
+Bottom line
+
+Conditional GO granted. Execute the 48-hour Agent 3 validation on staging under the above controls. Post the verification outputs and the one-pager so I can lock final approval for the custom-domain production rollout. This approach directly supports our organic growth mandate and low-CAC acquisition strategy while maintaining security and reversibility during external validation .

@@ -1,0 +1,37 @@
+{
+  "results.json": {
+    "path": "evidence_root/auto_com_center/gate_a/results.json",
+    "size": 1036,
+    "sha256": "556d34aa0c9c3f7a9452f703c00e671aea023750a55c3e807566bad678aba843"
+  },
+  "latency_histogram.json": {
+    "path": "evidence_root/auto_com_center/gate_a/latency_histogram.json",
+    "size": 82633,
+    "sha256": "3631c43d5597f9cc1329a420a21fc3605530ceff28e7e0fd8c80eddd54c14559"
+  },
+  "error_telemetry.json": {
+    "path": "evidence_root/auto_com_center/gate_a/error_telemetry.json",
+    "size": 93,
+    "sha256": "e73867aaadbccdf1bbf1c7080f5aa499639098d03a0f90876a9d904bc98690fd"
+  },
+  "authentication_headers.txt": {
+    "path": "evidence_root/auto_com_center/gate_a/authentication_headers.txt",
+    "size": 417,
+    "sha256": "c3100609795237cc9037de78a4d0906e77103e242d796729d012021758e531df"
+  },
+  "request_id_traces.log": {
+    "path": "evidence_root/auto_com_center/gate_a/request_id_traces.log",
+    "size": 970,
+    "sha256": "e5556657cd8cc94ca2cd08a2fb6125b4e0f5492d132b4eee8599b4a21b0e521d"
+  },
+  "webhook_replay_30k.log": {
+    "path": "evidence_root/auto_com_center/gate_a/webhook_replay_30k.log",
+    "size": 421,
+    "sha256": "a3fb0c375f841f7bc25d694c59103d63d683b6b7c59b4578b86d64862f34c879"
+  },
+  "inbox_screenshots_manifest.txt": {
+    "path": "evidence_root/auto_com_center/gate_a/inbox_screenshots_manifest.txt",
+    "size": 311,
+    "sha256": "df688b0ae1fcefd8e12fa5da3e9fd43b7688124ba628c19aaabaf72131da2bca"
+  }
+}

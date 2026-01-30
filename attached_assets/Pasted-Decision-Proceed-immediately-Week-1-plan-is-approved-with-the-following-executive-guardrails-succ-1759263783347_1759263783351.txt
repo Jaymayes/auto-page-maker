@@ -1,0 +1,66 @@
+Decision: Proceed immediately. Week 1 plan is approved with the following executive guardrails, success criteria, and minor adjustments.
+
+Why this matters to the business
+
+Core Web Vitals → SEO → lower CAC: Faster FCP/LCP improves rankings and crawl frequency for Auto Page Maker pages, reduces bounce on mobile, and drives low-CAC organic growth.
+Operating leverage: Cutting third-party font calls and shrinking JS meaningfully reduces infra egress and improves global reliability.
+Go/No-Go gates and success metrics
+
+Performance (mobile, P75):
+FCP ≤ 2.2s
+LCP ≤ 2.8s
+JS bundle ≤ 80KB gz (initial route)
+Secondary (mobile, P95):
+FCP ≤ 4.0s
+LCP ≤ 4.5s
+Business leading indicators (2-week trend, organic only):
+-5–10% bounce, +5–10% organic clicks on top 50 Auto Page Maker pages
+Canary ramp rules:
+Start 50% canary when P75 targets hold for 24 hours across top 10 pages
+Ramp to 100% when P95 targets hold for 48 hours and no engagement regressions
+Priority calls and adjustments
+
+Fonts (P0, ship first)
+Directive: Start with system font stack for the canary to maximize impact and de-risk CLS. In parallel, prepare Inter-only self-hosted variant as Plan B.
+Guardrails:
+Use font-display: swap and size-adjust/ascent-override to avoid CLS when Inter is tested.
+Delete Google Fonts link entirely in the optimized variant.
+Confirm licensing compliance for any self-hosted fonts.
+JS bundle (P0)
+Implement route-level code splitting immediately and prune unused deps.
+Enforce icon-level imports and verify tree-shaking in CI via a bundle-size check.
+CSS (P1)
+Inline critical CSS for above-the-fold H1 and nav only; defer the rest.
+Third parties and resource hints (P1)
+GA4 must be async/deferred and respect consent mode.
+Remove any dev banners or non-essential scripts in prod.
+Infra, caching, and compression (P1)
+Enable Brotli where supported; confirm gzip fallback.
+Set immutable, 1-year cache headers on hashed assets.
+Acceptance criteria by ticket cluster
+
+Tickets #1-3 (Fonts): FCP improves ≥2.0s on mobile P75 and Lighthouse no longer flags render-blocking fonts. Zero visual regressions in H1/H2 sizing across top 10 pages (snapshot diff).
+Tickets #4-6 (JS): Initial route bundle ≤80KB gz; interaction-to-next-paint (INP) not degraded.
+Tickets #7-8 (CSS): Hero text paints without waiting for full CSS; CLS ≤ 0.05 on mobile.
+Tickets #9-10, #13-14 (3P + hints): No render-blocking third parties; requests reduced by at least one external origin on first paint.
+Tickets #11-12 (Compression + cache): Repeat-visit FCP improves ≥10% on canary cohort.
+Tickets #15-17 (Measurement): LHCI gate in CI with budgets: FCP > 1.8s or LCP > 2.3s fails PR on the reference device profile.
+Execution and reporting
+
+Execution order you proposed stands. Keep the parallelization.
+Daily 6pm ET update: P75/P95 FCP/LCP by page template, mobile vs. desktop, 4G vs. Wi‑Fi; canary vs. control deltas.
+Single owner per ticket; no merges to main without passing LHCI and bundle-size gate.
+Risks and mitigations
+
+Brand consistency with system fonts: For Week 1, prioritize speed and SEO. Marketing to review canary screenshots; if engagement/brand concerns emerge, switch to Inter-only self-hosted with size-adjust to preserve layout.
+CLS from font swap: Use size-adjust/ascent-override in @font-face and verify via Web Vitals CLS traces before ramp.
+Over-splitting JS: Monitor route transitions to ensure no jank; add prefetch on hover/idle for top nav routes.
+Decision on your immediate next step
+
+Greenlight: Start Ticket #1 now using system font stack for the canary variant. Remove Google Fonts, ship font-display: swap, and prepare self-hosted Inter (regular + bold WOFF2) behind a toggle.
+Target: Land Tickets #1–3 within 48 hours; post a canary P75 report after 24 hours of traffic.
+Unblockers
+
+If you need design sign-off for the system stack: proceed under “performance canary” exemption; design review concurrent, not blocking.
+Ensure CSP updated to allow self-hosted font paths and remove fonts.gstatic.com if unused.
+Once Tickets #1–3 are merged behind the 50% canary, proceed with Tickets #4–6. I’ll review the first canary report tomorrow and authorize the ramp.

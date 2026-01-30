@@ -1,0 +1,57 @@
+Approve Option B with a tightened execution plan.
+
+Decision
+
+Proceed with Option B. Complete Tickets #5–#8 and the low-risk #9–#14 items that do not require code refactors before Thursday 6pm ET. Target a 50% canary rollout Thursday evening with a 48-hour observation window, decision Saturday.
+Why
+
+Hitting P75 LCP ≤2.8s and materially closing the FCP gap is critical for SEO-driven, low-CAC growth and on-site conversion. Option B balances speed-to-learning with a high likelihood of meeting interim performance targets before we expose 100% of traffic.
+Directives and sequencing (next 24–48 hours)
+
+Day 3 (now → Thurs 12pm ET): High-impact, low-risk first
+
+Critical CSS inlining for above-the-fold (~4KB); defer non-critical CSS.
+Enable Brotli at CDN/origin and verify text assets served with br.
+Add resource hints (preconnect/dns-prefetch) to CDN, API, analytics.
+Confirm GA4 async, defer non-essential third-party tags, and block any synchronous tags.
+Instrument field Web Vitals (FCP, LCP, CLS, INP, TTFB) to GA4/BigQuery with device type, connection type, country.
+Day 3–4: Complete bundle optimizations with a strict cutoff
+
+Lucide tree-shake to the 23 used icons and Radix pruning. Hard cutoff: Thurs 3pm ET code freeze. If refactor risk emerges, ship partial reductions but do not slip the canary.
+Readiness gates for canary (must meet on lab and preliminary field samples)
+
+JS bundle ≤75KB gz on home and category pages (70KB target ideal).
+P75 FCP ≤2.6s and P75 LCP ≤2.9s on mobile test profiles before canary.
+CLS ≤0.01 maintained.
+No increase in 4xx/5xx error rates and no degradation in P95 backend latency (>120ms P95 is a stop).
+Canary plan (50% traffic, Thurs evening → Sat)
+
+Rollout: 10% → 25% → 50% over 2 hours while monitoring guardrails.
+Guardrails (any two breaches trigger automatic rollback to previous stable):
+P75 LCP >2.9s or FCP >2.6s for mobile organic traffic.
+CLS >0.02.
+Sign-up conversion down >5% relative to control.
+Page error rate +50% relative to control, or P95 server latency >120ms.
+Success criteria to graduate to 100% Saturday:
+P75 FCP ≤2.2–2.4s trendline, P75 LCP ≤2.8s, CLS ≤0.01 across top 10 geos on mobile.
+JS bundle ≤75KB gz (70KB preferred).
+No negative movement (>2%) in sign-up conversion and scholarship search engagement.
+Additional implementation notes
+
+Validate on low-end Android (slow 4G/“Fast 3G”) and mid-tier iPhone profiles; run Lighthouse CI and WebPageTest lab checks pre-canary.
+Ensure code splitting does not regress SEO: preserve SSR for critical content and hydration order; prefetch next-route bundles on idle.
+Verify Brotli at CDN edge and origin; confirm cache keys and Vary headers so br is correctly cached.
+Add rel=preload for the main CSS and critical font files only if system font stack still requires one brand font; otherwise skip fonts to avoid regressions.
+Keep a one-click rollback ready in the deploy pipeline.
+Owners and reporting
+
+Performance lead: Tickets #5–#8 and critical CSS (#7–#8).
+Infra/CDN: Brotli, cache config, resource hints, and guardrail automation.
+Analytics: Web Vitals + business KPI dashboards with canary vs control segmentation.
+Provide a 5pm ET Thursday go/no-go report with:
+Current lab and early field metrics vs gates.
+Risk items and mitigation.
+Canary rollout schedule and rollback plan confirmation.
+If any gate is missed by 5pm ET Thursday, slip canary by 24 hours only if we can land the bundle reductions to hit the gates. Otherwise, ship canary with partial traffic (25%) and stricter rollback thresholds to keep learning without risking core KPIs.
+
+Proceed with this plan. Keep me posted at noon and 5pm ET tomorrow with a two-slide update: metrics vs gates and risk/mitigation.

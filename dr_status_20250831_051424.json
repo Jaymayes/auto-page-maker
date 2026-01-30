@@ -1,0 +1,13 @@
+{
+  "test_date": "2025-08-31T05:14:38+00:00",
+  "test_status": "SUCCESS",
+  "backup_file": "dr_test_20250831_051424.sql",
+  "backup_size_bytes": 5603,
+  "original_data_counts": {
+    "users":      0,
+    "scholarships":      0
+  },
+  "test_duration_seconds": 14,
+  "log_file": "dr_test_20250831_051424.log",
+  "next_test_due": "2025-09-07T05:14:38+00:00"
+}

@@ -1,0 +1,106 @@
+System_Directive: ACTIVATE_OPERATION_GRAND_SLAM_V2_1_A8
+Mode: MAX_AUTONOMOUS
+Repository: A8 (auto_com_center)
+Objective: Fix A8 authentication so it accepts A6 events, persist them durably, replay any gaps, and certify the full ecosystem (A1–A8) GREEN. Execute P0 fixes immediately.
+
+Hard stop check
+
+If not currently in the A8 (auto_com_center) repository, stop and prompt the operator: “Open the A8 (auto_com_center) repository now.”
+Context
+
+A6 (provider_register) is CERTIFIED & PUBLISHED (health 200, p95 ~75ms, probe 3ms, 0×500 soak, 60s heartbeats).
+A6 emits events but A8 returns 403 INVALID_TOKEN for both Authorization: Bearer and X-API-Token.
+A2 fallback is receiving events; we must authorize A6 in A8 and ingest them directly.
+Critical data (use exactly as provided)
+
+A6 token hash prefix to allow: ecc2d250a7040364
+A6 app_name/source_app_id: provider_register
+A6 app_base_url: https://provider-register-jamarrlmayes.replit.app
+A2 base URL: https://scholarship-api-jamarrlmayes.replit.app
+P0 — Authentication remediation (execute now)
+
+Unify and centralize S2S auth
+Find shared S2S middleware (e.g., src/middleware/auth.ts) and route-level auth in telemetry ingest (e.g., src/routes/telemetry-ingest.ts).
+Normalize token extraction:
+If Authorization header present, strip “Bearer ” and use the remainder.
+Else, if X-API-Token header present, use that value.
+Trim whitespace/newlines. Never log token values.
+Validate using constant-time hash comparison:
+Compute SHA256(token) and compare against a full-hash allowlist.
+Do not store raw tokens in code; keep only hashes in config/env.
+Ensure telemetry-ingest route uses ONLY the shared middleware; remove/replace any divergent route-level auth.
+2. Update allowlist to include A6
+
+Add provider_register to the allowlist with the full SHA256 hash matching the prefix ecc2d250a7040364 (operator-provided). Example shape (do not store raw tokens):
+provider_register: { hash: "<full_sha256>", role: "editor", status: "active" }
+Keep existing authorized apps (A1, A2, A3, A4, A5, A7, A8 self).
+If allowlist is env-based, update env and reload; if code-based (e.g., src/config/allowed_sources.ts), update and redeploy.
+3. Enforce allowed source_app_id mapping
+
+Require source_app_id in the payload.
+Verify that source_app_id maps to an authorized hash entry (provider_register).
+On success, attach app_name and app_base_url to request context for downstream auditing.
+P0 — Ingest durability and idempotency
+4) Durable persistence and idempotency
+
+Ensure /api/ingest writes events in “durable” mode.
+Add idempotency on (source_app_id + event_type + correlation_id or timestamp window) to prevent duplicates under retries.
+Return: { persisted: true, mode: "durable", event_id: "<uuid>" } on success.
+P0 — Verification (A6 → A8)
+5) Two-path auth verification from A6
+
+Send two test POSTs to A8 /api/ingest from A6 or a secure runner:
+With Authorization: Bearer $COMMAND_CENTER_TOKEN
+With X-API-Token: $COMMAND_CENTER_TOKEN
+Body example: { "source_app_id":"provider_register", "app_base_url":"https://provider-register-jamarrlmayes.replit.app", "app_name":"provider_register", "event_type":"SYSTEM_HEALTH", "payload":{"message":"token_align_probe","value":1} }
+Expect: 200 with { persisted: true, mode: "durable", event_id: "..." }.
+Never print secrets; only log short token hash prefixes when diagnosing.
+P1 — Backfill and dashboard unification
+6) Replay backlog from A2 fallback
+
+If A2 exposes a business_events export/list endpoint, fetch provider_connected and listing_created events during the 403 window; otherwise instruct A6 to resend last 24h with replay:true.
+Re-ingest into A8 /api/ingest preserving original timestamps and correlation_id; include replay:true in payload for audit.
+Confirm no duplicates (idempotency prevents double-counting).
+7. Tiles and protocol verification
+
+Refresh or recompute dashboards; verify all 7 tiles present and GREEN:
+slo, b2c, b2b, seo, growth, trust, finance
+Confirm protocol/summary endpoint (e.g., /api/executive/validate or internal summary) reports tiles_present: 7/7 and protocol valid.
+P1 — Final ecosystem confirmations
+8) Won Deal 4/4 spot-check
+
+Trigger a synthetic A5 B2C purchase so A8 logs Won Deal with actions_executed: ["elevate_lead_score","move_to_customer_segment","enroll_upsell_sequence","record_revenue_by_page"]
+Verify A3 automation endpoints return 200; no partial failures.
+9. B2B loop spot-check
+
+From A6, emit one provider_connected and one listing_created with UTMs.
+Verify A8 accepts immediately (200) and B2B tile increments.
+Safety and governance
+
+Never log secrets; only hash prefixes where strictly necessary.
+Keep rate limiting/abuse protections.
+Maintain complaint rate <0.2% on Trust tile.
+Continue to accept both headers (Bearer and X-API-Token) system-wide for consistency with other apps.
+Operator-visible tests (do NOT print secrets)
+
+Bearer: curl -s -X POST https://auto-com-center-jamarrlmayes.replit.app/api/ingest -H "Authorization: Bearer $COMMAND_CENTER_TOKEN" -H "Content-Type: application/json" -d '{"source_app_id":"provider_register","app_base_url":"https://provider-register-jamarrlmayes.replit.app","app_name":"provider_register","event_type":"SYSTEM_HEALTH","payload":{"message":"bearer_probe","value":1}}'
+X-API-Token: curl -s -X POST https://auto-com-center-jamarrlmayes.replit.app/api/ingest -H "X-API-Token: $COMMAND_CENTER_TOKEN" -H "Content-Type: application/json" -d '{"source_app_id":"provider_register","app_base_url":"https://provider-register-jamarrlmayes.replit.app","app_name":"provider_register","event_type":"SYSTEM_HEALTH","payload":{"message":"header_probe","value":1}}'
+Acceptance criteria (must all be true)
+
+Auth: { bearer: true, x_api_token: true } for A6; zero 403s; persisted:true, mode:"durable".
+Tiles: 7/7 GREEN (slo, b2c, b2b, seo, growth, trust, finance).
+Replay: A6 backlog (403 window) re‑ingested; dashboard reflects provider_connected/listing_created counts accordingly.
+Won Deal: PASS (4/4 actions) for a new B2C purchase; no partial failures.
+Heartbeats: All A1–A7 heartbeats active and visible; mode:"durable".
+Final KPI sanity: A2 KPIs accessible; finance tile consistent; complaint rate <0.2%.
+Deliverables (return on completion)
+
+auth_status: { bearer: true|false, x_api_token: true|false }
+event_ids: { token_align_probes: ["...","..."], provider_connected: "...", listing_created: "...", won_deal: "...", heartbeats_sample: ["...","..."] }
+tiles_snapshot: list/summary of 7/7 GREEN
+replay_count: number of backfilled events ingested for A6
+token_hash_prefixes_confirmed: ["ecc2d250a7040364", ...]
+notes: files changed, config diffs, and any middleware unification details
+Command
+
+EXECUTE_OPERATION_GRAND_SLAM_A8_TOKEN_ALIGN_AND_CERTIFY

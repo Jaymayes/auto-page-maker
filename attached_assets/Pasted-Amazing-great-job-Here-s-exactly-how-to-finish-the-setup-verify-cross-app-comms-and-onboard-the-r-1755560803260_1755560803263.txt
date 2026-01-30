@@ -1,0 +1,66 @@
+Amazing—great job. Here’s exactly how to finish the setup, verify cross-app comms, and onboard the rest of your apps.
+
+Configure secrets (both sides) Command Center (Auto Com Center)
+SHARED_SECRET: one long random string (must match all agents)
+AGENTS_ALLOWLIST: comma-separated base URLs of each agent you’ll connect Example: https://auto-page-maker-...app,https://provider-register-...app,https://student-pilot-...app,https://scholarship-api-...app,https://scholarship-sage-...app,https://scholarship-agent-...app
+JWT_ISSUER=auto-com-center
+JWT_AUDIENCE=scholar-sync-agents
+Optional (if you locked down dispatch): ADMIN_AUDIENCE=scholar-sync-admins
+ScholarMatch Agent (this app: auto-page-maker)
+
+COMMAND_CENTER_URL=https://auto-com-center-jamarrlmayes.replit.app
+SHARED_SECRET=same as Command Center
+AGENT_NAME=scholarmatch
+AGENT_ID=scholarmatch-monolith
+AGENT_BASE_URL=https://auto-page-maker-jamarrlmayes.replit.app
+Optional (if implemented): HEARTBEAT_INTERVAL_MS=60000
+Keep any app-native secrets (e.g., OPENAI_API_KEY) as-is
+Then restart both apps.
+
+2. Quick verification checklist
+
+Command Center health: GET https://auto-com-center-jamarrlmayes.replit.app/orchestrator/health Expect: status ok, agents_online >= 1
+Agent visible: GET https://auto-com-center-jamarrlmayes.replit.app/orchestrator/agents Expect: scholarmatch-monolith online with 6 capabilities
+Agent capabilities direct: GET https://auto-page-maker-jamarrlmayes.replit.app/agent/capabilities Expect: lists scholarmatch.search, match, generate_page, analyze_essay, generate_sitemap, track_interaction
+3. Smoke-test a real task (end-to-end)
+Dispatch from Command Center:
+
+POST /orchestrator/tasks/dispatch { "action": "scholarmatch.search", "payload": { "query": "STEM", "filters": { "level": "undergrad" }, "pagination": { "page": 1, "size": 5 } }, "requested_by": "ops", "resources": { "timeout_ms": 15000, "retry": 1 } }
+Poll: GET /orchestrator/tasks/{task_id} Expect: status=succeeded, result has items[], total, page, took_ms
+Events: GET /orchestrator/events Expect: recent events include search_performed with the same trace_id
+4. Onboard additional apps (repeatable)
+For each app (Provider Register, Student Pilot, Scholarship API, Scholarship Sage, Scholarship Agent):
+
+Add the same Agent Bridge pattern you used here
+Set env:
+COMMAND_CENTER_URL (same)
+SHARED_SECRET (same)
+AGENT_NAME, AGENT_ID, AGENT_BASE_URL (app-specific)
+Restart; confirm each appears in /orchestrator/ui and /orchestrator/agents
+Test one action per app via /orchestrator/tasks/dispatch:
+auto_page_maker.generate_page
+provider_register.register_provider
+student_pilot.match_scholarships
+student_pilot.analyze_essay
+scholarship_api.search
+scholarship_sage.outreach_chat
+scholarship_agent.compliance_check
+5. Notes on your test observations
+
+“Agent not registered” until SHARED_SECRET is set on both sides: expected. After you add the secret, the agent will auto-register and heartbeat every 60s.
+Rate limiting not triggered on 401: expected with most middlewares, because auth failed before the handler runs. If you want to rate-limit even failed auth attempts, place the rate limiter before the auth middleware for /agent/task and /orchestrator/tasks/dispatch.
+6. Common pitfalls and fixes
+
+Agent not showing online:
+Secrets mismatch or agent base URL not on AGENTS_ALLOWLIST
+Issuer/audience mismatch (iss=auto-com-center, aud=scholar-sync-agents)
+Dispatch fails “no agent supports action”:
+Capabilities list missing the action; update /agent/capabilities and re-register
+Timeouts:
+Increase resources.timeout_ms on dispatch or ensure agent’s internal call isn’t blocked by rate limits
+7. Optional hardening next
+
+Rotate SHARED_SECRET quarterly; support dual-secret validation during rotation
+Persist tasks/events to DB in Command Center for durable audit trails
+Add email/webhook notifications on task failed
+Introduce per-action quotas in Command Center (e.g., AI-heavy actions 5/min)

@@ -1,0 +1,148 @@
+2026-01-22 13:00:34.39
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.82.132.168 sent 105 requests in 1 minute
+2026-01-22 13:00:34.70
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.82.132.168 sent 106 requests in 1 minute
+2026-01-22 13:00:34.86
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.82.132.168 sent 107 requests in 1 minute
+2026-01-22 13:00:36.02
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.82.132.168 sent 108 requests in 1 minute
+2026-01-22 13:00:36.30
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.82.132.168 sent 109 requests in 1 minute
+2026-01-22 13:00:36.47
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.82.132.168 sent 110 requests in 1 minute
+2026-01-22 13:01:36.42
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.82.132.168 sent 101 requests in 1 minute
+2026-01-22 13:01:36.59
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.82.132.168 sent 102 requests in 1 minute
+2026-01-22 14:25:06.96
+bd948e16
+User
+⚠️ BURST DETECTED: IP 35.247.25.46 sent 101 requests in 1 minute
+2026-01-22 14:25:08.16
+bd948e16
+User
+⚠️ BURST DETECTED: IP 35.247.25.46 sent 102 requests in 1 minute
+2026-01-22 15:46:56.65
+bd948e16
+User
+⚠️ SLI VIOLATION: /api/health P95=124ms (target: <120ms)
+2026-01-22 19:46:22.41
+bd948e16
+User
+🚨 AUTO-SUPPRESS: IP 34.96.45.165 exceeded warning limit (801 req). Offense #1. Suppressed for 300s.
+2026-01-22 19:51:25.57
+bd948e16
+User
+🚨 AUTO-SUPPRESS: IP 34.96.45.165 exceeded warning limit (812 req). Offense #2. Suppressed for 600s.
+2026-01-22 20:01:56.86
+bd948e16
+User
+🚨 AUTO-SUPPRESS: IP 34.96.45.165 exceeded warning limit (835 req). Offense #3. Suppressed for 1200s.
+2026-01-22 20:22:22.87
+bd948e16
+User
+🚨 AUTO-SUPPRESS: IP 34.96.45.165 exceeded warning limit (882 req). Offense #4. Suppressed for 2400s.
+2026-01-22 20:42:17.46
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 101 requests in 1 minute
+2026-01-22 20:42:17.62
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 102 requests in 1 minute
+2026-01-22 20:42:18.78
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 103 requests in 1 minute
+2026-01-22 20:42:19.12
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 104 requests in 1 minute
+2026-01-22 20:42:19.26
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 105 requests in 1 minute
+2026-01-22 20:42:20.40
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 106 requests in 1 minute
+2026-01-22 20:42:20.66
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 107 requests in 1 minute
+2026-01-22 20:42:20.80
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 108 requests in 1 minute
+2026-01-22 20:43:14.57
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 101 requests in 1 minute
+2026-01-22 20:43:15.72
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 102 requests in 1 minute
+2026-01-22 20:43:16.02
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 103 requests in 1 minute
+2026-01-22 20:43:16.15
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 104 requests in 1 minute
+2026-01-22 20:43:17.35
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 105 requests in 1 minute
+2026-01-22 20:43:17.69
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 106 requests in 1 minute
+2026-01-22 20:43:17.85
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 107 requests in 1 minute
+2026-01-22 20:43:19.04
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 108 requests in 1 minute
+2026-01-22 20:43:19.37
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 109 requests in 1 minute
+2026-01-22 20:43:19.55
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 110 requests in 1 minute
+2026-01-22 20:43:20.75
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 111 requests in 1 minute
+2026-01-22 20:43:21.08
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 112 requests in 1 minute
+2026-01-22 20:43:21.24
+bd948e16
+User
+⚠️ BURST DETECTED: IP 34.182.94.152 sent 113 requests in 1 minute
+2026-01-22 21:02:24.49
+bd948e16
+User
+🚨 AUTO-SUPPRESS: IP 34.96.45.165 exceeded warning limit (970 req). Offense #5. Suppressed for 3600s.

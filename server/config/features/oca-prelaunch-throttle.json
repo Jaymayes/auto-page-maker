@@ -1,0 +1,40 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-20T02:00:00Z",
+  "canary_id": "oca_canary_5pct_20260120",
+  "prelaunch_throttle": {
+    "enabled": true,
+    "owner": "Engineering A6",
+    "trigger": {
+      "condition": "10min_p95_trend >= 1250ms pre-launch",
+      "action": "clamp_to_4_per_user_day",
+      "notify_a8": true
+    },
+    "a6_requirements": {
+      "p95_ms": {"max": 200},
+      "error_rate": {"max": 0.005},
+      "uptime": {"equals": 1.0},
+      "oca_header_present": true,
+      "provider_register_status": 200,
+      "capacity_prewarm": true
+    }
+  },
+  "legal_warning": {
+    "enabled": true,
+    "warning_time": "T+3h45",
+    "deadline": "T+4h",
+    "on_warning": {
+      "action": "page_ceo_with_eta",
+      "confirm": "provider_only_failover_readiness"
+    },
+    "on_miss": {
+      "action": "auto_failover_provider_only_banner",
+      "page": "ceo"
+    }
+  },
+  "code_freeze": {
+    "post_freeze_hash_to_a8": true,
+    "record_freeze_start_at_launch": true,
+    "scope": "oca_touching_repos"
+  }
+}

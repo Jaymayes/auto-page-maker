@@ -1,0 +1,11 @@
+{
+  "run_id": "CEOSPRINT-20260123-EXEC-ZT3G-FIX-AUTH-009",
+  "timestamp": "2026-01-23T12:31:09Z",
+  "versions": {
+    "A1": {"version": "1.0.0", "build_time": "2026-01-23T10:19:49Z", "status": "REGISTRY_NEEDS_UPDATE"},
+    "A5": {"version": "dev", "status": "ROUTES_MISSING"},
+    "A6": {"version": "1.0.0", "status": "PKCE_MISSING"},
+    "A7": {"version": "v3.5.1", "status": "HEALTHY"},
+    "A8": {"version": "production", "status": "HEALTHY"}
+  }
+}

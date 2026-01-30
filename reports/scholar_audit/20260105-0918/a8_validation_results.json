@@ -1,0 +1,15 @@
+{
+  "audit_timestamp": "2026-01-05T09:18:00Z",
+  "namespace": "simulated_audit",
+  "validation_results": {
+    "schema_check": {"status": "pass", "all_headers_present": true},
+    "round_trip": {"events_sent": 5, "events_persisted": 5, "success_rate": "100%"},
+    "latency_profile": {"p50_ms": 216, "min_ms": 212, "max_ms": 221, "target_ms": 150, "breach": true}
+  },
+  "issues_confirmed": [
+    {"id": "A", "title": "A2 /ready 404", "severity": "P1", "status": "CONFIRMED"},
+    {"id": "B", "title": "A7/A8 ingestion P50 216ms > 150ms", "severity": "P1", "status": "CONFIRMED"},
+    {"id": "C", "title": "A8 stale banners", "severity": "P2", "status": "CONFIRMED"},
+    {"id": "D", "title": "Revenue viz excludes test mode", "severity": "P0-perception", "status": "CONFIRMED"}
+  ]
+}

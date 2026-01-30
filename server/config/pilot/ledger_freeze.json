@@ -1,0 +1,39 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-20T03:26:00Z",
+  "sev_status": "SEV-2",
+  "ledger_freeze": {
+    "LEDGER_FREEZE": true,
+    "PROVIDER_INVOICING_PAUSED": true,
+    "FEE_POSTINGS_PAUSED": true,
+    "persist_ledger_events": true,
+    "downstream_invoicing": false,
+    "settlement": false
+  },
+  "unfreeze_conditions": [
+    "reconciliation_packet_complete",
+    "cfo_sign_off_received",
+    "attached_in_a8"
+  ],
+  "reconciliation_requirements": {
+    "report_fields": [
+      "attempted_writes",
+      "successful_inserts",
+      "deduped",
+      "net_postings"
+    ],
+    "sample_records": 20,
+    "hash_fingerprint_provenance": true,
+    "aggregations": [
+      "sum(amount_cents) by provider",
+      "sum(amount_cents) by day",
+      "sum(fee_cents) by provider",
+      "sum(fee_cents) by day"
+    ],
+    "traffic_volume_mapping": {
+      "target": "2% pilot",
+      "tolerance": "±2%"
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-20T03:26:00Z",
+  "sev_status": "SEV-2",
+  "gate1_status": "NO_GO",
+  "traffic_cap": {
+    "b2c_pilot": 0.02,
+    "mode": "pilot_only"
+  },
+  "defensive_posture_24h": {
+    "api_gateway_telemetry_override": true,
+    "response_codes": [200, 202],
+    "x_fingerprint": true,
+    "command_center_spool_first": true,
+    "multi_retry": false,
+    "waf_sitemap_block": true,
+    "probe_suppression": {
+      "metrics_p95": false,
+      "localhost": false
+    }
+  },
+  "slos_24h": {
+    "telemetry_acceptance_min": 0.99,
+    "queue_max": 100,
+    "queue_trend": "flat",
+    "http_428": 0,
+    "provider_p95_max_ms": 500,
+    "login_p95_max_ms": 200,
+    "auth_5xx": 0,
+    "db_p95_max_ms": 100,
+    "statement_timeouts": 0,
+    "sitemap_429": 0,
+    "metrics_p95_404": 0,
+    "localhost_probes": 0
+  },
+  "ledger_liveness_sentinel": {
+    "heartbeat_interval_minutes": 10,
+    "alert_threshold_minutes": 15,
+    "check_field": "last_written_at"
+  },
+  "reporting_cadence": {
+    "t_plus_6h": ["telemetry_acceptance", "auth_db_slos", "probe_suppression", "ledger_row_growth_vs_traffic"],
+    "t_plus_12h": ["telemetry_acceptance", "auth_db_slos", "probe_suppression", "ledger_row_growth_vs_traffic"],
+    "t_plus_24h": ["all_slos_green_24h", "reconciliation_report", "cfo_sign_off", "gate1_5pct_request"]
+  },
+  "rollback_triggers": {
+    "ledger_persist_failure": true,
+    "schema_error": true,
+    "telemetry_acceptance_below": 0.95,
+    "telemetry_window_min": 5,
+    "provider_p95_above_ms": 500,
+    "any_auth_5xx": true,
+    "db_p95_above_ms": 120,
+    "db_duration_min": 10
+  },
+  "rollback_action": {
+    "traffic_cap": 0,
+    "refunds": "ON",
+    "append_cir": true,
+    "include_evidence": true
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T18:00:00Z",
+  "client_emitters": {
+    "required_headers": [
+      "X-Idempotency-Key",
+      "X-Request-Id",
+      "X-Sent-At"
+    ],
+    "x_idempotency_key": "uuid_v4",
+    "x_request_id": "uuid_v4",
+    "x_sent_at": "iso8601"
+  },
+  "server_policy": {
+    "accept_missing_keys": true,
+    "response_code": 202,
+    "server_fingerprint": "sha256(body)",
+    "dedupe_window_hours": 24,
+    "reject_428_disabled": true
+  },
+  "backpressure": {
+    "rps_cap_per_emitter": 50,
+    "jitter_enabled": true,
+    "retry_strategy": "exponential_backoff",
+    "retry_on": ["4xx", "5xx"],
+    "max_flush_attempts": 3,
+    "on_flush_fail": "local_spool_then_dlq",
+    "never_sample": ["payments", "security", "breaker", "error"],
+    "downsample_others_pct": 10,
+    "downsample_until_backlog_under": 100
+  },
+  "slo": {
+    "telemetry_acceptance_ratio": 0.99,
+    "consecutive_minutes": 30,
+    "a8_queue_depth_max": 100,
+    "fallback_failures": 0
+  }
+}

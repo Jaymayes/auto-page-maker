@@ -1,0 +1,32 @@
+Decision: Implement Option A now as a time-boxed stopgap, and commit to Option B as the target architecture.
+
+Rationale
+
+Time-to-value and revenue impact: Provider onboarding is a supply-side growth lever. Unblocking scholarship ingestion immediately supports both B2C inventory and B2B provider value, which feeds our dual-engine growth model and ARR target. Acting with urgency is paramount.
+Architectural direction: Our target state is API-driven separation. Replit apps are isolated and should communicate via well-defined APIs; shared databases across services are an anti-pattern and, in multi-app scenarios on Replit, effectively impossible. The recommended pattern is a dedicated data/service API with secure REST calls and resilience patterns (retries, circuit breakers) for inter-app communication (see “Database-as-a-Service via API” and inter-service security/resiliency guidance) .
+Execution practicality: If provider_register and scholarship_api currently live inside a single monolith with one database, direct writes are the fastest, lowest-risk path to restore functionality. But we’ll implement this behind an interface that mirrors the eventual POST /api/scholarships contract so we can later swap to HTTP calls with minimal refactor. This aligns with the phased roadmap that starts with clean service contracts and then orchestrates via REST calls within a domain .
+What to implement now (Option A, tightly scoped)
+
+Create a ScholarshipsRepository (or equivalent service layer) inside the monolith that:
+Exposes create_scholarship(payload) with the same schema you plan for POST /api/scholarships.
+Performs direct DB writes and returns a canonical response object (id, status, created_at).
+Logs an audit event for each creation to support later observability.
+Acceptance criteria:
+Provider registration flow results in scholarships visible in the catalog within <1 minute.
+Errors bubble up with actionable messages; no silent failures.
+Unit tests for repository and a smoke test for provider_register end-to-end.
+Target architecture (Option B) to schedule next sprint
+
+Define and document the POST /api/scholarships contract in scholarship_api.
+Secure with API key auth via Secrets; serve over HTTPS (default on Replit) .
+Add resiliency: retries with exponential backoff and basic circuit breaker on provider_register’s client when calling scholarship_api .
+Keep the repository interface; flip implementation from direct DB to HTTP once cross-app comms are verified.
+This aligns with the recommended Database-as-a-Service/API model and avoids tight coupling to a shared DB as we scale to multiple apps .
+Prioritization relative to auto_com_center
+
+Proceed with the Option A fix now, time-boxed to a half-day. Immediately after, resume auto_com_center optimization work, which is a primary lever for organic acquisition and CAC reduction via SEO at scale . This preserves velocity on our lowest-CAC growth engine while ensuring provider intake isn’t a bottleneck.
+Summary call
+
+Implement Option A now with a clean interface abstraction.
+Commit to Option B next sprint as the target-state contract between apps, including security and resiliency standards.
+After the quick unblock, refocus on auto_com_center optimization to drive organic growth and ARPU/CAC KPIs.

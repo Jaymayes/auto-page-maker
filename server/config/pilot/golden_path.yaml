@@ -1,0 +1,55 @@
+# Golden Path Enforcement Configuration
+# Order: SAA-EO-2026-01-19-01
+# Deadline: 8 hours from T0
+
+version: "1.0.0"
+order_id: "SAA-EO-2026-01-19-01"
+run_id: "ZT3G-056"
+
+daas_rules:
+  hard_rule: "No local state"
+  reads_writes: "Core API only"
+  database_url_embedded: false
+  
+release_gate:
+  manifest_digest_required: true
+  smoke_tests:
+    - endpoint: "/health"
+      expected: 200
+      markers_required: true
+    - endpoint: "/readyz"
+      expected: "green"
+    - security_headers: true
+  confirmations:
+    required: 3
+    checksum_threshold: 0.99
+
+success_criteria:
+  consecutive_snapshots: 2
+  snapshot_duration_minutes: 60
+  core_paths_p95_ms: 120  # A1-A4
+  aux_paths_p95_ms: 200   # A6/A8
+
+drift_sentinel:
+  tracked_fields:
+    - workspace_id
+    - commit_sha
+    - manifest_digest
+    - build_artifact_sha
+  alerts:
+    digest_mismatch:
+      action: "auto-block publish"
+      notify: "on-call"
+    endpoint_regression:
+      threshold_5xx: 0.02
+      threshold_404: 0.02
+      duration_minutes: 10
+      action: "disable B2C capture, keep refunds, open CIR"
+
+apps:
+  A5:
+    name: "student-pilot"
+    golden_path_enforced: true
+  A7:
+    name: "auto-page-maker"
+    golden_path_enforced: true

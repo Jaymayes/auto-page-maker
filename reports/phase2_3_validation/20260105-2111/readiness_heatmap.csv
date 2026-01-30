@@ -1,0 +1,12 @@
+category,weight,score,weighted,status
+reliability_slo,15,5,15.0,GREEN
+performance_scalability,10,5,10.0,GREEN
+security_secrets,15,4,12.0,YELLOW
+data_protection,10,4,8.0,YELLOW
+observability_telemetry,10,4,8.0,YELLOW
+resiliency_dr,10,4,8.0,YELLOW
+release_engineering,8,4,6.4,YELLOW
+test_quality,6,3,3.6,YELLOW
+runbooks_ops,6,4,4.8,YELLOW
+cost_efficiency,5,4,4.0,YELLOW
+dependency_health,5,4,4.0,YELLOW

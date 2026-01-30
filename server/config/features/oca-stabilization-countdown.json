@@ -1,0 +1,66 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-15T09:16:13Z",
+  "status": "COUNTDOWN_ACTIVE",
+  "countdown": {
+    "start_utc": "2026-01-15T09:16:13Z",
+    "end_utc": "2026-01-15T09:21:13Z",
+    "duration_minutes": 5
+  },
+  "green_achieved": {
+    "conditions": {
+      "continuous_30min": true,
+      "p95_ms": {"lt": 1250},
+      "error_rate": {"lt": 0.005}
+    },
+    "actions": [
+      {"action": "cancel_maintenance_auto_send"},
+      {"action": "enter_no_change_freeze", "until": "Gate 3 (10:11:13Z)"},
+      {"action": "taper_probes", "to_rps": 20, "condition": "5 consecutive minutes P95 ≤1.0s"},
+      {"action": "maintain_autoscaling_reserves", "min_pct": 15},
+      {"action": "post_a8_event", "type": "a6_green_window_pass", "include": ["evidence_hash", "breaker_flag_status", "green_window_timer"]}
+    ],
+    "freeze_rules": {
+      "no_deploys": true,
+      "no_config_flips": true,
+      "until": "2026-01-15T10:11:13Z"
+    }
+  },
+  "timer_reset": {
+    "trigger": "breach during window (P95 ≥1.25s or error ≥0.5%)",
+    "actions": [
+      {"action": "auto_send_maintenance_immediately"},
+      {"action": "hide_provider_onboarding_ctas"},
+      {"action": "sustain_student_only_mode"},
+      {"action": "sustain_breaker_true_immutable"},
+      {"action": "queue_provider_tasks"},
+      {"action": "start_new_stabilization_window"},
+      {"action": "page_ceo", "include": ["new_eta", "root_symptom"]}
+    ],
+    "root_symptom_types": ["p95_spike", "error_burst"]
+  },
+  "gate3": {
+    "deadline_utc": "2026-01-15T10:11:13Z",
+    "pass_requires": [
+      "30-min green",
+      "breaker CLOSED",
+      "backlog <10 for 10 min",
+      "budget <80%",
+      "compute ≤2x baseline"
+    ],
+    "on_pass": {
+      "canary_ramp": ["1%", "5%", "25%", "100%"],
+      "auto_halt_on": "breach"
+    },
+    "on_miss": {
+      "mode": "Student-Only",
+      "reschedule": "next daily gate"
+    }
+  },
+  "telemetry": {
+    "a8_schema_guards": "ON",
+    "accept_only": "oca_canary_a6_precheck with signatures and evidence_hash",
+    "publish_cadence_sec": 60,
+    "fields": ["breaker_flag_status", "green_window_timer"]
+  }
+}

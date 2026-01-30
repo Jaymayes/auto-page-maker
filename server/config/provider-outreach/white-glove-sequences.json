@@ -1,0 +1,74 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-19T22:30:00Z",
+  "campaign": "white_glove_48h_sprint",
+  "target_segment": "checkout_abandoning_providers",
+  "target_closed": 3,
+  "target_listings": 6,
+  "success_metrics": {
+    "outreach_to_reply_pct": 25,
+    "reply_to_listing_pct": 60
+  },
+  "incentive": {
+    "free_listing_setup": true,
+    "priority_category_placement": true,
+    "provider_fee_pct": 3
+  },
+  "sla": {
+    "turnaround_hours": "24-48",
+    "edits_included": 1
+  },
+  "sequences": [
+    {
+      "touch": 1,
+      "timing": "immediate",
+      "subject_options": [
+        "Ready to publish your scholarships? We'll finish the setup for you.",
+        "We saved your draft—want our team to publish it in 24–48 hours?",
+        "Quick assist to go live: we'll convert your draft into a complete listing."
+      ],
+      "body_template": "touch1_white_glove.html",
+      "utm": {
+        "source": "email",
+        "medium": "outreach",
+        "campaign": "white_glove_48h",
+        "content": "touch1"
+      }
+    },
+    {
+      "touch": 2,
+      "timing": "+48h",
+      "subject": "Quick follow-up: publish your scholarship this week",
+      "body": "Hi {{FirstName}} — still happy to convert your draft and publish this week. One reply with the PDF/brief and we'll take it from there.",
+      "utm": {
+        "source": "email",
+        "medium": "outreach",
+        "campaign": "white_glove_48h",
+        "content": "touch2"
+      }
+    },
+    {
+      "touch": 3,
+      "timing": "Day 5",
+      "subject": "Last nudge before weekend traffic",
+      "body": "Last nudge to publish {{OrgName}}'s scholarship before weekend traffic. Reply YES and we'll white‑glove it.",
+      "utm": {
+        "source": "email",
+        "medium": "outreach",
+        "campaign": "white_glove_48h",
+        "content": "touch3"
+      }
+    }
+  ],
+  "merge_fields": [
+    "{{FirstName}}",
+    "{{OrgName}}",
+    "{{BookingLink}}",
+    "{{AE_Name}}"
+  ],
+  "compliance": {
+    "retargeting_only": true,
+    "minors_do_not_sell": true,
+    "coppa_ferpa_compliant": true
+  }
+}

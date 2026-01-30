@@ -1,0 +1,58 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T17:30:00Z",
+  "observability_mandate": {
+    "unknown_alerts_banned": true,
+    "slo_events_mapped": 1.0,
+    "slo_unknown_in_dashboards": 0,
+    "breach_action": "incident"
+  },
+  "error_codes": [
+    {
+      "code": "AUTH_DB_UNREACHABLE",
+      "severity": "SEV-2",
+      "description": "Authentication database connection failed"
+    },
+    {
+      "code": "AUTH_TIMEOUT",
+      "severity": "SEV-2",
+      "description": "Authentication request timed out"
+    },
+    {
+      "code": "ORCH_BACKOFF",
+      "severity": "SEV-3",
+      "description": "Orchestrator in exponential backoff"
+    },
+    {
+      "code": "RETRY_STORM_SUPPRESSED",
+      "severity": "SEV-2",
+      "description": "Retry storm detected and suppressed"
+    },
+    {
+      "code": "RATE_LIMITED",
+      "severity": "SEV-3",
+      "description": "Request rate limited"
+    },
+    {
+      "code": "POOL_EXHAUSTED",
+      "severity": "SEV-2",
+      "description": "Connection pool exhausted"
+    },
+    {
+      "code": "DOWNSTREAM_5XX",
+      "severity": "SEV-2",
+      "description": "Downstream service returned 5xx"
+    },
+    {
+      "code": "CONFIG_DRIFT_BLOCKED",
+      "severity": "SEV-1",
+      "description": "Configuration drift detected and blocked"
+    }
+  ],
+  "watchtower_policy": {
+    "reject_unmapped_events": true,
+    "remap_unknown_to": null,
+    "log_unmapped": true
+  }
+}

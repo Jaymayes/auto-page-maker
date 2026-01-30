@@ -1,0 +1,107 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-19T23:30:00Z",
+  "runbook_id": "oca_kill_runbook_v1",
+  "response_time_seconds": 60,
+  "triggers": [
+    {
+      "id": "provider_complaint",
+      "condition": "provider_complaints >= 1",
+      "severity": "critical",
+      "action": "immediate_kill"
+    },
+    {
+      "id": "integrity_violation",
+      "condition": "confirmed_integrity_violations >= 1",
+      "severity": "critical",
+      "action": "immediate_kill"
+    },
+    {
+      "id": "p95_breach",
+      "condition": "p95 > 1500ms for 5 consecutive minutes",
+      "severity": "high",
+      "action": "immediate_kill"
+    },
+    {
+      "id": "error_spike",
+      "condition": "error_rate >= 1.0% for 5 minutes",
+      "severity": "high",
+      "action": "immediate_kill"
+    },
+    {
+      "id": "refund_breach",
+      "condition": "refund_rate > 2.0% 24h",
+      "severity": "high",
+      "action": "immediate_kill"
+    }
+  ],
+  "kill_sequence": [
+    {
+      "step": 1,
+      "action": "disable_feature",
+      "config": {
+        "one_click_apply.status": "DISABLED",
+        "one_click_apply.traffic_pct": 0
+      },
+      "timeout_seconds": 10
+    },
+    {
+      "step": 2,
+      "action": "emit_a8_event",
+      "event": "oca_feature_killed",
+      "payload": {
+        "trigger": "{{trigger_id}}",
+        "reason": "{{trigger_condition}}",
+        "timestamp": "{{now}}",
+        "metrics_snapshot": true
+      }
+    },
+    {
+      "step": 3,
+      "action": "pause_emails",
+      "config": {
+        "campaign": "oca_canary_student_v1",
+        "status": "paused"
+      }
+    },
+    {
+      "step": 4,
+      "action": "notify_providers",
+      "config": {
+        "banner_type": "warning",
+        "message": "One-Click Apply has been temporarily paused. We are investigating an issue and will update you shortly."
+      }
+    },
+    {
+      "step": 5,
+      "action": "page_oncall",
+      "config": {
+        "channels": ["ops", "engineering", "product"],
+        "priority": "P1",
+        "message": "OCA killed due to {{trigger_id}}"
+      }
+    }
+  ],
+  "post_kill_requirements": {
+    "root_cause_analysis": {
+      "owner": "Engineering",
+      "deadline_hours": 4
+    },
+    "fix_plan": {
+      "owner": "Engineering",
+      "requires_approval": ["Product", "Legal"]
+    },
+    "verification_plan": {
+      "owner": "QA",
+      "requires": ["dry_run", "red_team_retest"]
+    },
+    "re_enable_approval": {
+      "authority": "CEO",
+      "requires": ["root_cause", "fix_verified", "all_gates_green"]
+    }
+  },
+  "escalation": {
+    "if_no_response_minutes": 5,
+    "escalate_to": ["engineering_lead", "product_lead", "ceo"]
+  }
+}

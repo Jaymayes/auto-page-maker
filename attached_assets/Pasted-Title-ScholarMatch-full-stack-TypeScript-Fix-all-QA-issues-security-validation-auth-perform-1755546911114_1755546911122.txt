@@ -1,0 +1,186 @@
+Title
+ScholarMatch (full‑stack TypeScript) – Fix all QA issues (security, validation, auth, performance) and make deployable
+
+Context
+App: ScholarMatch (client: React/Next.js, server: Node/Express + TypeScript, Prisma or in‑memory storage, OpenAI integration)
+QA surfaced 18 real issues including CRITICAL XSS (stored) in landing page generation, HIGH prompt‑injection risk in OpenAI prompts, missing rate limiting, broken/weak input validation, inconsistent error handling, analytics type mismatch, missing core actions, and configuration gaps. Fix all issues without weakening security. Keep responses consistent and secrets out of logs.
+
+Non‑negotiables
+
+Do not weaken security. Add protections but never relax CORS/auth already present.
+Never log secrets (API keys, JWT secrets, DB URLs). Sanitize logs.
+Standardize server error JSON shape across APIs: { code, message, status, timestamp, traceId, details? }
+Middleware order (Express): helmet/security headers → trust proxy → CORS → body parsers (size limits) → rate limiting → auth → routers → 404 JSON → centralized error handler.
+Issues to fix (map to QA IDs)
+Security
+
+SEC‑001: Stored XSS via template/slug in landing‑page generation.
+SEC‑002: Prompt injection risk from unsanitized user content embedded in OpenAI prompts.
+SEC‑003: No rate limiting on expensive endpoints.
+Validation/Data integrity
+
+VAL‑001: Negative/excessive limit/offset accepted.
+VAL‑002: Empty strings accepted for required fields.
+VAL‑003: Empty/invalid slug accepted.
+Error handling/logging
+
+ERR‑001: Sensitive errors returned/logged; Zod stack traces exposed.
+ERR‑002: Inconsistent OpenAI success/failure handling; fallback always taken.
+ERR‑003: Slug retrieval inconsistency.
+Performance/Scalability
+
+PERF‑001: O(n) in‑memory filtering each request.
+PERF‑002: No caching/dedup for identical OpenAI requests.
+PERF‑003: No content size limits for large content checks.
+Frontend/Analytics
+
+FE‑001: trackEvent signature mismatch across codebase.
+FE‑002: GA measurement ID directly embedded; potential XSS via invalid ID.
+Data consistency/config
+
+DATA‑001: In‑memory storage causes data loss on restart.
+DATA‑002: Hardcoded domain in sitemap generator.
+Missing functionality
+
+MISS‑001: Critical actions (Apply/Save/Get Matches) not implemented (TODOs only).
+MISS‑002: No auth/authorization protection around sensitive operations.
+Plan of action
+
+Centralized error and tracing utilities
+server/src/lib/errors.ts: buildError(code, message, status, details?, traceId?) returning the canonical JSON (add timestamp, generate traceId if missing).
+server/src/middleware/error-handler.ts:
+404 JSON handler after routers.
+Central error handler that maps ZodError/Validation errors to 422 with cleaned details; maps generic errors to 500; never exposes stack traces in responses; log with redaction.
+Ensure all routes use next(err) and never return raw error objects.
+2. Stored XSS mitigation (SEC‑001) and input sanitization
+
+Introduce server‑side sanitization:
+Use sanitize-html (or DOMPurify with JSDOM) to sanitize template and any rich HTML fields before storage and before response.
+Validate slug using strict regex: ^a-z0-9$ (3–64 chars). Reject empty/invalid slugs with 422.
+For plain text fields, escape before embedding into HTML or store as plain text only.
+Add unit tests: posting <script> content results in sanitized output; scripts removed from DB and response.
+3. Prompt‑injection hardening (SEC‑002)
+
+server/services/contentGenerator.ts:
+Never interpolate raw user strings into prompts. Wrap user inputs via JSON.stringify and label them explicitly as data, not instructions.
+Add a fixed system prompt that instructs the model to ignore user instructions outside the “user_data” JSON.
+Escape braces/backticks/newlines as needed or use template literals with clear separators.
+Add allowlist validation for template variables; drop unexpected keys.
+Add tests simulating malicious inputs; ensure prompt assembly escapes content and returns safe output.
+4. Rate limiting (SEC‑003)
+
+Add express-rate-limit (or rate-limiter-flexible with Redis when configured) for expensive routes:
+e.g., /api/landing-pages/generate, /api/ai/*, content quality endpoints.
+Return 429 with standard headers: X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After.
+Respect OPTIONS (do not limit preflight).
+If Redis URL is provided, use it; otherwise use in‑memory limiter only in development.
+5. Input validation (VAL‑001..VAL‑003)
+
+Use zod schemas for all public endpoints:
+Pagination: limit 1..100, offset >= 0. Coerce numeric query params safely.
+Required strings: nonempty().trim().min(1), use regex where relevant (slug regex above).
+TemplateData: restrict size and allowed value types; deep object length limit.
+Add a generic validate middleware that converts ZodError to 422 via buildError.
+6. Error handling consistency (ERR‑001..ERR‑003)
+
+Replace verbose error responses with sanitized messages. In logs, use pino or winston with redaction of secrets.
+Fix landing‑page slug lookup to use normalized slugs (lowercase, single hyphen, same regex).
+Correct OpenAI success/failure handling:
+On success, return actual model result.
+On network/API error, return fallback result with code="AI_SERVICE_UNAVAILABLE", status=503, and details.retryAfter if applicable.
+7. Performance improvements (PERF‑001..PERF‑003)
+
+If using DB/Prisma: convert filter logic to DB queries with indexes; add missing indexes in schema and run migration.
+If temporarily in‑memory: pre‑index common keys once at startup and cache filtered results by a normalized key (LRU with TTL).
+Add caching layer for OpenAI results keyed by hash(template+templateData). TTL configurable (e.g., 6 hours).
+Enforce content size limits:
+Increase bodyParser limits sensibly (e.g., 1–2 MB) and add per‑endpoint content length checks; return 413 via buildError when exceeded.
+8. Frontend analytics fixes (FE‑001, FE‑002)
+
+Refactor trackEvent to use a single options object:
+trackEvent({ event, category, label?, value?, userId? })
+Update all calls to match.
+Validate GA Measurement ID via regex ^G-[A-Z0-9]{10}$; if invalid or missing, disable GA gracefully and log a warning in dev only. Never inject unvalidated IDs.
+9. Data consistency/config (DATA‑001, DATA‑002)
+
+If persistence must be in place: connect to DB (Prisma) instead of in‑memory store for landing pages and critical data. If DB not yet available, clearly warn at startup in development that data is ephemeral.
+Make sitemap base URL configurable:
+Use BASE_URL or PUBLIC_ORIGIN env; default to http://localhost:5000 in dev.
+Update sitemap generator to use this variable.
+10. Implement missing functionality (MISS‑001, MISS‑002)
+
+Add minimal server endpoints and client handlers for:
+Save scholarship, Apply, Get Matches.
+Save: POST /api/saves with auth; idempotent; returns saved state.
+Apply: POST /api/applications with auth; record timestamp/status.
+Get Matches: GET /api/matches with auth; return simple rule‑based matches initially.
+Authentication/authorization:
+Add JWT middleware: read Bearer token, verify with JWT_SECRET, populate req.user; 401 otherwise.
+Protect sensitive routes (saves, applications, matches, content gen).
+Add role checks where needed; return 403 for insufficient privileges.
+Client: wire up buttons to call these endpoints, show success/failure toasts, and update UI state.
+11. Hardening, middleware, and limits
+
+Ensure helmet is enabled with sane CSP defaults. For HTML returned to clients, avoid inline scripts or set nonce.
+CORS: dev allow localhost/replit; prod use strict allowlist from env.
+Body parser JSON limit (e.g., 1–2 MB). Enforce per‑route additional checks.
+Add request‑id/traceId middleware; include in error payload and logs.
+12. Tests and checks
+
+Add jest/vitest tests with supertest:
+XSS sanitization: POST landing‑pages injects script → response/body sanitized; DB sanitized.
+Prompt escaping: malicious content results in escaped prompt; returns safe output.
+Rate limiting: exceed threshold → 429 with headers.
+Validation: invalid slug/limit/empty strings → 422.
+Error responses: 401/403/404/413/422/429/500/503 return unified error JSON with traceId.
+Slug retrieval: create → GET by slug returns 200.
+Analytics: trackEvent compiles and sends correct payload.
+TypeScript: npm run check must be 0 errors.
+13. Deployment readiness
+
+Health endpoint GET /healthz returns 200 quickly (no DB required).
+Start command uses node dist/server/index.js or next start as appropriate; bind to 0.0.0.0:$PORT.
+Add scripts:
+"check": "tsc --noEmit"
+"build": "tsc -b"
+"start": "node dist/server/index.js"
+"dev": "tsx watch server/index.ts" (or nodemon)
+README:
+Document env vars: JWT_SECRET, OPENAI_API_KEY, DATABASE_URL, CORS_ORIGINS, BASE_URL, RATE_LIMITS, etc.
+Explain data persistence and any dev-only fallbacks.
+Concrete implementation hints
+
+Server
+
+Add sanitize-html and zod. Example usage:
+sanitized = sanitizeHtml(input, { allowedTags: [], allowedAttributes: {} })
+z.object({ slug: z.string().regex(/^a-z0-9$/) })
+Add express-rate-limit with route-specific configs.
+Use pino logger with redaction: ["req.headers.authorization","env.JWT_SECRET","env.OPENAI_API_KEY"].
+Client
+
+Refactor trackEvent to an options object; adjust imports and all usages.
+Add ErrorBoundary and wrap major routes/pages; show friendly fallback.
+Acceptance criteria
+
+All listed QA issues (SEC‑001..CONFIG‑001) are fixed or mitigated as described.
+npm run check returns 0 TypeScript errors.
+Unit/integration tests added for security/validation/rate limiting; all pass locally.
+Stored XSS attempts are removed from stored/returned data.
+AI prompt inputs are escaped; rate limited; return graceful errors if key missing.
+Pagination and required fields fully validated; invalid inputs → 422.
+404 returns JSON with unified error schema.
+OpenAI success path returns model output; failures return 503 with fallback and no stack traces.
+queryClient builds correct URLs; no malformed paths.
+trackEvent signature fixed; GA ID validation added; no XSS vector in GA injection.
+Health check probes pass; server binds to 0.0.0.0:$PORT; start scripts correct.
+README updated; env vars and limits documented.
+Deliverables
+
+Code changes across server and client with brief inline comments.
+New tests under server/tests and client tests where applicable.
+Updated package.json scripts and README.
+Short CHANGELOG summarizing fixes mapped to each QA Issue ID.
+Execution
+
+Start by running npm run check and fix compilation. Then implement SEC‑001/002/003, validation, error handler, and auth protections. Add tests as you go, and run npm test (or equivalent) to verify.

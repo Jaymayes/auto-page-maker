@@ -1,0 +1,61 @@
+{
+  "version": "2.1.0",
+  "updated_at": "2026-01-18T10:30:00Z",
+  "phase": "scale_90day_stepup",
+  "throttle": {
+    "status": "DISABLED",
+    "last_active": "2026-01-16T02:15:00Z",
+    "reason": "cost_recovered"
+  },
+  "auto_throttle_triggers": {
+    "rolling_24h_projection_ceiling_usd": 300,
+    "documents_analyze_queue_depth_ceiling": 30,
+    "documents_analyze_p95_ceiling_ms": 1500,
+    "p95_breach_window_min": 15,
+    "actions": {
+      "non_revenue_task_reduction_pct": 50,
+      "page_ops_finance": true
+    }
+  },
+  "step_down_plan": {
+    "trigger": "rolling_24h_projection <= $280 for 4 consecutive hours AND SLOs green",
+    "steps": [
+      {
+        "step": 1,
+        "action": "Re-enable background tasks to 75%",
+        "duration_hours": 1,
+        "condition": "projection stays <= $280"
+      },
+      {
+        "step": 2,
+        "action": "Re-enable background tasks to 100%",
+        "condition": "projection stays <= $300"
+      }
+    ]
+  },
+  "cache_policy": {
+    "search_match_ttl_seconds": 60,
+    "review_at": "friday_kpi"
+  },
+  "watch_items": {
+    "documents_analyze_queue_depth": {
+      "threshold": 30,
+      "breach_window_minutes": 15,
+      "action": "add_one_worker"
+    },
+    "documents_analyze_p95": {
+      "threshold_ms": 1500,
+      "breach_window_minutes": 15,
+      "action": "add_one_worker"
+    }
+  },
+  "budget": {
+    "daily_cap_usd": 300,
+    "alert_threshold_pct": 80,
+    "throttle_threshold_pct": 93
+  },
+  "slo_targets": {
+    "p95_latency_ms": 110,
+    "error_rate_pct": 0.5
+  }
+}

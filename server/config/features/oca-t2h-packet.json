@@ -1,0 +1,54 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-20T02:00:00Z",
+  "ceo_approval": "CEO-20260119-OCA-PROMOTE-10PCT-PREAUTH",
+  "canary_id": "oca_canary_5pct_20260120",
+  "t2h_packet": {
+    "destination": ["a8", "ceo"],
+    "page_ceo_on_delivery": true,
+    "sections": {
+      "slos": {
+        "by_variant": true,
+        "by_control": true,
+        "fields": ["p95_ms", "error_rate_pct", "queue_depth"]
+      },
+      "funnel": {
+        "stages": ["open", "click", "start", "complete"],
+        "by_variant": true,
+        "by_control": true
+      },
+      "safety": {
+        "suppression_match_rate_pct": true,
+        "complaints": {"expected": 0, "actual": true},
+        "violations": {"expected": 0, "actual": true}
+      },
+      "integrity": {
+        "holdout_drift_pp": {"max": 0.5, "actual": true},
+        "randomization_locked": true
+      },
+      "economics": {
+        "cost_per_notified": true,
+        "cost_per_started": true,
+        "cost_per_completed": true,
+        "compute_per_completion": true
+      },
+      "b2b_pulse": {
+        "early_provider_acceptance_vs_baseline": true
+      },
+      "kill_drill_proof": {
+        "attached": true
+      }
+    },
+    "data_sufficiency_guardrail": {
+      "enabled": true,
+      "thresholds": {
+        "min_opens": 500,
+        "min_starts": 50
+      },
+      "on_insufficient": {
+        "action": "defer_optimization_to_t6h",
+        "note_in_packet": true
+      }
+    }
+  }
+}

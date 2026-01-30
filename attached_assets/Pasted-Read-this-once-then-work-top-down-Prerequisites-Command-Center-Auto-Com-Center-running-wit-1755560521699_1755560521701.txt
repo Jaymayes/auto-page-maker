@@ -1,0 +1,176 @@
+Read this once, then work top-down.
+
+Prerequisites
+
+Command Center (Auto Com Center) running with:
+SHARED_SECRET set
+AGENTS_ALLOWLIST set to include each agent base URL
+JWT_ISSUER=auto-com-center, JWT_AUDIENCE=scholar-sync-agents
+Each Agent (apps) running with:
+COMMAND_CENTER_URL=https://auto-com-center-jamarrlmayes.replit.app
+SHARED_SECRET same as Command Center
+AGENT_NAME, AGENT_ID, AGENT_BASE_URL set
+Confirm the Agent Bridge is added to each app per the earlier instructions.
+Optional: Mint a test Admin JWT for Command Center calls
+
+If your Command Center requires admin auth on dispatch/relay, mint a short-lived token. In any Node shell with jsonwebtoken installed: node -e "const jwt=require('jsonwebtoken');const token=jwt.sign({role:'admin'}, process.env.SHARED_SECRET || 'YOUR_SHARED_SECRET',{algorithm:'HS256',issuer:'auto-com-center',audience:'scholar-sync-admins',expiresIn:'10m'});console.log(token);"
+Then in curl add: -H "Authorization: Bearer <ADMIN_TOKEN>"
+Environment variables for testing:
+
+export CC=https://auto-com-center-jamarrlmayes.replit.app
+Phase A: Command Center <-> Single Agent (ScholarMatch monolith)
+A1) Health and UI
+
+Objective: Ensure Command Center is up.
+curl: curl -s $CC/orchestrator/health
+Expect: {"status":"ok", "time":..., "agents_online": <number>}
+A2) Agent registration visible
+
+Objective: Verify your monolith agent (e.g., scholarmatch-monolith) auto-registers and heartbeats.
+curl: curl -s $CC/orchestrator/agents
+Expect: List includes scholarmatch-monolith with status=online and capabilities like scholarmatch.search, scholarmatch.match, etc.
+A3) Capabilities discovery (agent-side)
+
+Objective: Confirm agent bridge exposes capabilities.
+curl (against the agent app base URL): curl -s https://auto-page-maker-jamarrlmayes.replit.app/agent/capabilities
+Expect: JSON with agent_id, name, capabilities[], version, health.ok=true.
+A4) Dispatch a basic search task
+
+Objective: End-to-end task dispatch -> agent execution -> callback -> result retrieval.
+Dispatch: curl -s -X POST $CC/orchestrator/tasks/dispatch -H "Content-Type: application/json" -d '{"action":"scholarmatch.search","payload":{"query":"STEM","filters":{"level":"undergrad"},"pagination":{"page":1,"size":5}},"requested_by":"qa","resources":{"timeout_ms":15000,"retry":1}}'
+Expect: 202/200 with task_id, trace_id, status=queued or dispatched.
+Poll status: curl -s $CC/orchestrator/tasks/<task_id>
+Expect: status eventually becomes succeeded with result { items[], total, page, took_ms }
+A5) View events for the task
+
+Objective: Verify agent posted events.
+curl: curl -s "$CC/orchestrator/events"
+Expect: Recent events include types like "search_performed" with trace_id matching the task.
+A6) Negative: unknown action
+
+Objective: Command Center should reject unknown action.
+curl: curl -s -X POST $CC/orchestrator/tasks/dispatch -H "Content-Type: application/json" -d '{"action":"scholarmatch.NOPE","payload":{},"requested_by":"qa"}'
+Expect: 4xx with structured error "no agent supports action".
+A7) Security: invalid JWT to /agent/task
+
+Objective: Agent rejects forged/invalid signed task.
+curl: curl -s -X POST https://auto-page-maker-jamarrlmayes.replit.app/agent/task -H "Content-Type: application/json" -H "Authorization: Bearer not-a-valid-token" -d '{"task_id":"t1","action":"scholarmatch.search","payload":{}}'
+Expect: 401/403 error.
+A8) Rate limit
+
+Objective: /agent/task is limited (5/min).
+Send 6 quick tasks of action scholarmatch.search.
+Expect: The 6th results in 429 Too Many Requests (or Command Center dispatch limit triggers).
+A9) Timeout and retry
+
+Objective: Verify retry path when agent is slow.
+Dispatch with small timeout: curl -s -X POST $CC/orchestrator/tasks/dispatch -H "Content-Type: application/json" -d '{"action":"scholarmatch.search","payload":{"query":"biology"},"requested_by":"qa","resources":{"timeout_ms":1000,"retry":2}}'
+Expect: Command Center retries according to backoff; final status either succeeded on retry or failed with error.timeout.
+A10) Offline detection
+
+Objective: Agent marked offline after missed heartbeats.
+Action: Stop the agent (or disable its heartbeat), wait 2 heartbeat intervals.
+curl: curl -s $CC/orchestrator/agents
+Expect: Agent status=offline; new dispatches for its actions fail with structured error.
+Phase B: Per-agent happy-path tests
+Run these for each onboarded agent to confirm unique capabilities work over the bus.
+
+B1) Scholarship API: search
+
+Dispatch: curl -s -X POST $CC/orchestrator/tasks/dispatch -H "Content-Type: application/json" -d '{"action":"scholarship_api.search","payload":{"query":"STEM","filters":{"country":"US"},"pagination":{"page":1,"size":10}},"requested_by":"qa"}'
+Expect: succeeded with items[], total.
+B2) Auto Page Maker: generate landing page
+
+Dispatch: curl -s -X POST $CC/orchestrator/tasks/dispatch -H "Content-Type: application/json" -d '{"action":"auto_page_maker.generate_page","payload":{"template":"modern","title":"STEM Awards 2025","sections":[{"type":"hero","headline":"Apply Now"}],"seo":{"metaTitle":"STEM Awards 2025","metaDescription":"Top scholarships"}}, "requested_by":"qa"}'
+Expect: succeeded with result containing pageUrl or html; event "page_generated" present.
+B3) Student Pilot: match scholarships
+
+Dispatch: curl -s -X POST $CC/orchestrator/tasks/dispatch -H "Content-Type: application/json" -d '{"action":"student_pilot.match_scholarships","payload":{"student":{"gpa":3.7,"major":"CS","level":"undergrad"},"limit":10},"requested_by":"qa"}'
+Expect: succeeded with matches[] each including scholarshipId and score.
+B4) Student Pilot: analyze essay
+
+Dispatch: curl -s -X POST $CC/orchestrator/tasks/dispatch -H "Content-Type: application/json" -d '{"action":"student_pilot.analyze_essay","payload":{"prompt":"Why CS?","essay":"My journey..."},"requested_by":"qa"}'
+Expect: succeeded with feedback { strengths, improvements, score }.
+B5) Provider Register: register provider
+
+Dispatch: curl -s -X POST $CC/orchestrator/tasks/dispatch -H "Content-Type: application/json" -d '{"action":"provider_register.register_provider","payload":{"org":{"name":"STEM Foundation","contactEmail":"ops@stem.org"},"program":{"name":"2025 Excellence","awardAmount":5000}},"requested_by":"qa"}'
+Expect: succeeded with { orgId, programId }.
+B6) Scholarship Sage: outreach chat
+
+Dispatch: curl -s -X POST $CC/orchestrator/tasks/dispatch -H "Content-Type: application/json" -d '{"action":"scholarship_sage.outreach_chat","payload":{"persona":"Student","message":"How do I apply?"},"requested_by":"qa"}'
+Expect: succeeded with { transcriptId or demoId, messages[] }.
+B7) Scholarship Agent: compliance check
+
+Dispatch: curl -s -X POST $CC/orchestrator/tasks/dispatch -H "Content-Type: application/json" -d '{"action":"scholarship_agent.compliance_check","payload":{"content":"Landing page HTML","locale":"en-US"},"requested_by":"qa"}'
+Expect: succeeded with { compliant: true/false, issues[], score }.
+Phase C: Cross-agent workflow tests
+C1) Search -> Match -> Page generate (3-step orchestration)
+
+Step 1: Search POST /dispatch action=scholarship_api.search -> capture result items (top 5)
+Step 2: Match POST /dispatch action=student_pilot.match_scholarships with payload { student: {…}, scholarships: <top 5 ids> }
+Step 3: Page POST /dispatch action=auto_page_maker.generate_page with payload that includes selected scholarships in the sections/content
+Acceptance:
+Each step succeeds, emits events with the same trace_id propagated (or store trace_id and pass as parentTraceId in payload).
+Final result contains a pageUrl listing the matched scholarships.
+C2) Provider onboarding campaign
+
+Register provider -> Generate page -> Compliance check -> Outreach
+Dispatch sequential tasks:
+provider_register.register_provider -> get orgId/programId
+auto_page_maker.generate_page with org/program branding
+scholarship_agent.compliance_check on page content/url
+scholarship_sage.outreach_chat to initiate a demo with provider
+Acceptance: All results succeed; events recorded for each step; compliance result is attached to outreach payload.
+C3) Relay passthrough (Command Center proxy)
+
+Objective: Prove Command Center relay can securely call an agent native route.
+curl: curl -s -X POST $CC/orchestrator/relay -H "Content-Type: application/json" -d '{"target_agent_id":"auto-page-maker","method":"GET","path":"/health","body":null}'
+Expect: 200 returning the agent’s /health JSON. Check that Authorization was attached by CC and accepted by agent.
+Failure-path and resiliency tests
+F1) Structured error propagation
+
+In any agent, trigger a known validation error (e.g., missing required field).
+Expect: task result status=failed with error.code and message, preserved in CC.
+F2) Agent restart resilience
+
+Restart an agent after Task dispatch but before callback completes.
+Expect: CC either retries or task eventually fails with proper error; agent re-registers automatically upon reboot.
+F3) Allowlist enforcement
+
+Temporarily remove an agent base URL from AGENTS_ALLOWLIST and restart CC.
+Expect: agent registration fails with 403; CC does not list the agent; re-adding allowlist fixes it.
+F4) Payload size and sanitization
+
+Dispatch an oversized payload (e.g., 1–2MB HTML).
+Expect: Either CC or agent rejects with 413/validation error; logs show sanitization active.
+F5) CORS and headers
+
+From a browser or curl with Origin header, hit /orchestrator/* endpoints.
+Expect: Only allowed origins per your config; security headers present.
+Observability and trace checks
+O1) Trace ID propagation
+
+Check that:
+CC includes trace_id in dispatch response.
+Agent logs include the same trace_id when processing the task.
+Callback payload contains trace_id.
+Events emitted contain trace_id.
+Pass if the same trace_id appears across these logs and endpoints.
+O2) Metrics sanity
+
+Verify CC lists:
+total tasks, succeeded/failed counts,
+agents_online,
+recent events length.
+Pass if numbers match what you just executed.
+Quick troubleshooting
+
+Agent not visible: Check AGENTS_ALLOWLIST, SHARED_SECRET mismatch, heartbeat failing (network or JWT).
+Tasks stuck: Check CC logs for dispatch errors; verify agent /agent/task rate limit not exceeded.
+401/403: Ensure iss/aud match (Command Center: iss=auto-com-center, aud=scholar-sync-agents).
+Timeouts: Increase resources.timeout_ms on dispatch and watch retries.
+If you want, I can turn the above into:
+
+A ready-to-import Postman collection with environments; or
+A Node.js test runner (newman/k6/jest) that executes the scenarios and prints a pass/fail matrix.
+Tell me which you prefer and the exact set of agents you want included, and I’ll generate it.

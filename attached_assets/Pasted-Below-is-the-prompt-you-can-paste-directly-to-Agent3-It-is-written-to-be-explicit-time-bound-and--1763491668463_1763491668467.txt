@@ -1,0 +1,126 @@
+Below is the prompt you can paste directly to Agent3. It is written to be explicit, time-bound, and testable, with clear acceptance criteria and deliverables. It prioritizes the Auto Page Maker SEO engine so we can minimize CAC and unlock organic revenue, in line with our strategic playbook and growth model. Where relevant, leverage Agent3’s built‑in App Testing and self-healing loop to accelerate iteration and verification during this run. Replit’s deployment monitoring/logs should be used for post-fix validation.
+
+Prompt to Agent3
+
+Role and mission
+
+You are Agent3 acting as Release Captain and Principal Engineer for “auto_page_maker.” Your objective is to deliver a production-ready release that enables organic traffic and revenue. You will fix critical SEO, sitemap, stability, and performance defects; then prove readiness with automated E2E tests, health checks, and performance verification.
+Use your built-in App Testing to validate and automatically re-test after fixes; iterate until all acceptance criteria are met. Your self-healing “test, fix, retest” loop is in scope for this task to maintain velocity .
+Use Replit deployment monitoring for logs, resource usage, HTTP statuses, and request durations to verify the live app state after deployment .
+Context and constraints
+
+Business objective: Enable organic acquisition via Auto Page Maker and begin monetization. Organic SEO traffic is our lowest CAC lever and must be unblocked today.
+Non-functional SLOs: 99.9% uptime; P95 API latency ≈120 ms for key endpoints.
+Security/ethics: Maintain current security headers and Responsible AI posture (no dark patterns, no academic dishonesty).
+Testing approach: Follow a layered strategy—unit/integration/system/E2E—automated wherever practical, and gate release with an objective pass/fail signal. Maintain a stable CI/CD signal with high-fidelity automated regression and performance checks .
+Inputs
+
+Latest E2E report findings (summary):
+Missing SEO meta tags on homepage
+Sitemap missing scholarship detail URLs
+Duplicate data-testid on “Get Matches” buttons
+Hardcoded localhost URLs (robots.txt and elsewhere)
+/readyz returns null
+Database latency ~258 ms (exceeds 120 ms SLO)
+Stats API ~565 ms (exceeds 120 ms SLO)
+Production base URL: use environment variable APP_BASE_URL (avoid hardcoding).
+Success = all acceptance criteria below met; all E2E tests green; performance SLO met.
+Work plan and acceptance criteria
+
+SEO meta and structured data (critical)
+Implement title, meta description, canonical, Open Graph, and Twitter Card tags on homepage and core routes.
+Add JSON-LD structured data:
+WebSite/Organization for the root.
+ItemList or CollectionPage for scholarship listing pages.
+Scholarship (or CreativeWork/FinancialAid equivalent) for scholarship detail pages.
+Acceptance:
+View source for homepage and a scholarship detail page shows correct tags and valid JSON-LD.
+Lighthouse SEO score ≥ 95 on homepage and ≥ 90 on scholarship detail pages.
+No duplicate titles or empty meta descriptions in key routes.
+2. Sitemap and robots.txt (high)
+
+Update sitemap generator to include all scholarship detail pages (/scholarship/:id). If >50k URLs, split into multiple sitemap parts and a sitemap index. Include lastmod; set changefreq and priority sensibly.
+Fix robots.txt to reference the production domain and the sitemap index URL.
+Acceptance:
+GET /sitemap.xml (or sitemap index) lists 100% of current scholarship detail pages or links to all sitemap parts containing them.
+robots.txt references the correct production host and sitemap index.
+E2E test confirms a random sample of 25 scholarship detail URLs present in sitemaps and resolve with 200 OK.
+3. Duplicate data-testid on primary CTA (high)
+
+Ensure the two primary CTAs on the homepage have unique data-testid values; update tests accordingly.
+Acceptance:
+No duplicate data-testid attributes across the page.
+Playwright (or equivalent) selectors uniquely target each CTA and pass.
+4. Remove hardcoded localhost and centralize environment config (high)
+
+Replace any localhost references (including robots.txt templates, API base URLs, internal links) with APP_BASE_URL and environment-based configuration.
+Acceptance:
+All env-based URLs resolve correctly in production build.
+Smoke test in production confirms no localhost leakage in network requests or markup.
+5. Production health endpoint (medium)
+
+Implement /readyz returning a 200 JSON payload: { status: "ok", version, git_sha, dependencies: { db: "ok", cache: "ok" } }.
+Acceptance:
+/readyz returns 200 and non-null structured status.
+Integrate with uptime checks to gate deploy completion.
+6. Performance hardening: DB latency and Stats API (medium → high)
+
+Database:
+Identify slow queries for the scholarship listing/matching and detail routes; add or tune indexes; eliminate N+1 patterns; ensure pagination and selective fields; enable prepared statements/connection pooling; consider read-through caching for hot queries (e.g., 60–300s TTL).
+Stats API:
+Add in-memory or distributed cache (e.g., precompute 60s TTL) and return compressed JSON; reduce response payload; avoid cold joins during peak.
+Acceptance:
+With 50–100 RPS synthetic load:
+P95 of key read endpoints ≤ 120 ms.
+DB average query latency ≤ 120 ms across instrumented operations.
+Re-run performance checks and attach summary.
+7. Post-deploy monitoring and runbook (always-on)
+
+Enable and validate Replit deployment monitoring: Logs, Resources, Web Analytics (Top URLs/Referrers, HTTP statuses, Request Durations) to confirm live behavior after release .
+Provide a 1-page runbook: alarms, key dashboards, log search filters, and rollback steps.
+Execution steps
+
+Phase 1: Fix-and-verify loop
+Implement items 1–4, then run App Testing and E2E suite. Iterate until green. Use the agent’s visible browser testing to validate user flows and fix regressions automatically where possible .
+Phase 2: Performance and health
+Implement items 5–6, then run synthetic load and capture P95 metrics and DB timings.
+Phase 3: Release and observe
+Blue/green or canary deploy; validate with /readyz and smoke tests; watch logs and request durations on Replit’s deployment dashboard; expand traffic to 100% if stable .
+Verification and test protocol
+
+Automated E2E/UI: All tests must pass. Add/adjust tests for fixed selectors and SEO tags.
+System tests: Verify end-to-end flows in a production-like environment, including sitemap coverage and robots directives .
+Performance: Provide a brief report with P50/P95 latencies for key endpoints under expected load and screenshots/exports from Replit’s request duration analytics .
+Release gate: No critical or high-severity defects remain; SLOs met; E2E 100% pass; /readyz stable.
+Deliverables (attach these at completion)
+
+Diff/PRs with concise summaries of each fix.
+Screenshot or JSON snippets of homepage and detail page head tags (SEO and JSON-LD).
+Sitemap index URL plus sample child sitemap and count of URLs included.
+robots.txt content referencing correct host and sitemap index.
+Test artifacts: E2E run output, performance summary (latency table), and brief narrative of fixes.
+Runbook: Monitoring links (Replit), key alerts, and rollback procedure.
+Timing and reporting
+
+Target: If you can complete all acceptance criteria today, do so and ship. If any blocker arises, respond immediately with BLOCKER:, root cause, mitigation options, and revised ETA.
+Status cadence: Post progress updates every 2 hours with current pass/fail counts, open defects, and any risks to the schedule.
+Definition of done
+
+All acceptance criteria above are satisfied.
+0 critical/high defects open; 100% E2E pass rate; /readyz returns “ok.”
+Sitemap includes all scholarship detail pages and robots.txt points to production.
+P95 latency ≤ 120 ms on key endpoints under expected load; monitoring dashboards live and linked.
+Release notes delivered with runbook.
+Why this sequence and tooling
+
+Using your autonomous App Testing and self-healing loop accelerates the “test-fix-retest” cadence required for a same-day release while reducing regression risk .
+Post-launch verification via Replit’s deployment analytics (logs, resources, request durations, statuses) gives immediate operational confidence and fast feedback on performance SLOs and errors .
+The layered test strategy (system/E2E + performance + acceptance gate) ensures the product is both technically sound and commercially ready to unlock organic traffic and revenue .
+This work directly supports our platform’s value delivery to students and our organic growth engine by surfacing high-quality, indexable scholarship pages that reduce CAC and improve conversion, consistent with our playbook’s emphasis on aligning product improvements with high-value user experiences that drive monetization .
+CEO note on ETA and revenue start
+
+If all tasks flow without blockers, today’s ship is possible. However, based on the latest E2E findings and typical time to implement SEO, sitemap, config refactors, and performance optimization, the realistic window is 10–14 hours. Commit to delivering within that window.
+Revenue start ETA: November 19, 2025, 18:00 UTC. This assumes all acceptance criteria above are met, a clean canary, and stable post-deploy metrics for 60–90 minutes.
+End prompt.
+
+If you want, I can also provide a short “smoke checklist” for your E2E runner to use immediately after Agent3 posts the first candidate build.

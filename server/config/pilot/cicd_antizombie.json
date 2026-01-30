@@ -1,0 +1,28 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "deploy_success_requirements": {
+    "pid_change": true,
+    "commit_digest_match": true,
+    "live_heartbeat": "I am primary"
+  },
+  "drain_and_kill": {
+    "reject_traffic_before_stop": true,
+    "prove_zero_active_schedulers": true,
+    "assert_node_cron_disabled_web": true
+  },
+  "deploy_blockers": {
+    "legacy_probes_present": ["/metrics/p95", "localhost"],
+    "sitemap_jobs_present": true
+  },
+  "observability_guardrails": {
+    "unknown_ban_slo": 1.0,
+    "window_closed_at_required": true,
+    "waf_sitemap_block_until": "seo_owners_confirm_compliant",
+    "compliant_crawler_settings": {
+      "etag_if_modified_since": true,
+      "concurrency": 1,
+      "interval_seconds": 60
+    }
+  }
+}

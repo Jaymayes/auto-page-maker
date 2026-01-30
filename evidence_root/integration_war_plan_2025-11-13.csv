@@ -1,0 +1,40 @@
+Gate,Service,Task,DRI,Deadline MST,Status,Blocker,Priority
+Gate 0,auto_com_center,Publish workspace to production,Ops/SRE,2025-11-13 12:30,COMPLETE,,P0
+Gate 0,auto_com_center,Verify /.well-known/ceo.txt nonce file,Agent3,2025-11-13 12:45,COMPLETE,,P0
+Gate 0,auto_com_center,Run smoke tests and report metrics,Agent3,2025-11-13 13:00,COMPLETE,,P0
+Gate 0,scholar_auth,Implement OAuth2 client credentials RS256 + JWKS,Auth DRI,2025-11-13 18:00,IN PROGRESS,,P0
+Gate 0,scholar_auth,Expose /.well-known/jwks.json endpoint,Auth DRI,2025-11-13 18:00,PENDING,,P0
+Gate 0,scholar_auth,Lock CORS to FRONTEND_ORIGINS only,Auth DRI,2025-11-13 18:00,PENDING,,P0
+Gate 0,auto_com_center,Fix auto_com_center published and verified,Agent3,2025-11-13 18:00,COMPLETE,,P0
+Gate 0,ALL,Health check endpoint standardization,Integration Lead,2025-11-13 18:00,IN PROGRESS,scholar-auth & scholarship-api missing /api/health,P0
+Gate 0,provider_register,Fix HTTP 500 server error,Provider DRI,2025-11-13 18:00,BLOCKED,Critical production error,P0-CRITICAL
+Gate 1,auto_com_center,Replace hardcoded links with env-derived URLs,Agent3,2025-11-14 07:00,PENDING,,P0
+Gate 1,scholar_auth,Finalize RBAC roles and permissions in tokens,Auth DRI,2025-11-14 10:00,PENDING,,P0
+Gate 1,scholar_auth,Configure HA (Reserved VM/Autoscale),Auth DRI,2025-11-14 12:00,PENDING,,P1
+Gate 1,scholar_auth,End-to-end MFA verification with provider,Auth DRI,2025-11-14 14:00,PENDING,,P1
+Gate 1,scholarship_api,Fix JWT validation stability (JWKS caching),API DRI,2025-11-14 12:00,PENDING,,P0
+Gate 1,scholarship_api,Implement deep /health checks (DB + auth),API DRI,2025-11-14 14:00,PENDING,,P0
+Gate 1,scholarship_api,Event hooks to auto_com_center,API DRI,2025-11-14 16:00,PENDING,,P1
+Gate 1,auto_com_center,Load testing (P95 <120ms at 200 rps),Agent3,2025-11-14 10:00,PENDING,,P1
+Gate 1,auto_com_center,Monitoring and alerting for delivery failures,Agent3,2025-11-14 12:00,PENDING,,P1
+Gate 2,scholarship_api,Strengthen data integrity and validation,API DRI,2025-11-15 10:00,PENDING,,P1
+Gate 2,scholarship_api,Configure HA,API DRI,2025-11-15 12:00,PENDING,,P1
+Gate 2,student_pilot,Refactor to environment-only config,Frontend DRI,2025-11-15 12:00,PENDING,,P0
+Gate 2,provider_register,Refactor to environment-only config,Frontend DRI,2025-11-15 12:00,PENDING,,P0
+Gate 2,student_pilot,Implement graceful error handling,Frontend DRI,2025-11-15 14:00,PENDING,,P1
+Gate 2,provider_register,Implement graceful error handling,Frontend DRI,2025-11-15 14:00,PENDING,,P1
+Gate 2,scholarship_sage,Enable service-to-service auth with client credentials,Sage DRI,2025-11-15 12:00,PENDING,,P0
+Gate 3,student_pilot,E2E Student Journey tests green on staging,QA + Frontend DRI,2025-11-16 10:00,PENDING,,P0
+Gate 3,provider_register,E2E Provider Journey tests green on staging,QA + Frontend DRI,2025-11-16 10:00,PENDING,,P0
+Gate 3,scholarship_sage,Validate recommendations (precision@10 >= 0.6),Sage DRI,2025-11-16 12:00,PENDING,,P1
+Gate 3,scholarship_sage,Performance test (P95 <200ms at 50 rps),Sage DRI,2025-11-16 14:00,PENDING,,P1
+Gate 3,scholarship_agent,Enable service auth and RBAC scopes,Agent DRI,2025-11-16 12:00,PENDING,,P0
+Gate 3,scholarship_agent,Admin monitoring and audit logs,Agent DRI,2025-11-16 14:00,PENDING,,P1
+Gate 3,scholarship_agent,Integration tests with auto_com_center,Agent DRI,2025-11-16 16:00,PENDING,,P1
+Gate 3,auto_page_maker,Confirm sitemap and canonical tags,SEO Eng,2025-11-14 12:00,PENDING,,P1
+Gate 3,auto_page_maker,Ready for integration triggers from scholarship_api,SEO Eng,2025-11-14 12:00,PENDING,,P1
+Gate 4,ALL,Executive war room sign-off,All DRIs,2025-11-17 17:00,PENDING,All prior gates must pass,P0
+Gate 4,ALL,Rollback plan verified,Integration Lead,2025-11-17 17:00,PENDING,,P0
+Gate 5,ALL,Staged rollout (10% canary),SRE + Integration Lead,2025-11-18 10:00,PENDING,Gate 4 approval required,P0
+Gate 5,ALL,Full rollout (100%) with SLO monitoring,SRE + Integration Lead,2025-11-18 14:00,PENDING,,P0
+Post-Launch,ALL,ARR ignition - Growth campaigns active,Marketing + Product,2025-11-20 09:00,PENDING,,P0

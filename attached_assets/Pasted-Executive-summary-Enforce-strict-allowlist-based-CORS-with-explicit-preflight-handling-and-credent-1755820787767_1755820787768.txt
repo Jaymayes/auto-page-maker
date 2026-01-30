@@ -1,0 +1,138 @@
+Executive summary
+Enforce strict, allowlist-based CORS with explicit preflight handling and credentials control. This closes a major web-exposure gap by blocking untrusted browser origins while preserving server-to-server agent traffic. It’s fast to ship, low risk, requires no new vendors, and is backward compatible for approved domains. The middleware will exactly match allowed origins, handle OPTIONS efficiently, and ensure no wildcard headers when credentials are enabled.
+
+{
+"recommendation_title": "Enforce strict allowlist CORS with preflight handling and credentials control",
+"priority": "P0",
+"why_now": [
+"Missing CORS enables unauthorized browser-origin access and token leakage.",
+"High security ROI with minimal code and no new dependencies.",
+"Complements the completed path traversal and Unicode hardening to reduce total attack surface.",
+"Preserves SEO and Agent Bridge flows by allowing requests without Origin (server-to-server)."
+],
+"scope": "IN: All Express server API and agent endpoints; preflight OPTIONS; credentialed browser requests. OUT: Business logic, DB schema, SEO content generation, static asset hosting.",
+"implementation_plan": [
+{
+"step": "Create centralized CORS middleware with exact-origin allowlist",
+"details": "Parse allowlist from env; if Origin present and not allowed, reject with 403. For allowed origins, set ACAO to the exact Origin, set Vary: Origin, and conditionally allow credentials. Short-circuit OPTIONS with proper ACA* headers.",
+"owner": "Platform",
+"estimate_hours": 3,
+"dependencies": ["ENV allowlist values for prod/staging"]
+},
+{
+"step": "Integrate middleware early in pipeline",
+"details": "Register after Helmet and path/unicode security, before routes. Ensure body parsing doesn’t interfere with OPTIONS short-circuit.",
+"owner": "Platform",
+"estimate_hours": 1,
+"dependencies": ["server/index.ts"]
+},
+{
+"step": "Safe defaults and feature flag",
+"details": "Default deny when allowlist empty; allow no-Origin requests; add CORS_LOG_ONLY to observe before enforcing in staging if needed.",
+"owner": "Security",
+"estimate_hours": 1,
+"dependencies": ["Environment configuration"]
+},
+{
+"step": "Test matrix and staging validation",
+"details": "Unit and integration tests for allowed/disallowed origins, preflight, and credentialed flows. Validate no SEO/agent regressions.",
+"owner": "QA",
+"estimate_hours": 3,
+"dependencies": ["Test harness and sample frontends"]
+}
+],
+"code_changes": [
+{
+"file": "server/middleware/cors.ts",
+"purpose": "Centralized CORS enforcement with allowlist and preflight handling",
+"snippet": "import { Request, Response, NextFunction } from 'express';\n\nconst parseList = (s?: string) => new Set((s || '').split(',').map(x => x.trim()).filter(Boolean));\nconst ALLOWLIST = () => parseList(process.env.CORS_ALLOWLIST);\nconst ALLOW_CREDENTIALS = (process.env.CORS_ALLOW_CREDENTIALS || 'false').toLowerCase() === 'true';\nconst MAX_AGE = Number(process.env.CORS_MAX_AGE || 600);\nconst LOG_ONLY = (process.env.CORS_LOG_ONLY || 'false').toLowerCase() === 'true';\n\nexport function corsEnforce(req: Request, res: Response, next: NextFunction) {\n  const origin = req.headers.origin as string | undefined;\n  if (!origin) return next(); // server-to-server\n  const allowed = ALLOWLIST().has(origin);\n\n  // Preflight\n  if (req.method === 'OPTIONS') {\n    if (!allowed) {\n      if (LOG_ONLY) return res.status(204).end();\n      return res.status(403).end();\n    }\n    res.setHeader('Access-Control-Allow-Origin', origin);\n    if (ALLOW_CREDENTIALS) res.setHeader('Access-Control-Allow-Credentials', 'true');\n    res.setHeader('Vary', 'Origin');\n    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');\n    res.setHeader('Access-Control-Allow-Headers', 'Authorization,Content-Type,X-Requested-With');\n    res.setHeader('Access-Control-Max-Age', String(MAX_AGE));\n    return res.status(204).end();\n  }\n\n  if (!allowed) {\n    if (LOG_ONLY) return next();\n    return res.status(403).json({ error: 'CORS origin not allowed' });\n  }\n\n  res.setHeader('Access-Control-Allow-Origin', origin);\n  if (ALLOW_CREDENTIALS) res.setHeader('Access-Control-Allow-Credentials', 'true');\n  res.setHeader('Vary', 'Origin');\n  return next();\n}\n"
+},
+{
+"file": "server/index.ts",
+"purpose": "Register CORS middleware before routes",
+"snippet": "import express from 'express';\nimport helmet from 'helmet';\nimport { pathSecurity } from './middleware/path-security';\nimport { unicodeNormalize } from './middleware/unicode-normalize';\nimport { corsEnforce } from './middleware/cors';\n\nconst app = express();\napp.use(helmet());\napp.use(pathSecurity);\napp.use(corsEnforce);\napp.use(express.json({ limit: '1mb' }));\napp.use(unicodeNormalize);\n// ...routes\n"
+}
+],
+"config_changes": [
+{
+"file": ".env",
+"entries": [
+"CORS_ALLOWLIST=https://www.scholarmatch.org,https://app.scholarmatch.org,https://admin.scholarmatch.org",
+"CORS_ALLOW_CREDENTIALS=true",
+"CORS_MAX_AGE=600",
+"CORS_LOG_ONLY=false"
+]
+},
+{
+"file": "README.md",
+"entries": [
+"CORS: Exact-origin allowlist. Requests without an Origin header are treated as server-to-server and allowed.",
+"Enable credentials only when needed; never use '' with credentials."
+]
+}
+],
+"acceptance_criteria": [
+"Allowed origins receive Access-Control-Allow-Origin matching the exact Origin and succeed.",
+"OPTIONS preflight from allowed origins returns 204 with ACA headers and Max-Age.",
+"Disallowed origins receive 403 and no ACAO header.",
+"Server-to-server requests (no Origin) continue to work unchanged.",
+"No '' ACAO is ever emitted when credentials are enabled.",
+"p95 latency impact of middleware < 2ms."
+],
+"tests": {
+"unit": [
+"parses allowlist env correctly including spaces and duplicates",
+"no-Origin requests pass through without CORS headers",
+"allowed origin sets ACAO and optional credentials; Vary: Origin present"
+],
+"integration": [
+"OPTIONS preflight allowed -> 204 with ACA headers",
+"OPTIONS preflight disallowed -> 403",
+"GET with disallowed Origin -> 403, no ACAO",
+"GET with allowed Origin -> 200, ACAO=origin",
+"Credentialed request from allowed Origin succeeds when CORS_ALLOW_CREDENTIALS=true"
+],
+"security": [
+"Ensure no wildcard ACAO with credentials",
+"Origin spoofing with mixed case/trailing slash rejected unless exact match",
+"Punycode/unicode origins only pass if exact match in allowlist",
+"Preflight cache respected via Max-Age"
+]
+],
+"risk_mitigation": {
+"risks": [
+"Legitimate frontends blocked if not allowlisted",
+"Unexpected subdomains (e.g., staging) fail due to exact match",
+"Third-party embeds may break"
+],
+"rollback_plan": "Toggle CORS_LOG_ONLY=true to disable enforcement while retaining headers for allowed origins; or revert middleware registration and redeploy."
+},
+"metrics": {
+"security": [
+"0 successful cross-origin calls from disallowed origins",
+"No ACAO '*' when credentials enabled"
+],
+"performance": [
+"Middleware overhead p95 < 2ms",
+"OPTIONS share of traffic < 5% due to Max-Age caching"
+],
+"stability": [
+"No increase in 5xx rate",
+"Expected 403s for disallowed origins observed without affecting allowed origins"
+]
+},
+"timeline_days": 2,
+"communications": [
+"Notify frontend teams of the exact allowlist and go-live window.",
+"Update environment variables across dev/staging/prod and deployment runbooks.",
+"Inform support that unknown origins will receive 403 CORS errors."
+],
+"alternatives_if_blocked": [
+"Read-only CORS: temporarily allow GET/HEAD for all origins while blocking credentials.",
+"Telemetry-first: set CORS_LOG_ONLY=true in staging for 24–48 hours to collect Origin distribution, then enforce."
+],
+"follow_up_recommendations": [
+"Harden auth: strict JWT iss/aud/exp/nbf verification and key rotation hooks; add CSRF protection for any cookie-based flows.",
+"Improve observability: add security event counters (blocked origins, preflight volume) and alerting thresholds."
+]
+}

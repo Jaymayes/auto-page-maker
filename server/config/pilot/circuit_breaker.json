@@ -1,0 +1,36 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "sev2_activated": "2026-01-19T16:00:00Z",
+  "profiles": {
+    "standard": {
+      "open_on_consecutive_failures": 3,
+      "cooldown_seconds": 60,
+      "backoff": "exponential_with_jitter",
+      "max_backoff_seconds": 300,
+      "emit_metrics_to_a8": true
+    }
+  },
+  "global_rate_limit": {
+    "enabled": true,
+    "target": "A1",
+    "type": "token_bucket",
+    "rps_ceiling": 50,
+    "burst": 20
+  },
+  "pooling": {
+    "max": 10,
+    "min": 2,
+    "idleTimeoutMs": 10000,
+    "acquireTimeoutMs": 3000,
+    "statementTimeoutMs": 5000,
+    "keepalive": true,
+    "utilization_alarm_threshold": 0.8,
+    "utilization_alarm_duration_min": 5
+  },
+  "queue_pressure": {
+    "drop_non_critical_when_breaker_open": true,
+    "max_queue_depth": 1000,
+    "dead_letter_enabled": true,
+    "alarm_on_growth_slope": true
+  }
+}

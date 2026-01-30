@@ -1,0 +1,14 @@
+{
+  "audit_timestamp": "2026-01-05T18:40:00Z",
+  "namespace": "simulated_audit",
+  "ttl_days": 14,
+  "workflows": [
+    {"domain": "marketing_seo", "event_type": "PageView", "source": "auto_page_maker", "event_id": "evt_1767638496271_gu5b2pwus", "persisted": true, "latency_ms": 193, "status": "pass"},
+    {"domain": "lead_gen", "event_type": "NewLead", "source": "auto_page_maker", "event_id": "evt_1767638496522_3eupkqbin", "persisted": true, "latency_ms": 195, "status": "pass"},
+    {"domain": "revenue_b2c", "event_type": "PaymentSuccess", "source": "student_pilot", "event_id": "evt_1767638496774_jxci56bhv", "persisted": true, "latency_ms": 209, "status": "pass"},
+    {"domain": "revenue_b2b", "event_type": "ProviderOnboarded", "source": "provider_register", "event_id": "evt_1767638497031_dle06kn47", "persisted": true, "latency_ms": 197, "status": "pass"},
+    {"domain": "learning", "event_type": "SageAssist", "source": "scholarship_sage", "event_id": "evt_1767638497308_zigjmlojv", "persisted": true, "latency_ms": 226, "status": "pass"},
+    {"domain": "telemetry", "event_type": "SystemHealth", "source": "auto_com_center", "event_id": "evt_1767638497555_uzg6xnrlo", "persisted": true, "latency_ms": 210, "status": "pass"}
+  ],
+  "summary": {"total": 6, "passed": 6, "failed": 0, "success_rate": "100%"}
+}

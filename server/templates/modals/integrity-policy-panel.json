@@ -1,0 +1,49 @@
+{
+  "version": "1.0.0",
+  "panel_id": "integrity_policy_panel",
+  "title": "What We Won't Do",
+  "subtitle": "Our commitment to academic integrity",
+  "sections": [
+    {
+      "heading": "We will never:",
+      "icon": "x-circle",
+      "items": [
+        "Write your essay or personal statement",
+        "Complete creative prompts on your behalf",
+        "Generate content you can copy and submit",
+        "Paraphrase content to disguise AI authorship",
+        "Help you misrepresent your qualifications"
+      ],
+      "style": "danger"
+    },
+    {
+      "heading": "We will always:",
+      "icon": "check-circle",
+      "items": [
+        "Help you organize your ideas",
+        "Suggest ways to improve clarity and structure",
+        "Check grammar and formatting",
+        "Pre-fill administrative fields (name, GPA, eligibility)",
+        "Give you full control to review and edit before submission"
+      ],
+      "style": "success"
+    }
+  ],
+  "refusal_message": {
+    "heading": "If you ask us to write your essay:",
+    "message": "I can't write or complete scholarship essays for you. I can help you organize your ideas, improve clarity, and check structure. Upload your draft and I'll coach you on edits.",
+    "style": "info"
+  },
+  "footer": {
+    "text": "Scholar AI Advisor operates on the \"Editor/Coach, not Ghostwriter\" principle. Your voice, your story, your success.",
+    "link_text": "Full Academic Integrity Policy",
+    "link_url": "/policies/academic-integrity"
+  },
+  "buttons": {
+    "close": {
+      "text": "Got it",
+      "style": "primary",
+      "action": "close_panel"
+    }
+  }
+}

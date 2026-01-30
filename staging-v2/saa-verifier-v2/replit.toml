@@ -1,0 +1,13 @@
+[run]
+run = "npx tsx index.ts"
+
+[env]
+PORT = "3004"
+
+[deployment]
+run = ["npx", "tsx", "index.ts"]
+deploymentTarget = "autoscale"
+
+[[ports]]
+localPort = 3004
+externalPort = 80

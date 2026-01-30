@@ -1,0 +1,475 @@
+{
+  "app": "auto_page_maker",
+  "base_url": "https://auto-page-maker-jamarrlmayes.replit.app",
+  "version": "v2.7",
+  "test_date": "2025-11-17T15:20:00Z",
+  "test_agent": "Agent3 (E2E Readiness Orchestrator)",
+  
+  "health_schema": {
+    "endpoint": "/health",
+    "auth_required": false,
+    "response_format": "JSON",
+    "fields": {
+      "status": "string (healthy|degraded|unhealthy)",
+      "timestamp": "ISO 8601 timestamp",
+      "version": "string",
+      "app": "string",
+      "dependencies": "array of dependency objects",
+      "summary": "object with counts"
+    },
+    "sample_response": {
+      "status": "healthy",
+      "timestamp": "2025-11-17T15:23:44.056Z",
+      "version": "v2.7",
+      "app": "auto_page_maker",
+      "dependencies": [
+        {
+          "name": "database",
+          "status": "healthy",
+          "latency_ms": 25
+        },
+        {
+          "name": "email_provider",
+          "status": "healthy",
+          "latency_ms": 274
+        },
+        {
+          "name": "jwks",
+          "status": "healthy",
+          "latency_ms": 1
+        }
+      ],
+      "summary": {
+        "total": 3,
+        "healthy": 3,
+        "degraded": 0,
+        "unhealthy": 0
+      }
+    }
+  },
+  
+  "endpoints": [
+    {
+      "path": "/health",
+      "method": "GET",
+      "auth_required": false,
+      "purpose": "Health check with dependency status",
+      "status": "operational",
+      "response_code": 200
+    },
+    {
+      "path": "/readyz",
+      "method": "GET",
+      "auth_required": false,
+      "purpose": "Readiness check",
+      "status": "operational",
+      "response_code": 200
+    },
+    {
+      "path": "/version",
+      "method": "GET",
+      "auth_required": false,
+      "purpose": "Version information",
+      "status": "operational",
+      "response_code": 200
+    },
+    {
+      "path": "/metrics",
+      "method": "GET",
+      "auth_required": false,
+      "purpose": "Application metrics",
+      "status": "operational",
+      "response_code": 200
+    },
+    {
+      "path": "/docs",
+      "method": "GET",
+      "auth_required": false,
+      "purpose": "API documentation",
+      "status": "operational",
+      "response_code": 200
+    },
+    {
+      "path": "/swagger",
+      "method": "GET",
+      "auth_required": false,
+      "purpose": "Swagger UI",
+      "status": "operational",
+      "response_code": 200
+    },
+    {
+      "path": "/openapi.json",
+      "method": "GET",
+      "auth_required": false,
+      "purpose": "OpenAPI specification",
+      "status": "operational",
+      "response_code": 200
+    },
+    {
+      "path": "/api-docs",
+      "method": "GET",
+      "auth_required": false,
+      "purpose": "Additional API documentation",
+      "status": "operational",
+      "response_code": 200
+    },
+    {
+      "path": "/robots.txt",
+      "method": "GET",
+      "auth_required": false,
+      "purpose": "Search engine crawler instructions",
+      "status": "operational",
+      "response_code": 200
+    },
+    {
+      "path": "/sitemap.xml",
+      "method": "GET",
+      "auth_required": false,
+      "purpose": "SEO sitemap with 2,020 URLs",
+      "status": "operational",
+      "response_code": 200
+    },
+    {
+      "path": "/api/generate",
+      "method": "POST",
+      "auth_required": true,
+      "auth_type": "RS256 JWT (S2S)",
+      "purpose": "Generate scholarship assets (PDFs)",
+      "status": "operational",
+      "response_code": 200
+    }
+  ],
+  
+  "dependencies": {
+    "upstream": [
+      {
+        "service": "scholarship_api",
+        "url": "https://scholarship-api-jamarrlmayes.replit.app",
+        "purpose": "Scholarship data for page generation",
+        "status": "unknown",
+        "validation_result": "API returns empty array - needs investigation",
+        "critical": true
+      },
+      {
+        "service": "scholar_auth",
+        "url": "https://scholar-auth-jamarrlmayes.replit.app",
+        "purpose": "JWKS for S2S authentication",
+        "status": "healthy",
+        "validation_result": "JWKS latency 1ms",
+        "critical": true
+      }
+    ],
+    "downstream": [
+      {
+        "service": "student_pilot",
+        "url": "https://student-pilot-jamarrlmayes.replit.app",
+        "purpose": "Landing page CTAs and conversion",
+        "status": "unknown",
+        "validation_result": "Not tested - CTA links not validated",
+        "critical": true
+      },
+      {
+        "service": "Search Engines",
+        "url": "https://www.google.com",
+        "purpose": "Crawl and index landing pages",
+        "status": "ready",
+        "validation_result": "Sitemap with 2,020 URLs available",
+        "critical": true
+      }
+    ],
+    "external": [
+      {
+        "service": "PostgreSQL (Neon)",
+        "purpose": "Database for landing pages and scholarships",
+        "status": "healthy",
+        "latency_ms": 25,
+        "critical": true
+      },
+      {
+        "service": "SendGrid",
+        "purpose": "Email notifications",
+        "status": "healthy",
+        "latency_ms": 274,
+        "critical": false,
+        "note": "High latency contributing to P95 issues"
+      },
+      {
+        "service": "Google Analytics (GA4)",
+        "purpose": "Traffic and conversion analytics",
+        "status": "configured",
+        "validation_result": "Measurement ID in environment",
+        "critical": true
+      },
+      {
+        "service": "Google Search Console",
+        "purpose": "SEO monitoring and sitemap submission",
+        "status": "not_verified",
+        "validation_result": "Domain not verified; sitemap not submitted",
+        "critical": true
+      },
+      {
+        "service": "Cloudflare CDN",
+        "purpose": "Static asset delivery and caching",
+        "status": "not_configured",
+        "validation_result": "No CDN detected",
+        "critical": false,
+        "recommended": true
+      }
+    ]
+  },
+  
+  "performance": {
+    "measurement_window": {
+      "start": "2025-11-17T15:23:00Z",
+      "end": "2025-11-17T15:28:00Z",
+      "duration_seconds": 300
+    },
+    "sample_size": 20,
+    "endpoint": "GET /health",
+    "latency_ms": {
+      "min": 83,
+      "p50": 130,
+      "p95": 268,
+      "p99": 305,
+      "max": 305,
+      "avg": 167.5
+    },
+    "target": {
+      "p95_ms": 120,
+      "p99_ms": 200
+    },
+    "slo_compliance": {
+      "p95_passed": false,
+      "p95_variance_percent": 123.3,
+      "p99_passed": false,
+      "assessment": "FAIL - Exceeds target by 123%"
+    },
+    "distribution": {
+      "0-100ms": 2,
+      "100-150ms": 11,
+      "150-250ms": 4,
+      "250ms+": 3
+    }
+  },
+  
+  "slo_gates": {
+    "gate_0_health_endpoint": {
+      "status": "PASS",
+      "requirements": [
+        "Returns JSON with {app, status, version}",
+        "200 OK status",
+        "No auth required"
+      ],
+      "validation": "All requirements met"
+    },
+    "gate_1_readyz_endpoint": {
+      "status": "PASS",
+      "requirements": [
+        "Returns 200 OK when dependencies healthy",
+        "JSON format",
+        "No auth required"
+      ],
+      "validation": "All requirements met"
+    },
+    "gate_2_performance": {
+      "status": "FAIL",
+      "requirements": [
+        "P95 ≤ 120ms on /health",
+        "P95 ≤ 120ms on primary read endpoints"
+      ],
+      "validation": "P95 = 268ms (123% over target)",
+      "blocker": true
+    },
+    "gate_3_security_headers": {
+      "status": "PASS",
+      "requirements": [
+        "HSTS",
+        "CSP",
+        "X-Content-Type-Options",
+        "X-Frame-Options",
+        "Referrer-Policy",
+        "Permissions-Policy",
+        "CORS correctly scoped"
+      ],
+      "validation": "All security headers present and configured"
+    },
+    "gate_4_integrations": {
+      "status": "PARTIAL",
+      "requirements": [
+        "Contracts verified live with test calls"
+      ],
+      "validation": "JWKS verified; scholarship_api returns empty data",
+      "blocker": false
+    },
+    "gate_5_observability": {
+      "status": "PASS",
+      "requirements": [
+        "/version exists",
+        "Trace/request IDs logged",
+        "Error response schema standardized",
+        "Metrics endpoint available"
+      ],
+      "validation": "All requirements met"
+    },
+    "gate_seo_public_apps": {
+      "status": "FAIL",
+      "requirements": [
+        "robots.txt",
+        "sitemap.xml",
+        "canonical tags",
+        "meta description",
+        "Open Graph",
+        "JSON-LD where relevant"
+      ],
+      "validation": "robots.txt and sitemap.xml excellent; missing homepage meta tags and JSON-LD",
+      "blocker": true
+    }
+  },
+  
+  "open_issues": [
+    {
+      "id": "auto_page_maker_001",
+      "severity": "P0",
+      "title": "P95 Latency SLO Violation",
+      "description": "Health endpoint P95 latency is 268ms vs 120ms target (123% over)",
+      "owner": "auto_page_maker backend team",
+      "status": "open",
+      "blocking": true,
+      "evidence": "20-sample test shows P95=268ms, max=305ms",
+      "eta_hours": 16,
+      "eta_date": "2025-11-18T12:00:00Z"
+    },
+    {
+      "id": "auto_page_maker_002",
+      "severity": "P0",
+      "title": "Missing Critical SEO Elements",
+      "description": "Homepage lacks title, meta description, canonical, Open Graph, JSON-LD",
+      "owner": "auto_page_maker frontend team",
+      "status": "open",
+      "blocking": true,
+      "evidence": "Homepage meta tag audit shows all elements missing",
+      "eta_hours": 8,
+      "eta_date": "2025-11-18T06:00:00Z"
+    },
+    {
+      "id": "auto_page_maker_003",
+      "severity": "P1",
+      "title": "Landing Page 301 Redirects",
+      "description": "Sample landing page returns 301 redirect (scholarmatch.com domain)",
+      "owner": "auto_page_maker routing team",
+      "status": "open",
+      "blocking": false,
+      "evidence": "https://scholarmatch.com/scholarships/theater → 301",
+      "eta_hours": 6,
+      "eta_date": "2025-11-18T06:00:00Z"
+    },
+    {
+      "id": "auto_page_maker_004",
+      "severity": "P1",
+      "title": "scholarship_api Returns Empty Data",
+      "description": "GET /api/v1/scholarships returns empty array - cannot verify integration",
+      "owner": "scholarship_api team (cross-app)",
+      "status": "open",
+      "blocking": false,
+      "evidence": "curl test returned {\"data\": []}",
+      "eta_hours": 8,
+      "eta_date": "2025-11-18T08:00:00Z"
+    },
+    {
+      "id": "auto_page_maker_005",
+      "severity": "P2",
+      "title": "Email Provider High Latency",
+      "description": "SendGrid health check takes 274ms, contributing to P95 issues",
+      "owner": "auto_page_maker infrastructure",
+      "status": "open",
+      "blocking": false,
+      "evidence": "Health response shows email_provider latency_ms: 274",
+      "eta_hours": 4,
+      "eta_date": "2025-11-18T04:00:00Z"
+    },
+    {
+      "id": "auto_page_maker_006",
+      "severity": "P2",
+      "title": "CDN Not Configured",
+      "description": "No CDN detected - impacts page load speed and SEO",
+      "owner": "auto_page_maker infrastructure",
+      "status": "open",
+      "blocking": false,
+      "evidence": "No CDN headers in HTTP responses",
+      "eta_hours": 8,
+      "eta_date": "2025-11-18T08:00:00Z"
+    },
+    {
+      "id": "auto_page_maker_007",
+      "severity": "P2",
+      "title": "Search Console Not Verified",
+      "description": "Domain not verified in Google Search Console; sitemap not submitted",
+      "owner": "auto_page_maker SEO team",
+      "status": "open",
+      "blocking": false,
+      "evidence": "No confirmation of Search Console setup",
+      "eta_hours": 2,
+      "eta_date": "2025-11-17T18:00:00Z"
+    }
+  ],
+  
+  "go_live_decision": {
+    "status": "NOT_READY_TODAY",
+    "decision_date": "2025-11-17T15:30:00Z",
+    "blocking_issues": [
+      "auto_page_maker_001",
+      "auto_page_maker_002"
+    ],
+    "estimated_go_live": {
+      "optimistic": "2025-11-19T12:00:00Z",
+      "realistic": "2025-11-20T00:00:00Z",
+      "conservative": "2025-11-20T12:00:00Z"
+    },
+    "prerequisites": {
+      "internal_dev": [
+        "Performance optimization (12-20h)",
+        "SEO implementation (6-10h)"
+      ],
+      "cross_team": [
+        "scholarship_api data resolution (4-8h)"
+      ],
+      "external": [
+        "CDN DNS propagation (4-24h)",
+        "Search Console verification (1h + indexing delay)"
+      ]
+    }
+  },
+  
+  "arr_ignition": {
+    "role": "Low-CAC B2C student acquisition via organic search",
+    "target_arr_year_1": "$424.5K",
+    "target_arr_5_year": "$2.16M",
+    "current_readiness": "PARTIAL",
+    "readiness_percentage": 70,
+    "blockers": [
+      "P95 latency fails SLO (poor UX = high bounce rate)",
+      "Missing meta tags = poor search engine indexing",
+      "scholarship_api integration unverified",
+      "No CDN = slow page loads = SEO penalty"
+    ],
+    "estimated_arr_if_launched_today": "$42K",
+    "estimated_arr_after_fixes": "$306K",
+    "recommended_ignition_date": "2025-11-20T00:00:00Z",
+    "expected_ramp": "70% of target traffic by Month 1, 100% by Month 6"
+  },
+  
+  "owner_contacts": {
+    "primary_owner": "auto_page_maker team",
+    "backend_lead": "TBD",
+    "frontend_lead": "TBD",
+    "infrastructure_lead": "TBD",
+    "seo_lead": "TBD"
+  },
+  
+  "metadata": {
+    "manifest_version": "1.0",
+    "generated_by": "Agent3 (E2E Readiness Orchestrator)",
+    "generated_at": "2025-11-17T15:30:00Z",
+    "report_file": "evidence/auto_page_maker_READINESS_REPORT_20251117.md"
+  }
+}

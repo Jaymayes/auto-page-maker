@@ -1,0 +1,32 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T08:45:00Z",
+  "fee_capture": {
+    "enabled": true,
+    "trigger_event": "AwardDisbursed",
+    "platform_fee_rate": 0.03,
+    "rounding": 2
+  },
+  "ledger_events": [
+    "ListingCreated",
+    "LeadAccepted",
+    "ApplicationSubmitted",
+    "AwardApproved",
+    "AwardDisbursed"
+  ],
+  "settlement": {
+    "schedule": "monthly",
+    "auto_debit_enabled": false
+  },
+  "kpis": {
+    "activation_to_first_listing_hours": 72,
+    "listing_to_first_lead_days": 7,
+    "fee_capture_rate_target": 0.98,
+    "dispute_rate_max": 0.005
+  },
+  "onboarding_targets": {
+    "first_30_days": 10,
+    "weekly_after": 3
+  }
+}

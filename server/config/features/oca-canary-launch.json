@@ -1,0 +1,142 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-19T23:30:00Z",
+  "ceo_approval": "CEO-20260119-OCA-AUTO-GO-5PCT",
+  "canary_id": "oca_canary_5pct_20260120",
+  "status": "STAGED_AUTO_GO",
+  "channel": "production",
+  "traffic_pct": 5,
+  "max_exposures": 1000,
+  "window_hours": 24,
+  "randomization": "locked",
+  "rate_limit_per_user_day": 5,
+  "budget_cap_usd": 500,
+  "pre_launch_gates": {
+    "a6_provider_service": {
+      "owner": "Engineering Lead",
+      "deadline_hours": 12,
+      "criteria": {
+        "health_window_min": 60,
+        "uptime_min_pct": 99.9,
+        "p95_max_ms": 200,
+        "error_max_pct": 0.5,
+        "smoke_test": {
+          "endpoint": "/api/provider/register",
+          "expected_status": 200,
+          "expected_header": "X-OCA-Enabled: true"
+        }
+      },
+      "status": "PENDING"
+    },
+    "legal_signoff": {
+      "owner": "General Counsel",
+      "deadline_hours": 4,
+      "criteria": {
+        "copy_deck_approved": true,
+        "consent_language_approved": true,
+        "record_stored_in_repo": true,
+        "linked_in_a8": true
+      },
+      "status": "PENDING"
+    },
+    "code_freeze": {
+      "scope": "oca_touching_repos",
+      "duration_hours": 24,
+      "enforced": true
+    }
+  },
+  "launch_checklist": [
+    {
+      "step": 1,
+      "action": "flip_feature_flag",
+      "config": {
+        "one_click_apply.status": "CANARY_5",
+        "one_click_apply.traffic_pct": 5,
+        "one_click_apply.rate_limit": 5,
+        "one_click_apply.experiment_window": "24h_or_1000"
+      }
+    },
+    {
+      "step": 2,
+      "action": "enable_provider_ui",
+      "config": {
+        "dashboard_banner": true,
+        "report_issue_workflow": true,
+        "auto_disable_on_report": true
+      }
+    },
+    {
+      "step": 3,
+      "action": "send_canary_emails",
+      "config": {
+        "ab_split": "50/50",
+        "cohort": "eligible_canary",
+        "suppress": ["under_13", "no_consent"]
+      }
+    },
+    {
+      "step": 4,
+      "action": "emit_a8_event",
+      "event": "oca_canary_started",
+      "payload": {
+        "cohort_id": "{{cohort_id}}",
+        "variant_allocations": {"a": 50, "b": 50},
+        "slo_snapshot": true
+      }
+    },
+    {
+      "step": 5,
+      "action": "start_realtime_watch",
+      "monitors": ["slo", "integrity", "refunds", "funnel"]
+    }
+  ],
+  "realtime_monitors": {
+    "slo": {
+      "p95_max_ms": 1500,
+      "error_max_pct": 1.0,
+      "queue_depth_max": 30
+    },
+    "integrity": {
+      "ghostwriting_refusal_rate_pct": 100,
+      "provider_complaints_max": 0
+    },
+    "refunds": {
+      "max_24h_pct": 2.0,
+      "delta_vs_baseline_max_pp": 0.25
+    },
+    "funnel": {
+      "open_rate_min_pct": 35,
+      "ctr_min_pct": 8,
+      "modal_completion_min_pct": 70,
+      "submit_success_min_pct": 50
+    }
+  },
+  "promotion_criteria_10pct": {
+    "integrity": {
+      "provider_complaints": 0,
+      "confirmed_violations": 0
+    },
+    "performance": {
+      "p95_max_ms": 1500,
+      "error_max_pct": 1.0,
+      "queue_depth_max": 30
+    },
+    "finance": {
+      "refund_delta_max_pp": 0.25,
+      "refund_max_24h_pct": 2.0
+    },
+    "provider": {
+      "acceptance_rate_delta": "non_negative"
+    },
+    "growth": {
+      "completion_rate_lift_min_pct": 10,
+      "refund_stable": true,
+      "complaints_stable": true
+    }
+  },
+  "auto_go": {
+    "enabled": true,
+    "trigger": "all_pre_launch_gates_green",
+    "action": "execute_launch_checklist"
+  }
+}

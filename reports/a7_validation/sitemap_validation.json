@@ -1,0 +1,73 @@
+{
+  "validation_type": "A7_SITEMAP_VOLUME",
+  "protocol": "AGENT3_HANDSHAKE",
+  "namespace": "simulated_audit",
+  "version": "a02d6f5",
+  "timestamp": "2026-01-08T08:27:12Z",
+  "assigned_app": "A7",
+  "app_name": "scholar_pagemaker",
+  "base_url": "https://scholaraiadvisor.com",
+  
+  "validation_criteria": {
+    "sitemap_min_entries": 2500,
+    "sitemap_endpoint": "/sitemap.xml",
+    "sitemap_slo_warm_ms": 500
+  },
+  
+  "dual_evidence": {
+    "source_1": {
+      "type": "local_staging",
+      "endpoint": "http://localhost:5000/sitemap.xml",
+      "url_count": 2908,
+      "status": 200,
+      "verified_at": "2026-01-08T08:27:00Z"
+    },
+    "source_2": {
+      "type": "production",
+      "endpoint": "https://scholaraiadvisor.com/sitemap.xml",
+      "url_count": 2908,
+      "status": 200,
+      "verified_at": "2026-01-08T08:27:01Z"
+    },
+    "match": true,
+    "second_confirmation_protocol": "SATISFIED"
+  },
+  
+  "results": {
+    "sitemap_entry_count": 2908,
+    "threshold_exceeded": true,
+    "margin": 408,
+    "margin_percent": "16.3%"
+  },
+  
+  "route_tagging": {
+    "sitemap_excluded_from_150ms": true,
+    "sitemap_slo_ms": 500,
+    "core_routes_slo_ms": 150,
+    "implementation_file": "tests/perf/k6/a7_pages.js",
+    "tag_key": "route",
+    "sitemap_tag_value": "sitemap",
+    "core_tag_value": "core"
+  },
+  
+  "attribution_events": {
+    "telemetry_client_present": true,
+    "command_center_integration": true,
+    "primary_endpoint": "https://auto-com-center-jamarrlmayes.replit.app/events",
+    "trace_id_header": "X-Trace-ID",
+    "utm_cookie": "_sm_utm",
+    "utm_cookie_expiry_days": 30
+  },
+  
+  "success_criteria_met": {
+    "sitemap_gt_2500": true,
+    "attribution_events_to_a8": true,
+    "route_tagging_applied": true
+  },
+  
+  "verdict": "PASS",
+  "egrs_contribution": {
+    "seo_marketing_weight": 15,
+    "score": 15
+  }
+}

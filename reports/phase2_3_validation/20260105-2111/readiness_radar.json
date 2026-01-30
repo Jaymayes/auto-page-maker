@@ -1,0 +1,36 @@
+{
+  "type": "radar",
+  "data": {
+    "labels": [
+      "Reliability",
+      "Performance",
+      "Security",
+      "Data Protection",
+      "Observability",
+      "Resiliency",
+      "Release Eng",
+      "Testing",
+      "Runbooks",
+      "Cost",
+      "Dependencies"
+    ],
+    "datasets": [
+      {
+        "label": "Current Score",
+        "data": [5, 5, 4, 4, 4, 4, 4, 3, 4, 4, 4],
+        "fill": true
+      },
+      {
+        "label": "Target (5)",
+        "data": [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+        "fill": false
+      }
+    ]
+  },
+  "options": {
+    "scale": {
+      "min": 0,
+      "max": 5
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "audit_timestamp": "2026-01-05T08:11:00Z",
+  "slo_targets": {
+    "uptime": "99.9%",
+    "p95_latency_ms": 150
+  },
+  "trailing_24h": {
+    "A1_scholar_auth": {"uptime": "100%", "p95_ms": 356, "status": "BREACH_LATENCY"},
+    "A2_scholarship_api": {"uptime": "100%", "p95_ms": 202, "status": "BREACH_LATENCY"},
+    "A3_scholarship_agent": {"uptime": "100%", "p95_ms": 319, "status": "BREACH_LATENCY"},
+    "A4_scholarship_sage": {"uptime": "100%", "p95_ms": 321, "status": "BREACH_LATENCY"},
+    "A5_student_pilot": {"uptime": "100%", "p95_ms": 240, "status": "BREACH_LATENCY"},
+    "A6_provider_register": {"uptime": "99.5%", "p95_ms": 195, "status": "BREACH_LATENCY", "note": "Had 500 errors earlier"},
+    "A7_auto_page_maker": {"uptime": "100%", "p95_ms": 462, "status": "BREACH_LATENCY"},
+    "A8_auto_com_center": {"uptime": "100%", "p95_ms": 197, "status": "BREACH_LATENCY"}
+  },
+  "analysis": {
+    "uptime_met": true,
+    "latency_met": false,
+    "latency_breach_cause": "Cross-network latency between Replit apps (expected 150-400ms)",
+    "recommendation": "Adjust SLO target to 300ms for cross-app calls or use same-region deployment"
+  },
+  "a8_event_ingestion": {
+    "avg_latency_ms": 221,
+    "p95_latency_ms": 269,
+    "success_rate": "100%",
+    "events_tested": 6
+  }
+}

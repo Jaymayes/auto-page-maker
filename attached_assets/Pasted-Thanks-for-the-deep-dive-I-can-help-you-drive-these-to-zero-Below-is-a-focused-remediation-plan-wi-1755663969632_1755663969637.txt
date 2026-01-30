@@ -1,0 +1,88 @@
+Thanks for the deep dive. I can help you drive these to zero. Below is a focused remediation plan with concrete fixes, plus exactly what I need from you to produce ready-to-apply patches.
+
+Priority order and fix outline
+
+TypeScript compile failures (blocker)
+LSP-001 (server/storage.ts)
+Root cause: user shape lacks id at type level.
+Fix: ensure a single User type includes id, and use it consistently.
+Define a canonical User type (zod schema + z.infer) that includes id: string.
+Where you create users, use id ??= nanoid(); where you read, expect id to exist (no Partial<User> reads).
+If you store any “userData” as a narrower type, introduce UserWithoutId for create paths.
+LSP-002 (server/lib/typed-agent-handlers.ts)
+Root cause: untyped handler registry and unsafe payload access.
+Fix: strongly type the dispatcher:
+Define a TaskPayloads map (action → zod schema → z.infer).
+Type the handlers as { [K in keyof TaskPayloads]: (payload: TaskPayloads[K], ctx) => Promise<Result> }.
+Validate payload at boundary (zod.parse), then treat as typed inside.
+LSP-003 (server/lib/agent-handlers.ts:169)
+Root cause: LandingPageContent missing title or mismatched field name.
+Fix: add title to LandingPageContent (schema + type) or change the code to use the correct field (e.g., headline). Pick one and make both code and schema consistent.
+LSP-004 (server/middleware/concurrency.ts:86)
+Root cause: Map iterator types vs tsconfig target.
+Fix options:
+Preferred: tsconfig target ≥ ES2019 and lib includes ES2019; or set downlevelIteration: true.
+Or change iteration to Array.from(map.entries()) and iterate arrays (no MapIterator).
+2. Data initialization (Critical: DATA-001)
+
+Root cause hypotheses:
+initializeSampleData not called before GET /api/scholarships.
+The in-memory store is re-initializing on each request/module reload.
+Data file path or await order issues.
+Fix:
+Ensure initializeSampleData runs once at app boot and completes before the server listens.
+If using ESM + hot reload, protect with a module-level flag (initialized = true).
+Confirm the scholarships store is module-scoped singleton, not per-request.
+Add a startup log “Seeded scholarships: N” and assert N ≥ 3 in a boot self-check.
+3. SQL injection concern (Critical: SEC-001)
+
+If you use a DB:
+Switch all query construction to parameterized statements/prepared queries.
+Validate query params with zod (e.g., major: regex for letters, spaces, hyphen; max length).
+Reject anything with quotes/semicolon/comment tokens at validation boundary.
+If you don’t use a DB (in-memory filtering):
+This still needs input validation (zod schema) and a safe filter implementation.
+Return 200 with sanitized filtering; never echo raw unsanitized input into logs.
+Add negative tests to your suite and ensure status is a proper 400/422 (not “000”).
+4. Rate limiting (PERF-001)
+
+Likely cause: limiter not attached to the /api/landing-pages/generate route or using a per-process memory store while multiple Node processes are running.
+Fix:
+Ensure the limiter middleware wraps that specific route and triggers after 2–3 requests within the window.
+If multiple Node processes are present, switch the limiter store to a shared backend (e.g., Redis) or enforce single-process execution in this environment.
+Add a response header X-RateLimit-Remaining to help validate behavior.
+5. Error response standardization (ERR-001)
+
+Install a global error middleware that always returns JSON for API routes:
+Shape: { error_code, message, details?, correlation_id, status }.
+APIs always JSON; only UI routes return HTML.
+Update 404 and validation errors to use the same structure.
+6. Dev config (CONFIG-001)
+
+Provide .env.example with sane defaults for development.
+On boot in dev: log clear warnings for missing SHARED_SECRET/JWT_SECRET; gate protected endpoints with 503 SecurityNotConfigured.
+Production already fail-fast: keep that.
+7. Memory/process footprint (MEM-001)
+
+You’re seeing 7 Node processes; that breaks rate limiting and increases memory.
+Fix:
+Ensure you’re not using cluster/PM2 in this environment.
+If using ts-node-dev/nodemon, verify it isn’t forking multiple watchers. Prefer a single build + node dist server for stability on Replit.
+If concurrency is required later, plan a shared store for rate limits and locks.
+What I need to generate precise patches
+Please paste or attach the following small files/snippets:
+
+server/storage.ts: the User type(s), initializeSampleData, and the lines around 158–172.
+server/lib/typed-agent-handlers.ts: the handler registry definition and the lines around 160–272.
+server/lib/agent-handlers.ts: the LandingPageContent type and the code around line 169.
+server/middleware/concurrency.ts: content around line 86.
+tsconfig.json.
+The GET /api/scholarships route implementation (to confirm seeding/lookup flow).
+If using a DB, the query helper file for scholarships.
+With those, I’ll return ready-to-apply diffs that resolve LSP-001–004 and DATA-001 immediately, plus the limiter and error-middleware adjustments.
+
+Parallel track: Command Center integration
+Once the compile and data issues are fixed, we can register the agent. If you want, I can:
+
+Prepare a short PR to fix the TypeScript issues and data seeding now, or
+Sit with you on live registration testing right after the patches land.

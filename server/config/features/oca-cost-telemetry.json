@@ -1,0 +1,48 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-20T00:30:00Z",
+  "canary_id": "oca_canary_5pct_20260120",
+  "cost_telemetry": {
+    "enabled": true,
+    "budget_cap_usd": 500,
+    "fields": {
+      "cost_per_notified": {
+        "description": "Total cost / users who received OCA notification",
+        "unit": "usd",
+        "emit_to_a8": true
+      },
+      "cost_per_started": {
+        "description": "Total cost / users who opened OCA modal",
+        "unit": "usd",
+        "emit_to_a8": true
+      },
+      "cost_per_completed": {
+        "description": "Total cost / users who successfully submitted via OCA",
+        "unit": "usd",
+        "emit_to_a8": true
+      },
+      "compute_per_completion": {
+        "description": "Compute/infra cost per completed OCA submission",
+        "unit": "usd",
+        "emit_to_a8": true
+      }
+    },
+    "cost_components": {
+      "email_send": {"per_unit_usd": 0.001},
+      "modal_render": {"per_unit_usd": 0.0005},
+      "prefill_compute": {"per_unit_usd": 0.002},
+      "submission_process": {"per_unit_usd": 0.005},
+      "provider_packet_generate": {"per_unit_usd": 0.01}
+    },
+    "reporting": {
+      "include_in_t2h": true,
+      "include_in_t6h": true,
+      "include_in_t24h": true,
+      "roi_view": {
+        "arpu_lift": true,
+        "payback_period": true,
+        "unit_economics_vs_cap": true
+      }
+    }
+  }
+}

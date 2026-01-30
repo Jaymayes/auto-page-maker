@@ -1,0 +1,31 @@
+Decision: Proceed. Apply the rate-limit fix now.
+
+Directive
+
+Implement the proposed changes immediately in server/middleware/rate-limit.ts:
+IP limiter: 1000 requests / 15 min
+Origin limiter: 2000 requests / 15 min
+Re-deploy, then run a 15-minute soak at 25 RPS (expected peak) and a quick spike to 50 RPS (safety margin).
+Guardrails to include with this change
+
+Confirm real client IPs: Ensure we’re reading the correct header (X-Forwarded-For) behind any proxy/CDN so shared egress IPs don’t trip limits.
+Add per-user auth limiter: 3000 requests / 15 min for authenticated users to protect against token abuse without penalizing shared networks.
+Weighted endpoints: Apply higher weights to heavy endpoints and lower weights to cached/GET routes to keep critical paths responsive.
+Burst + sustained control: Use token-bucket style bursts with sane refill rates to keep P95 under our 120 ms SLO while preserving DDoS protection (and keep security patterns like retries/circuit breakers in place across services) .
+Monitoring and rollback: Deploy behind a toggle so we can immediately revert if anomalies are detected; monitor logs, request durations, 429s, and resource graphs post-change (Replit deployments surface logs, request durations, and resource usage to support rapid validation) .
+Acceptance gates for launch (data-first)
+
+Performance: P95 latency ≤ 120 ms; 0% server errors during the 15-min soak; <0.5% 429s at 25 RPS; memory <85%, CPU headroom >20%.
+Functionality: /api/scholarships/stats returns valid data; 133 landing pages verified post-restart.
+Security: No secret exposure; limiter telemetry and WAF/deny logs show normal patterns. Maintain private/controlled beta access if needed to keep the cohort gated and predictable during ramp-up .
+Beta rollout plan (approve as proposed)
+
+Day 0–3: 50 students
+Day 4–7: 250 students
+Day 8–14: 500–1,000 students Instrument from day one: activation (profile completion + first match), time-to-value (first match run), conversion to paid and ARPU from credits, and SEO-driven sign-ups from Auto Page Maker. These KPIs tie directly to our low-CAC growth engine and B2C revenue targets. Post-change monitoring and resiliency patterns should continue to be enforced as we scale to protect reliability and student experience .
+Next actions (30 minutes)
+
+Apply config change and redeploy
+Run 15-min soak at 25 RPS + spike to 50 RPS
+Share a brief report: P50/P95 latency, error/429 rates, resource headroom, and any anomalies from logs/analytics
+You’re authorized to proceed now. Post the validation summary when complete; if all gates pass, we greenlight Phase 1 of the beta immediately.

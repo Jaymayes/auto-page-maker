@@ -1,0 +1,31 @@
+Acknowledged. Thank you for the crisp prep and risk framing.
+
+Executive direction for Wednesday
+
+9:30am ET measurement: Run the same WebPageTest profile as the prior baseline (same device/location/throttling), 9–10 runs to compute a stable P75. Share the result link immediately in the release channel with a one-line verdict against thresholds.
+Go/No-go rule (pre-approved):
+If FCP P75 ≤ 2.4s AND LCP P75 ≤ 2.8s: Proceed with canary 2–4pm ET at 10% → 25% → 50%. Real-time RUM watch: if LCP P75 during canary drifts >+10% above threshold for 10 consecutive minutes, pause at current slice and investigate. Rollback trigger: >+15% for 10 consecutive minutes or error rate regression >0.3% absolute.
+If either metric exceeds thresholds: No deploy. Escalate to Thursday optimization sprint.
+Communications:
+10:15am ET: Post a single-sentence pass/fail with next steps in the stakeholder channel using the template in your status doc. If pass, notify Marketing to prep low-risk release notes; if fail, notify the optimization squad to block Thursday.
+Contingency: Thursday optimization sprint (pre-approved if gates fail)
+
+Objective: Reduce JS by 23–33 KB gz and recover 150–300ms on LCP P75 without touching forbidden files.
+Constraints: No changes to vite.config.ts (FORBIDDEN_CHANGES). Code-only strategies.
+Primary levers (code-only):
+Route- and component-level lazy-loading for non-critical views and below-the-fold modules (start with landing and scholarship-category if they carry heavy components).
+Radix/UI footprint: prune unused components and icons; replace default barrels with per-component imports; strip unused styles/tokens.
+Icons: you’ve done per-icon imports; as a follow-up, consider full-path ESM imports or a local icon proxy file that re-exports only used icons to ensure shaking without alias changes.
+Defer non-essential scripts to idle/interaction; ensure any analytics bundles are loaded with defer/async and moved out of the critical path.
+Success criteria for sprint: ≤75 KB gz main bundle and demonstrable WebPageTest improvement to meet the same FCP/LCP gates.
+Schedule: One-day timebox, QA same-day verification, re-run WPT, ship Friday if gates pass.
+Business rationale and alignment
+
+Our prime growth engine is low-CAC, organic acquisition. Performance and Core Web Vitals directly impact SEO and discovery; the playbook emphasizes concentrating user acquisition on organic channels like SEO to build MAUs efficiently, especially in early phases (e.g., “All efforts will be concentrated on low-cost, organic channels… content marketing and SEO,” Year 1 focus) . Protecting these vitals protects the Auto Page Maker engine, reduces CAC, and supports our 5-year $10M ARR plan.
+Operational risk posture: Maintain platform trust and performance as first-class product features; we move forward only when user experience meets our performance bar, consistent with the infrastructure and reliability mandates in the playbook’s Section 5 .
+What I need from you Wednesday
+
+By 9:45am ET: WebPageTest link + one-line pass/fail vs. thresholds.
+If pass: 12:00pm ET canary plan confirmation and monitoring dashboard link; confirm rollback owner.
+If fail: 11:00am ET Thursday sprint scope list (components to lazy-load, Radix/UI targets, icon strategy) with estimated KB savings per item.
+You’ve done the right work to give us a clean decision gate. Execute the measurement exactly, and we’ll proceed per the pre-approved path.

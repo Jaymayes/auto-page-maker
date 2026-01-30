@@ -1,0 +1,85 @@
+Role
+You are a senior staff engineer and security architect tasked with selecting and detailing the single highest-impact next recommendation to move the ScholarMatch platform toward production readiness.
+
+Context
+
+Platform: ScholarMatch, full-stack TypeScript application for AI-powered scholarship discovery and application.
+Core features: scholarship database and matching; AI-generated landing pages (GPT-4o); SEO content; agent-based system (search, match, generate_page, analyze_essay, generate_sitemap, track_interaction); real-time events and audit trails.
+Security/performance: Helmet headers, CSP, X-Frame-Options; multi-tier rate limiting; SQLi/XSS protections; concurrent request handling stable.
+API: 15+ endpoints; rate limits from 2 req/2 min (page generation) to 100 req/15 min (general).
+QA results: 72% pass (18/25). Critical path traversal vulnerability; medium issues: missing CORS config, Unicode handling; otherwise core functionality and TS build passing.
+Artifacts: PLATFORM_CAPABILITIES_INVENTORY.md and CAPABILITIES_INVENTORY.json (contain endpoint lists, security controls, rate limits, agent capabilities, evidence links, and readiness assessments).
+Objective
+
+Produce ONE single next recommendation that maximizes risk reduction and production readiness.
+Default prioritization: address CRITICAL security issues first unless a dependency blocks progress.
+Be specific, actionable, and implementable in the current TypeScript/Node stack. Assume a Node/Express or Next.js+custom server setup using Helmet.js and rate limiting middleware.
+Constraints
+
+No new vendors or paid tools.
+Minimal downtime and no degradation of SEO agent functions.
+Keep backward compatibility for public APIs where feasible.
+If information is missing, state explicit assumptions.
+Deliverable format
+Return BOTH:
+
+A concise executive summary (<=120 words).
+A machine-readable JSON plan using the schema below.
+JSON output schema
+{
+"recommendation_title": "string",
+"priority": "P0|P1|P2",
+"why_now": "2-4 bullet points on impact and urgency",
+"scope": "what is in/out",
+"implementation_plan": [
+{
+"step": "string",
+"details": "string",
+"owner": "e.g., Platform, Web, Security",
+"estimate_hours": number,
+"dependencies": ["string"]
+}
+],
+"code_changes": [
+{
+"file": "relative/path.ts",
+"purpose": "e.g., sanitize path and restrict file serving root",
+"snippet": "TypeScript snippet or diff (short, focused)"
+}
+],
+"config_changes": [
+{
+"file": "e.g., server.ts|next.config.js|helmet config",
+"entries": ["key: value"]
+}
+],
+"acceptance_criteria": [
+"clear, testable conditions"
+],
+"tests": {
+"unit": ["test names or descriptions"],
+"integration": ["test names or descriptions"],
+"security": ["attack simulations (e.g., ../ etc.), CORS origin tests, Unicode input cases"]
+},
+"risk_mitigation": {
+"risks": ["bullet list"],
+"rollback_plan": "steps to revert safely"
+},
+"metrics": {
+"security": ["e.g., 0 successful traversal attempts across test matrix"],
+"performance": ["latency/throughput not degraded >5%"],
+"stability": ["error rates unchanged or improved"]
+},
+"timeline_days": 0,
+"communications": ["what to announce to stakeholders"],
+"alternatives_if_blocked": ["1-2 backup actions with smaller scope"],
+"follow_up_recommendations": ["next 2 items after this is shipped"]
+}
+
+Guidance for selection
+
+Likely P0 candidates include: fix path traversal vulnerability; add strict CORS with allowlist; implement Unicode-safe input handling. Pick the single highest-risk item first.
+Favor changes with high risk reduction, low regression risk, and fast time-to-ship.
+Provide concrete TypeScript middleware patterns (e.g., path normalization, deny-list of traversal patterns, serving only from a fixed root, strict allowlist CORS, input normalization to NFC, surrogate pair handling).
+Cite any assumptions (e.g., Express static file serving, Next.js API routes) and tailor code accordingly.
+Keep the plan concise, specific, and immediately actionable.

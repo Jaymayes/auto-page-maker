@@ -1,0 +1,89 @@
+# Provider Register
+## B2B Scholarship Provider Marketplace
+
+### Role
+Acquire, verify, and activate scholarship providers to power the 3% platform revenue stream.
+
+### Objectives
+- Increase active scholarship providers
+- Reduce time-to-verified to <48 hours
+- Stimulate scholarship_posted velocity
+- Ensure 3% platform fee integrity and collection
+
+### KPIs to Track
+- **active_providers**: Number of providers with active scholarships
+- **provider_activation_rate**: Percentage of registered providers who post scholarships (basis points)
+- **scholarships_posted**: Total scholarships published by providers
+- **3_percent_fee_revenue**: Platform revenue from scholarship fees (cents)
+- **top_decile_concentration**: Revenue concentration in top 10% of providers (basis points)
+
+### Required Events to Emit
+
+**Provider Lifecycle:**
+- `provider_registered` with properties: { providerId: string, providerType: string, source: string }
+- `provider_verified` with properties: { providerId: string, verificationType: string, verifiedAt: Date }
+- `provider_active` with properties: { providerId: string, firstScholarshipId: string }
+- `provider_churned` with properties: { providerId: string, reason: string, daysSinceLastPost: number }
+
+**Scholarship Events:**
+- `scholarship_posted` with properties: { scholarshipId: string, providerId: string, amount: number, feeBasisPoints: number }
+
+### Guardrails
+
+**Verification and Fraud Prevention:**
+- Multi-step verification process (email, organization, tax ID where applicable)
+- Fraud detection for suspicious provider patterns
+- Manual review queue for high-value or flagged providers
+- Background checks on provider organization legitimacy
+
+**Fee Transparency:**
+- Clear disclosure of 3% platform fee during onboarding
+- Transparent invoicing and payment tracking
+- Grace periods for small/new providers
+- Dispute resolution process
+
+**Data Integrity:**
+- Validate scholarship data quality before publication
+- Ensure accurate fee calculation and collection
+- Track provider engagement and churn indicators
+- Monitor for duplicate or spam scholarships
+
+**Compliance:**
+- Verify provider has legal right to distribute funds
+- Ensure scholarship terms comply with regulations
+- No discriminatory practices in scholarship criteria
+- Maintain audit trail of all provider actions
+
+### Actions and Capabilities
+
+**Provider Onboarding:**
+- Streamlined registration flow (<5 minutes)
+- Email and organization verification
+- Provider profile creation and management
+- Fee agreement and terms acceptance
+
+**Scholarship Management:**
+- Scholarship posting interface
+- Draft/review/publish workflow
+- Analytics dashboard for provider performance
+- Bulk upload for large providers
+
+**Revenue Operations:**
+- Calculate and track 3% fees automatically
+- Generate invoices and payment tracking
+- Revenue reporting by provider
+- Top-decile concentration monitoring
+
+**Provider Success:**
+- Usage analytics and engagement metrics
+- Best practices guidance for high-performing scholarships
+- Alerts for inactive or churning providers
+- Success stories and case studies
+
+### Success Criteria
+- Maintain 50+ active providers with consistent posting
+- Achieve <48h average time-to-verified
+- Generate measurable 3% fee revenue
+- Provider satisfaction score >80%
+- <10% monthly churn rate
+- Top-decile concentration <70% for revenue diversification

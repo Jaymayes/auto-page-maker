@@ -1,0 +1,62 @@
+{
+  "order_id": "SAA-EO-2026-01-20-01",
+  "run_id": "ZT3G-057",
+  "effective_at": "2026-01-20T07:17:00Z",
+  "services": {
+    "A1": {
+      "name": "ScholarAuth",
+      "PUBLIC_BASE_URL": "https://scholarauth-jamarrlmayes.replit.app",
+      "HEALTH_URL": "https://scholarauth-jamarrlmayes.replit.app/health",
+      "READY_URL": "https://scholarauth-jamarrlmayes.replit.app/ready"
+    },
+    "A2": {
+      "name": "ScholarshipAPI",
+      "PUBLIC_BASE_URL": "https://scholarshipapi-jamarrlmayes.replit.app",
+      "HEALTH_URL": "https://scholarshipapi-jamarrlmayes.replit.app/health",
+      "READY_URL": "https://scholarshipapi-jamarrlmayes.replit.app/ready"
+    },
+    "A3": {
+      "name": "StudentPilot",
+      "PUBLIC_BASE_URL": "https://studentpilot-jamarrlmayes.replit.app",
+      "HEALTH_URL": "https://studentpilot-jamarrlmayes.replit.app/health",
+      "READY_URL": "https://studentpilot-jamarrlmayes.replit.app/ready"
+    },
+    "A4": {
+      "name": "ProviderRegister",
+      "PUBLIC_BASE_URL": "https://providerregister-jamarrlmayes.replit.app",
+      "HEALTH_URL": "https://providerregister-jamarrlmayes.replit.app/health",
+      "READY_URL": "https://providerregister-jamarrlmayes.replit.app/ready"
+    },
+    "A5": {
+      "name": "ScholarshipSage",
+      "PUBLIC_BASE_URL": "https://scholarshipsage-jamarrlmayes.replit.app",
+      "HEALTH_URL": "https://scholarshipsage-jamarrlmayes.replit.app/health",
+      "READY_URL": "https://scholarshipsage-jamarrlmayes.replit.app/ready"
+    },
+    "A6": {
+      "name": "ScholarshipAgent",
+      "PUBLIC_BASE_URL": "https://scholarshipagent-jamarrlmayes.replit.app",
+      "HEALTH_URL": "https://scholarshipagent-jamarrlmayes.replit.app/health",
+      "READY_URL": "https://scholarshipagent-jamarrlmayes.replit.app/ready"
+    },
+    "A7": {
+      "name": "AutoPageMaker",
+      "PUBLIC_BASE_URL": "https://auto-page-maker-jamarrlmayes.replit.app",
+      "HEALTH_URL": "https://auto-page-maker-jamarrlmayes.replit.app/health",
+      "READY_URL": "https://auto-page-maker-jamarrlmayes.replit.app/ready"
+    },
+    "A8": {
+      "name": "CommandCenter",
+      "PUBLIC_BASE_URL": "https://autocomcenter-jamarrlmayes.replit.app",
+      "HEALTH_URL": "https://autocomcenter-jamarrlmayes.replit.app/health",
+      "READY_URL": "https://autocomcenter-jamarrlmayes.replit.app/ready"
+    }
+  },
+  "rules": {
+    "localhost_forbidden": true,
+    "https_enforced": true,
+    "tls_min_version": "TLSv1.2",
+    "cache_control": "no-cache",
+    "epoch_query_param": true
+  }
+}

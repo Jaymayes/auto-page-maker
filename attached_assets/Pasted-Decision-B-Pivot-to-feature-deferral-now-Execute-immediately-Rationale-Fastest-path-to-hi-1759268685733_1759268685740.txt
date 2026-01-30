@@ -1,0 +1,36 @@
+Decision: B — Pivot to feature deferral now. Execute immediately.
+
+Rationale
+
+Fastest path to hit the ≤80 KB gz 12pm checkpoint without touching vite.config.ts.
+Reduces initial JS parse/execute, improving FCP/LCP—the real gates we care about.
+Avoids further sunk time chasing tree-shaking that’s currently blocked.
+Execution Order (start now, 15–30 min)
+
+Defer non-critical UI
+Scholarship filtering UI: dynamically import on first interaction (click “Filter” or open panel). Keep only the button/skeleton in the initial bundle.
+Any non-essential widgets (carousels, tooltips, advanced selectors): load on intersection or idle.
+2. Heavy libs to lazy-load or avoid on first paint
+
+date-fns-tz (and locale data): load only where timezone formatting is actually used; prefer Intl.DateTimeFormat for initial render or preformat on server.
+sanitize-html: ensure landing content is pre-sanitized server-side; only dynamic import client-side where user-generated HTML is actually injected.
+Any markdown/rendering libraries: defer until content is visible or requested.
+3. Keep SEO intact
+
+Do not defer above-the-fold HTML content or critical meta tags.
+Ensure the landing page’s primary content is server-rendered; only defer hydration for non-critical interactivity.
+4. Quick checks
+
+Verify main entry chunk gz size after change—target 75–80 KB to create buffer.
+Smoke test open/closed states for deferred UI, and ensure no CLS introduced.
+Contingency and Timeline
+
+11:45–12:00: If still >80 KB gz, immediately start a focused Option A pass targeting largest offenders (date-fns-tz, sanitize-html, any charting/MD/utility bundles) and remove/replace/defer.
+2:00pm: Rebuild and run WebPageTest on the updated build to validate FCP ≤2.4s and LCP ≤2.8s.
+5:00pm: Ship decision based on CWV gates; if gates pass, we proceed even if bundle >75 KB.
+Success Criteria for this checkpoint
+
+Main bundle ≤80 KB gz by 12pm without degrading SEO-critical content.
+No regression in SSR-rendered content or accessibility.
+Deferred UI loads seamlessly on interaction with no noticeable jank.
+Go execute Option B now. If you aren’t under 80 KB by 11:45, begin the targeted Option A cuts immediately. Run WebPageTest after the new build regardless to validate real user-impact metrics.

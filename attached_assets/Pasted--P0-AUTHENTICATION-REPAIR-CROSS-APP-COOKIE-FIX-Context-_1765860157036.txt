@@ -1,0 +1,53 @@
+# 🚨 P0 AUTHENTICATION REPAIR: CROSS-APP COOKIE FIX 🚨
+
+## Context
+A critical vulnerability ("Login Session Expired") has been traced to `SameSite=Lax` cookies blocking cross-domain authentication redirects. **A1 (scholar_auth)** and **A6 (provider_register)** are fixed. You must now patch your app to align with the ecosystem standard.
+
+## 🎯 OBJECTIVE
+1.  **Enforce Cookie Security:** Set session cookies to `SameSite=None; Secure; HttpOnly`.
+2.  **Verify CSRF:** Ensure protection is active given the looser SameSite policy.
+3.  **Confirm Fix:** Validate via `curl` and log evidence.
+
+---
+
+## 🔍 STEP 1: IDENTIFY & EXECUTE (Auto-Detect)
+*Look at your `APP_BASE_URL` or environment. Execute ONLY your section.*
+
+### 🟦 IF YOU ARE A3 (scholarship_agent)
+**File:** `server/replitAuth.ts` (or `index.ts`)
+**Action:**
+1.  Find the session configuration (look for `express-session` or `cookie:`).
+2.  Change `sameSite: 'lax'` (or default) to `sameSite: 'none'`.
+3.  Ensure `secure: true` (or `process.env.NODE_ENV === 'production'`).
+**Verify:** `curl -I https://scholarship-agent-jamarrlmayes.replit.app/api/login` → Expect `Set-Cookie: ... SameSite=None`
+
+### 🟦 IF YOU ARE A4 (scholarship_sage)
+**File:** `server/auth.ts` (or similar)
+**Action:**
+1.  Update cookie config to `sameSite: 'none'`.
+2.  **CRITICAL:** Check `client/src/lib/queryClient.ts`. Ensure `on401` behavior is `returnNull` or `redirect`, NOT `throw` (causes blank page crash).
+**Verify:** `curl -I https://scholarship-sage-jamarrlmayes.replit.app/api/login` → Expect `SameSite=None`.
+
+### 🟦 IF YOU ARE A5 (student_pilot)
+**Action:** Audit `server/routes.ts` or auth middleware. Set `sameSite: 'none'`.
+**Verify:** `curl -I https://student-pilot-jamarrlmayes.replit.app/api/login`.
+
+### 🟦 IF YOU ARE A7 (auto_page_maker)
+**Action:** Update session cookie settings.
+**Verify:** `curl -I https://auto-page-maker-jamarrlmayes.replit.app/api/login`.
+
+### 🟦 IF YOU ARE A8 (auto_com_center)
+**Action:** Update session cookie settings. Ensure the Gate Modal does not block dashboard access for authenticated users.
+**Verify:** `curl -I https://auto-com-center-jamarrlmayes.replit.app/api/login`.
+
+---
+
+## 📝 STEP 2: MANDATORY REPORTING
+*Output this exact format after applying the fix:*
+
+**APP:** [Your App Name]
+**STATUS:** [🟢 FIXED | 🔴 FAILED]
+**EVIDENCE:**
+* [ ] Cookie Header: `Set-Cookie: ...; SameSite=None; Secure; HttpOnly` (Paste actual output)
+* [ ] CSRF Check: (Confirmed active/middleware present)
+* [ ] Health Check: (HTTP 200)

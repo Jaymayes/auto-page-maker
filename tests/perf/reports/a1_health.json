@@ -1,0 +1,9 @@
+{
+  "run_id": "CEOSPRINT-20260123-EXEC-ZT3G-FIX-AUTH-009",
+  "timestamp": "2026-01-23T12:31:09Z",
+  "app": "scholar-auth (A1)",
+  "health": {"status": 200, "body": {"status": "alive", "service": "scholar_auth"}},
+  "readyz": {"status": 200, "db": "healthy", "pool": "2 connections", "circuit_breaker": "CLOSED"},
+  "discovery": {"s256_supported": true, "endpoints_present": true},
+  "client_registry": {"student-pilot": "PARTIALLY_OK", "provider-register": "INVALID_REDIRECT_URI"}
+}

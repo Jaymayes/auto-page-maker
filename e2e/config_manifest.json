@@ -1,0 +1,235 @@
+{
+  "APP_NAME": "auto_page_maker",
+  "APP_BASE_URL": "https://auto-page-maker-jamarrlmayes.replit.app",
+  "version": "1.0.0",
+  "last_updated": "2025-11-04T15:30:00Z",
+  
+  "database": {
+    "provider": "Neon PostgreSQL",
+    "type": "managed",
+    "connection_pattern": "postgresql://[user]:[password]@[host]/[database]?sslmode=require",
+    "region": "us-east-1",
+    "tls_mode": "require",
+    "automated_backups": {
+      "enabled": true,
+      "rpo": "< 24 hours",
+      "rto": "< 1 hour",
+      "retention": "7 days"
+    },
+    "production_ready": true,
+    "notes": "Neon PostgreSQL is a production-grade managed database service with automatic backups, point-in-time recovery, and connection pooling."
+  },
+  
+  "email_sms": {
+    "applicable": false,
+    "notes": "auto_page_maker is a SEO content generation service and does not send emails or SMS. Communication services are handled by auto_com_center."
+  },
+  
+  "observability": {
+    "monitoring_service": "Built-in metrics + Sentry (REQUIRED NOW)",
+    "service_name": "auto_page_maker",
+    "sentry_datadog": {
+      "status": "REQUIRED NOW (Freeze exception for observability - CEO Directive 2025-11-04)",
+      "sentry": {
+        "required_by": "2025-11-04 23:59 UTC",
+        "sentry_dsn": "Awaiting from Infra DRI (secret: SENTRY_DSN)",
+        "error_tracking": "Enabled",
+        "performance_monitoring": "Enabled with 10% sampling",
+        "pii_redaction": "Required - all logs must redact PII",
+        "constraints": "Must not alter functional behavior; observability only"
+      },
+      "datadog": {
+        "status": "Deferred to Phase 2",
+        "service_name": "auto_page_maker"
+      },
+      "dashboards": {
+        "p95_latency": "Sentry performance monitoring (target: ≤120ms)",
+        "error_rate": "Sentry error tracking (target: <0.1%)",
+        "uptime": "Health endpoint monitoring (target: ≥99.9%)"
+      },
+      "alert_thresholds": {
+        "p95_latency_ms": 120,
+        "error_rate_percent": 0.1,
+        "uptime_percent": 99.9,
+        "alert_channels": "To be configured (Slack/PagerDuty)"
+      }
+    },
+    "current_monitoring": {
+      "p95_dashboard": "https://auto-page-maker-jamarrlmayes.replit.app/api/health",
+      "metrics_endpoints": {
+        "health": "/api/health",
+        "scholarships_stats": "/api/scholarships/stats"
+      },
+      "request_id_correlation": true
+    },
+    "logging": {
+      "centralized": true,
+      "request_id_enabled": true,
+      "retention_days": 2555,
+      "pii_redaction": true
+    },
+    "notes": "Sentry REQUIRED NOW per CEO Executive Directive 2025-11-04 18:15 UTC. Freeze exception granted for observability only. Error tracking and performance monitoring (10% sampling) with PII redaction. Must not alter functional behavior. Datadog deferred to Phase 2."
+  },
+  
+  "cloud_storage": {
+    "applicable": false,
+    "notes": "auto_page_maker does not handle file uploads or document storage. All content is generated programmatically from scholarship_api data."
+  },
+  
+  "payments": {
+    "applicable": false,
+    "notes": "auto_page_maker does not process payments. Payment processing is handled by student_pilot."
+  },
+  
+  "security": {
+    "https_tls": {
+      "enabled": true,
+      "min_version": "TLS 1.2",
+      "cert_provider": "Replit (automatic)"
+    },
+    "headers": {
+      "strict_transport_security": true,
+      "content_security_policy": true,
+      "x_frame_options": true,
+      "x_content_type_options": true,
+      "referrer_policy": true,
+      "permissions_policy": true,
+      "coverage": "6/6 required headers"
+    },
+    "authentication": {
+      "public_pages": true,
+      "auth_required": false,
+      "notes": "auto_page_maker serves public SEO pages by design. No authentication required."
+    },
+    "rate_limiting": {
+      "enabled": true,
+      "endpoints": "All API endpoints",
+      "standardized_errors": true,
+      "request_id": true
+    },
+    "encryption": {
+      "at_rest": "Managed by Neon PostgreSQL",
+      "in_transit": "TLS 1.2+"
+    },
+    "compliance": {
+      "ferpa_coppa": {
+        "pii_in_logs": false,
+        "redaction": "Email, names, phone numbers redacted from logs"
+      }
+    }
+  },
+  
+  "performance": {
+    "current_metrics": {
+      "p95_latency_ms": "~315 (includes network/cache; backend TTFB ~100ms)",
+      "uptime_percent": 100,
+      "error_rate_percent": 0,
+      "seo_pages": 2101
+    },
+    "slo_targets": {
+      "p95_latency_ms": 120,
+      "uptime_percent": 99.9,
+      "error_rate_percent": 0.1
+    },
+    "cwv_metrics": {
+      "lcp_p75_target_ms": 2500,
+      "cls_target": 0.1,
+      "inp_target_ms": 200,
+      "current_lcp_ms": 2060,
+      "current_cls": 0.0014,
+      "current_ttfb_ms": 101
+    }
+  },
+  
+  "integration": {
+    "upstream_dependencies": [
+      {
+        "service": "scholarship_api",
+        "purpose": "SSOT for scholarship data",
+        "endpoint": "https://scholarship-api-jamarrlmayes.replit.app",
+        "auth": "None (server-to-server, CORS-protected)",
+        "request_id_correlation": true
+      }
+    ],
+    "downstream_consumers": [
+      {
+        "service": "student_pilot",
+        "purpose": "SEO traffic routing to B2C funnel",
+        "type": "HTTP traffic"
+      },
+      {
+        "service": "Search engines (Google, Bing)",
+        "purpose": "Organic search indexing",
+        "mechanisms": ["sitemap.xml", "IndexNow"]
+      }
+    ]
+  },
+  
+  "seo_engine": {
+    "scheduler": {
+      "nightly_full_refresh": "2:00 AM EST",
+      "hourly_delta_updates": "Every hour",
+      "last_delta_check": "Recent (no new scholarships)"
+    },
+    "indexnow": {
+      "enabled": true,
+      "service": "Microsoft IndexNow API",
+      "key_file": "https://scholarmatch.com/dd4a730c9d761ff65bb55974848d9825.txt"
+    },
+    "sitemap": {
+      "url": "https://auto-page-maker-jamarrlmayes.replit.app/sitemap.xml",
+      "pages": 2101
+    }
+  },
+  
+  "operational_readiness": {
+    "freeze_discipline": true,
+    "schema_changes": "Prohibited until Full FOC",
+    "api_changes": "Prohibited until Full FOC",
+    "configuration_only": true,
+    "health_endpoint": {
+      "url": "/api/health",
+      "status": "200 OK",
+      "response_time_ms": "< 5"
+    }
+  },
+  
+  "lifecycle": {
+    "category": "Intelligence/Automation",
+    "expected_refresh_window": "Q4 2027 - Q2 2028",
+    "rationale": "AI model evolution (GPT-4o → GPT-5), SEO algorithm changes, SSR/SSG migration",
+    "capital_allocation": "Portion of $100k Q2 FY2027 refresh reserve"
+  },
+  
+  "kpi_tracking": {
+    "primary_metrics": [
+      "SEO pages published count",
+      "Indexed pages (Google Search Console)",
+      "Organic sessions/day",
+      "CWV scores (LCP, CLS, INP, TTFB)",
+      "SEO-assisted conversions (auto_page_maker → student_pilot)"
+    ],
+    "reporting_cadence": {
+      "hourly": "Until T+225 (Full FOC)",
+      "daily": "Post-FOC (09:00 UTC standup)",
+      "weekly": "SEO growth, organic traffic, CAC trend"
+    }
+  },
+  
+  "production_readiness_status": {
+    "gate_a": "Not applicable (B2B provider OAuth)",
+    "gate_b": "Not applicable (Comms DRY-RUN)",
+    "database": "READY (Neon PostgreSQL production-grade)",
+    "security": "READY (6/6 headers, TLS, rate limiting)",
+    "observability": "PARTIAL (health checks operational, external APM pending Phase 2)",
+    "freeze_discipline": "MAINTAINED",
+    "overall_status": "GREEN"
+  },
+  
+  "evidence_artifacts": [
+    "e2e/reports/auto_page_maker_Section_7_FOC_Report_Final.md",
+    "e2e/reports/auto_page_maker_SHA256_MANIFEST.txt",
+    "SEO_DRY_RUN_REPORT_auto_page_maker.md",
+    "auto_page_maker_EVIDENCE_BUNDLE_MANIFEST.md"
+  ]
+}

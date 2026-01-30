@@ -1,0 +1,80 @@
+{
+  "version": "2.0.0",
+  "created_at": "2026-01-20T00:30:00Z",
+  "updated_at": "2026-01-20T01:30:00Z",
+  "ceo_approval": "CEO-20260119-OCA-PROMOTE-10PCT-PREAUTH",
+  "strategy": "B2B-led growth; lift First Document Uploads >=10% without harming trust or unit economics",
+  "guardrails": {
+    "messaging": "No AI essays. Students write; we only assist.",
+    "budget_cap_usd": 500,
+    "ltv_cac_min": 4.0
+  },
+  "scale_gates": {
+    "5pct_to_10pct": {
+      "timing": "T+24h",
+      "token": "CEO-20260119-OCA-PROMOTE-10PCT-PREAUTH",
+      "requires_ceo_approval": false,
+      "criteria": {
+        "integrity": {
+          "complaints": 0,
+          "violations": 0
+        },
+        "performance": {
+          "p95_ms": {"max": 1500},
+          "error_pct": {"max": 1.0},
+          "queue_depth": {"max": 30}
+        },
+        "finance": {
+          "refund_pct": {"max": 2.0},
+          "refund_delta_pp": {"max": 0.25},
+          "ltv_cac_ratio": {"min": 4.0, "check_trajectory": true}
+        },
+        "growth": {
+          "completion_lift_vs_control_pct": {"min": 10}
+        },
+        "provider": {
+          "acceptance_rate_delta": {"min": 0}
+        },
+        "roi": {
+          "arpu_trajectory": "positive_or_neutral",
+          "unit_economics": "sustainable"
+        }
+      },
+      "success_criteria_summary": "All Green including ROI/LTV:CAC trajectory",
+      "on_pass": {
+        "emit": "oca_canary_promoted",
+        "new_traffic_pct": 10,
+        "use_token": "CEO-20260119-OCA-PROMOTE-10PCT-PREAUTH"
+      },
+      "on_fail": {
+        "action": "hold",
+        "notify": "ceo",
+        "include": ["failed_criteria", "remediation_options"]
+      }
+    },
+    "10pct_to_25pct": {
+      "timing": "T+36h (promotion brief)",
+      "requires_ceo_approval": true,
+      "criteria": {
+        "performance": {
+          "p95_ms_last_6h": {"max": 1200},
+          "error_pct": {"max": 0.7}
+        },
+        "growth": {
+          "completion_lift_vs_control_pct": {"min": 12}
+        },
+        "provider": {
+          "acceptance_rate_delta": {"min": 0}
+        },
+        "finance": {
+          "cost_per_completion": {"within_target_margin": true},
+          "ltv_cac_ratio": {"min": 4.0}
+        }
+      },
+      "on_pass": {
+        "action": "prepare_promotion_brief",
+        "submit_to": "ceo"
+      }
+    }
+  }
+}

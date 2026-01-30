@@ -1,0 +1,44 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "cohort_id": "B2C-PILOT-001",
+  "effective_at": "2026-01-19T08:45:00Z",
+  "pilot_restored_at": "2026-01-19T17:00:00Z",
+  "flags": {
+    "B2C_CAPTURE": "pilot_only",
+    "MICROCHARGE_REFUND": "enabled",
+    "SAFETY_LOCK": "active",
+    "TRAFFIC_CAP_B2C_PILOT": 0.02
+  },
+  "budget": {
+    "max_spend_usd": 50,
+    "max_users": 100,
+    "first_6h_stripe_attempts": 4,
+    "auth_error_threshold": 0.03
+  },
+  "telemetry_required": [
+    "run_id",
+    "cohort_id",
+    "event_type",
+    "status",
+    "trace_id",
+    "checksum",
+    "latency_ms",
+    "refund_settled_at"
+  ],
+  "refund_slo": {
+    "settlement_max_minutes": 10,
+    "auto_refund": true
+  },
+  "auto_rollback": {
+    "enabled": true,
+    "thresholds": {
+      "auth_5xx_duration_min": 5,
+      "pool_utilization_80_duration_min": 2,
+      "core_p95_120ms_duration_min": 15,
+      "aux_p95_200ms_duration_min": 15,
+      "a3_error_burst_per_60s": 3
+    },
+    "action_on_breach": "pause_b2c_capture_keep_refunds"
+  }
+}

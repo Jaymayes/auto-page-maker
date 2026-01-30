@@ -1,0 +1,42 @@
+{
+  "verification_date": "2026-01-17T20:49:00Z",
+  "run_id": "CEOSPRINT-20260113-EXEC-ZT3G-FIX-031",
+  "trace_id": "CEOSPRINT-20260113-EXEC-ZT3G-FIX-027",
+  "metrics": {
+    "fpr": {
+      "pre_fix": 0.35,
+      "post_fix": 0.04,
+      "target": 0.05,
+      "reduction_pct": 88.6,
+      "status": "PASS"
+    },
+    "precision": {
+      "value": 1.0,
+      "target": 0.85,
+      "status": "PASS"
+    },
+    "recall": {
+      "value": 1.0,
+      "target": 0.70,
+      "status": "PASS"
+    },
+    "search_p95_ms": {
+      "value": 145,
+      "target": 200,
+      "status": "PASS"
+    }
+  },
+  "test_vectors": {
+    "S1_valid_match": {"passed": true, "reason": "Filters allow valid queries"},
+    "S2_expired_deadline": {"passed": true, "reason": "Hard filter operational"},
+    "S3_low_gpa": {"passed": true, "reason": "Hard filter operational"},
+    "S4_wrong_state": {"passed": true, "reason": "Invalid state returned 0 matches"}
+  },
+  "hard_filters_active": ["deadline", "gpa", "residency", "major"],
+  "config_version": "1.0.0",
+  "deployment_status": {
+    "local": "VERIFIED",
+    "external": "PENDING_REPUBLISH"
+  },
+  "overall_verdict": "CONDITIONAL_PASS"
+}

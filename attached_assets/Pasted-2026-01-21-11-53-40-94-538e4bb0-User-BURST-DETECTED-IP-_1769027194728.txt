@@ -1,0 +1,148 @@
+2026-01-21 11:53:40.94
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 101 requests in 1 minute
+2026-01-21 11:53:41.10
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 102 requests in 1 minute
+2026-01-21 11:53:41.26
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 103 requests in 1 minute
+2026-01-21 11:53:41.43
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 104 requests in 1 minute
+2026-01-21 11:53:41.58
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 105 requests in 1 minute
+2026-01-21 11:53:41.74
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 106 requests in 1 minute
+2026-01-21 11:53:41.89
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 107 requests in 1 minute
+2026-01-21 11:53:42.05
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 108 requests in 1 minute
+2026-01-21 11:53:42.21
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 109 requests in 1 minute
+2026-01-21 11:53:42.36
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 110 requests in 1 minute
+2026-01-21 11:53:42.53
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 111 requests in 1 minute
+2026-01-21 11:53:42.68
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 112 requests in 1 minute
+2026-01-21 11:53:42.84
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 113 requests in 1 minute
+2026-01-21 11:53:42.99
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 114 requests in 1 minute
+2026-01-21 11:53:43.14
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 115 requests in 1 minute
+2026-01-21 11:53:43.29
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 116 requests in 1 minute
+2026-01-21 11:53:43.46
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 117 requests in 1 minute
+2026-01-21 11:53:43.61
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 118 requests in 1 minute
+2026-01-21 11:53:43.76
+538e4bb0
+User
+⚠️ BURST DETECTED: IP 20.89.17.172 sent 119 requests in 1 minute
+2026-01-21 11:57:57.91
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1361 req). Suppressed for 300s.
+2026-01-21 12:02:58.50
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1372 req). Suppressed for 300s.
+2026-01-21 12:08:27.62
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1384 req). Suppressed for 300s.
+2026-01-21 12:13:29.10
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1395 req). Suppressed for 300s.
+2026-01-21 12:18:30.19
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1406 req). Suppressed for 300s.
+2026-01-21 12:18:30.19
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1406 req). Suppressed for 300s.
+2026-01-21 12:23:31.10
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1417 req). Suppressed for 300s.
+2026-01-21 12:28:31.92
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1532 req). Suppressed for 300s.
+2026-01-21 12:34:00.63
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1544 req). Suppressed for 300s.
+2026-01-21 12:39:02.82
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1555 req). Suppressed for 300s.
+2026-01-21 12:44:31.05
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1567 req). Suppressed for 300s.
+2026-01-21 12:50:00.44
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1579 req). Suppressed for 300s.
+2026-01-21 12:55:01.51
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1590 req). Suppressed for 300s.
+2026-01-21 13:00:02.38
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1601 req). Suppressed for 300s.
+2026-01-21 13:05:04.22
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1612 req). Suppressed for 300s.
+2026-01-21 13:10:14.54
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1624 req). Suppressed for 300s.
+2026-01-21 13:15:33.34
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1637 req). Suppressed for 300s.
+2026-01-21 13:21:04.20
+538e4bb0
+User
+🚨 AUTO-SUPPRESS: IP 34.96.44.138 exceeded warning limit (1650 req). Suppressed for 300s.

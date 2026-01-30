@@ -1,0 +1,45 @@
+GO for 9:30am ET. Proceed per locked checklist.
+
+Executive directives and guardrails
+
+Pass criteria for canary (applies vs control, normalized for device/geo):
+
+LCP P75: ≤+5% delta (improve or hold)
+INP P75: ≤200ms and ≤+5% delta
+TTFB P75: ≤+5% delta
+CLS P75: ≤+0.02 delta
+JS errors: ≤1 per 1,000 pageviews and non-increasing
+Conversion to application start: no worse than -1pp absolute or -3% relative
+Bundle size: ≤75 KB gz (as specified)
+Infra cost: flat or down during canary
+CWV passing rate (Auto Page Maker): hold or improve
+Pause/rollback authority:
+
+Follow your triggers as documented:
+Pause: >+10% degradation sustained 5 minutes with ≥1,500 pageviews, or as soon as trend is clearly breaking target
+Rollback: >+15% degradation OR JS error rate >0.3% sustained 5 minutes with ≥1,500 pageviews
+Clarification: apply “% degradation” pause/rollback triggers to LCP P75, INP P75, and TTFB P75; for CLS use the absolute delta threshold above.
+Rollback Owner retains immediate authority without sign-off. If CTO/VP unreachable at any point, safety authority stands.
+Compliance and data hygiene:
+
+Confirm RUM sampling and error logging exclude PII, respect consent, and remain COPPA/FERPA compliant; no session replay on under-13 traffic.
+Keep WPT config locked to baseline; post the exact test URL(s) in #perf-warroom.
+Canary ramp stays as written:
+
+10% for 30m → 25% for 60m → 50% hold overnight
+100% only after Thursday CTO/VP RUM review
+Reporting cadence and content
+
+9:45am ET one-line verdict (use this template):
+Verdict: PASS/PAUSE/ROLLBACK | Build v1.0.0 db61ca1… | Bundle 75 KB gz target | LCP P75 Δ: X% | INP P75: Y ms (Δ Z%) | TTFB P75 Δ: A% | CLS Δ: B | JS errors/1K: C | Conversion Δ: D% | WPT run: <link> | Dashboard: <link>
+12:00pm ET: dashboard link, named rollback owner confirmation, canary % confirmation (if PASS)
+4:00pm ET: EOD canary vs control deltas and cost snapshot (if PASS)
+Open items to confirm at 9:30am kickoff
+
+Name the single rollback owner in-channel.
+Post the WPT test URL(s) and dashboard link pinned in #perf-warroom.
+Confirm CDN/cache pre-warm complete and config parity verified.
+Decision
+
+Approved to execute at 9:30am ET under the above criteria. If any metric breaches the clarified thresholds, act immediately per authority structure and post status in #perf-warroom.
+Thank you for getting this buttoned up—this is aligned with our low-CAC, SEO-first growth strategy and protects CWV and conversion while driving bundle size down.

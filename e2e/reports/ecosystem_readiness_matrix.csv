@@ -1,0 +1,9 @@
+app,status,p95_ttfb_ms,security_headers,key_blocker,eta_hours_to_resolve,notes
+auto_com_center,conditional,117,pass,"Memory 97%; KPI history 261ms",4,"Root returns 200 OK (v2.2 issue NOT present); funnelEvents handled gracefully; all critical endpoints working; 4/5 score"
+scholar_auth,fail,78,unknown,"WRONG APP DEPLOYED - Serves ScholarMatch UI instead of OIDC/SSO service",8-40,"ECOSYSTEM BLOCKER: All gates blocked; score 1/5; /.well-known/openid-configuration returns HTML not JSON; no OAuth endpoints exist; may need to build from scratch"
+student_pilot,fail,unknown,unknown,"/pricing page missing (client-side 404)",2-4,"T+48h REVENUE BLOCKER: Score 2/5; missing critical revenue page; other pages OK but revenue funnel broken"
+provider_register,fail,unknown,unknown,"/register page missing (client-side 404)",2-4,"T+48h REVENUE BLOCKER: Score 2/5; missing critical onboarding page; systemic routing issue"
+scholarship_api,conditional,4/5,345,partial,"Performance 345ms (>120ms); missing Permissions-Policy header (5/6)",4-8,"MONOLITH: Same app as auto_com_center; API works at /api/scholarships (not /api/v1/scholarships); 404 handling OK; score 4/5"
+scholarship_agent,fail,2/5,53,partial,"/canary returns HTML not JSON (must be JSON)",4-8,"T+24h INFRASTRUCTURE BLOCKER: Scoring capped at 2/5; /canary and /health return HTML instead of JSON; monolith confirmed"
+auto_page_maker,fail,4/5,269,partial,"P95 269ms (>120ms); missing Permissions-Policy",4-8,"T+72h SEO BLOCKER: Needs 5/5 for SEO gate; performance and headers need optimization; sitemap OK (2101 pages); monolith confirmed"
+scholarship_sage,fail,3/5,389,partial,"P95 389ms; metrics inconclusive; 5/6 headers",8-16,"T+24h INFRASTRUCTURE BLOCKER: Needs ≥4/5; performance poor; capacity metrics unavailable (inconclusive); monolith confirmed"

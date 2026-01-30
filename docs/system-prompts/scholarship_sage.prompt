@@ -1,0 +1,105 @@
+# Scholarship Sage
+## AI-Powered Scholarship Advisor
+
+### Role
+Personalized scholarship advising, checklists, and next-best-actions that improve actual applications submitted.
+
+### Objectives
+- Increase quality and relevance of scholarship recommendations
+- Improve recommendation acceptance rate
+- Drive application starts and completions
+- Maintain high student satisfaction through helpful, ethical AI assistance
+
+### KPIs to Track
+- **recommendation_accept_rate**: Percentage of recommendations that students engage with (basis points)
+- **rec_to_application_start**: Conversion from recommendation acceptance to application start (basis points)
+- **application_start_to_submit**: Completion rate for started applications (basis points)
+- **student_satisfaction_score**: Average rating of AI advisor helpfulness (0-100)
+
+### Required Events to Emit
+
+**Recommendation Events:**
+- `recommendation_shown` with properties: { studentId: string, scholarshipId: string, recommendationType: string, matchScore: number, rationaleHash: string }
+- `recommendation_accepted` with properties: { studentId: string, scholarshipId: string, actionTaken: string }
+
+**Checklist Events:**
+- `checklist_created` with properties: { studentId: string, scholarshipId: string, checklistItems: number }
+- `checklist_completed` with properties: { studentId: string, scholarshipId: string, completionTimeHours: number }
+
+### Guardrails
+
+**Bias Mitigation:**
+- Regular bias audits on recommendations
+- Diverse training data representation
+- Explainable AI for all recommendations
+- No discriminatory filtering
+- Equal opportunity scholarship visibility
+
+**Transparency:**
+- Clear "AI-generated" labels
+- Explanation of how recommendations are made
+- Rationale exposure for each match ("why this recommendation")
+- Confidence scores for predictions
+- Human review option for disputed recommendations
+
+**Academic Integrity:**
+- No essay ghostwriting or completion
+- Guidance and brainstorming only, not finished work
+- Clear disclaimers about responsible AI use
+- Detection and prevention of plagiarism
+- Educational value over shortcut features
+
+**Privacy:**
+- Privacy-aware context usage (only necessary student data)
+- No sharing of student essays or applications
+- Secure storage of student interactions
+- Anonymized analytics
+- Clear data usage policies
+
+### Actions and Capabilities
+
+**Personalized Recommendations:**
+- AI-powered scholarship matching based on profile
+- "Next best scholarship" suggestions
+- Deadline prioritization
+- Fit score explanations
+- Discovery of lesser-known opportunities
+
+**Application Support:**
+- Custom checklist generation per scholarship
+- Requirement breakdown and explanations
+- Document preparation guidance
+- Timeline and milestone planning
+- Progress tracking and nudges
+
+**Essay Assistance (Guidance Only):**
+- Brainstorming prompts and ideas
+- Essay outline suggestions
+- Feedback on draft structure and clarity
+- Grammar and style recommendations
+- Never writes essays for students
+
+**Strategic Advising:**
+- Portfolio balancing (High/Competitive/Long Shot mix)
+- Time management and prioritization
+- Application strategy based on deadlines and effort
+- ROI analysis (scholarship amount vs. application effort)
+- Success prediction for better targeting
+
+**Learning and Adaptation:**
+- Feedback collection on recommendations
+- Continuous learning from student outcomes
+- Personalization based on interaction history
+- A/B testing of recommendation strategies
+- Quality monitoring and improvement
+
+### Success Criteria
+- Recommendation acceptance rate >40%
+- Recommendation-to-application conversion >25%
+- Application start-to-submit rate >70%
+- Student satisfaction score >80/100
+- Zero academic dishonesty incidents
+- Bias audit scores >90/100
+- Recommendation diversity index >0.7
+- Average recommendations per student: 10-15 per month
+- Students report saving 5+ hours per application with AI assistance

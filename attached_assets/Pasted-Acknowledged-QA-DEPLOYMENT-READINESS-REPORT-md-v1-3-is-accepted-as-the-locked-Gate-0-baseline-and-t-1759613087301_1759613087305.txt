@@ -1,0 +1,52 @@
+Acknowledged. QA_DEPLOYMENT_READINESS_REPORT.md v1.3 is accepted as the locked Gate 0 baseline and the single source of truth. Red lines stand with zero waivers. The Gate 0 decision remains binary (GO or NO-GO), with Safe Mode as the default if the bar is not met.
+
+Immediate CEO directives
+
+Timeline correction and confirmation
+There’s a weekday/date mismatch in the schedule. To remove ambiguity, align to weekdays and confirm timezone for all timestamps (PMO to post in #gate0-war-room):
+EOD Today: Sat Oct 4 — all EOD deliverables as listed
+Risk checkpoint: Wed Oct 8, 5:00 PM
+Evidence packs due: Thu Oct 9, 6:00 PM
+CEO pre-read: Thu Oct 9, 8:00–10:00 PM
+Must-fix comments (if any): Thu Oct 9, 10:30 PM
+Gate 0 decision (binary): Fri Oct 10 (30 min block)
+PMO: confirm the above with timezone for all artifacts and dashboard timestamps; update the canonical document and pin in #gate0-war-room.
+2. EOD Today deliverables (evidence-first, no opinions)
+
+PMO: Post 7 criteria → 9 categories mapping with initials and timestamps; confirm the Deviation Protocol routing and the exact CEO sign-off template for exceptions.
+Eng Lead: Canary + rollback demo plan with P95 budget, error policy, abort thresholds, and validation steps. Include the exact P95 target, budget remaining, and rollback timing SLA.
+SRE: Live alerting verification with paging route diagram, on-call schedule, and a real alert screenshot (timestamped) from production-like traffic; include current error budget remaining and the burn-rate indicator.
+QA Lead: Name the AI Quality Steward; post the signed charter; attach the initial bias/guardrail test battery with pass/fail thresholds and sampling plan. Include a clear definition of “Sev-1” for model behavior.
+Legal: FERPA/COPPA engagement scope, workback plan, DPA tracker, and list of at-risk counterparties. Add data residency map, breach notification SLAs, and a red/yellow status for each counterparty.
+3. Control-Tower snapshots for the next standup
+
+SLO: P95, P99, uptime, error rate, error budget remaining, and 7-day trend. Call out any dips >10% WoW.
+SEO: Indexation %, top 50 pages status, GSC impressions/clicks trend, and Auto Page Maker velocity (pages/day and acceptance rate).
+Revenue: Live $0.01 trace link, 3% provider fee observability, B2C ARPU and free→paid conversion trend (7-day).
+Finance: Week-to-date burn vs $60k plan, plus anomaly notes and remediation if variance >5%.
+4. Decision bar (no change)
+
+GO requires ALL:
+All 7 Gate 0 criteria GREEN with quantitative evidence
+Zero Sev-1 incidents in the last 7 days
+Weekly burn ≤ $60k plan
+All 5 CEO red lines PASS
+If any fail: Safe Mode (max 1 week), DRI-owned remediation, daily standups, re-review next Friday.
+5. Evidence pack specifics (due Thu Oct 9, 6:00 PM)
+
+Engineering Reliability: Canary rehearsal artifacts, rollback drill results (time-to-rollback, success criteria), saturation and latency headroom at P95/P99, and exception logs.
+SRE: On-call readiness proof, synthetic + real-user alert tests, error-budget consumption, and top 3 reliability risks with mitigations.
+Growth/SEO: Auto Page Maker output, indexation deltas, top-50 page status, and low-CAC acquisition trend.
+Revenue: B2C credit sales ARPU, conversion funnel, B2B provider count, and 3% fee capture validation. Include a 30/60/90 forecast and variance to our $10M ARR trajectory.
+AI Quality: Bias/guardrail results with sample errors, mitigation status, and a redline roll-up. Explicit “no academic dishonesty” enforcement checks.
+Legal: FERPA/COPPA gaps, DPA close plan, and any blocking counterparties with deadlines and owners.
+6. Deviation protocol and comms
+
+Any exception requires a posted quantitative justification and CEO sign-off prior to action.
+Must-fix blockers: post immediately in #gate0-war-room; do not wait for meetings.
+If a red line is at risk: Page PMO + CEO with mitigation plan and deadline.
+7. Operating stance
+
+Platform remains NO-GO until the decision meeting. All work proceeds under the Safe Mode path-to-approval assumptions.
+Prioritize low-CAC, SEO-led growth proof points and student value metrics (match quality, trust, application success) in all summaries.
+I will hold the schedule, the red lines, and the bar exactly as written. PMO: confirm the corrected calendar and timezone in-channel within the hour and update the canonical doc. DRIs: proceed with EOD deliverables now.

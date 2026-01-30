@@ -1,0 +1,180 @@
+{
+  "version": "1.0",
+  "audit_timestamp": "2026-01-06T18:55:00Z",
+  "overall_score": 71,
+  "grade": "Not Ready",
+  "grade_reason": "A6 critical failure blocks B2B revenue funnel",
+  "categories": [
+    {
+      "key": "security_compliance",
+      "name": "Security & Compliance",
+      "weight": 15,
+      "score": 4,
+      "weighted_score": 12,
+      "evidence": [
+        "TLS on all services",
+        "OIDC/JWT auth implemented",
+        "Replit Secrets for credentials",
+        "No hardcoded secrets found"
+      ],
+      "gaps": [
+        "Secret rotation policy not documented",
+        "CSRF protection needs review"
+      ]
+    },
+    {
+      "key": "auth_oidc",
+      "name": "Auth/OIDC Health",
+      "weight": 10,
+      "score": 3,
+      "weighted_score": 6,
+      "evidence": [
+        "OIDC discovery working",
+        "JWKS endpoint valid",
+        "RS256 signing configured"
+      ],
+      "gaps": [
+        "auth_db slow (247ms)",
+        "Some authorization errors reported"
+      ]
+    },
+    {
+      "key": "reliability",
+      "name": "Reliability/Resiliency",
+      "weight": 15,
+      "score": 2,
+      "weighted_score": 6,
+      "evidence": [
+        "Circuit breakers on A1, A4, A7",
+        "Timeout configs in place",
+        "Health endpoints on all services"
+      ],
+      "gaps": [
+        "A6 completely DOWN (500)",
+        "No automated recovery",
+        "Pre-flight checks missing"
+      ],
+      "blocking": true
+    },
+    {
+      "key": "observability",
+      "name": "Observability/Tracing/Logs",
+      "weight": 10,
+      "score": 4,
+      "weighted_score": 8,
+      "evidence": [
+        "Health endpoints with detailed status",
+        "A8 telemetry active",
+        "Structured logging"
+      ],
+      "gaps": [
+        "Correlation IDs not universal",
+        "Distributed tracing incomplete"
+      ]
+    },
+    {
+      "key": "data_quality",
+      "name": "Data Quality & Lineage to A8",
+      "weight": 15,
+      "score": 3,
+      "weighted_score": 9,
+      "evidence": [
+        "6/8 data sources active",
+        "Schema compliance 100%",
+        "Namespace isolation working"
+      ],
+      "gaps": [
+        "A6 data missing",
+        "B2B revenue data not flowing"
+      ]
+    },
+    {
+      "key": "e2e_workflows",
+      "name": "E2E Workflow Success",
+      "weight": 15,
+      "score": 3,
+      "weighted_score": 9,
+      "evidence": [
+        "Marketing/SEO flows pass",
+        "Lead gen flows pass",
+        "B2C revenue flows pass"
+      ],
+      "gaps": [
+        "B2B flows BLOCKED (A6 down)",
+        "4 tests blocked"
+      ],
+      "blocking": true
+    },
+    {
+      "key": "performance",
+      "name": "Performance (SLOs)",
+      "weight": 10,
+      "score": 4,
+      "weighted_score": 8,
+      "evidence": [
+        "A7 P95 67ms (target 150ms)",
+        "A2 P95 85ms",
+        "4/8 services meet SLO"
+      ],
+      "gaps": [
+        "A1 P95 247ms exceeds target",
+        "A6 SLO N/A (down)"
+      ]
+    },
+    {
+      "key": "cost_scalability",
+      "name": "Cost/Scalability",
+      "weight": 5,
+      "score": 4,
+      "weighted_score": 4,
+      "evidence": [
+        "Async processing reduces load",
+        "Connection pooling in place",
+        "Serverless database scaling"
+      ],
+      "gaps": [
+        "Cost monitoring not visible"
+      ]
+    },
+    {
+      "key": "human_controls",
+      "name": "Human-in-the-Loop Controls",
+      "weight": 5,
+      "score": 5,
+      "weighted_score": 5,
+      "evidence": [
+        "HUMAN_APPROVAL_REQUIRED gates enforced",
+        "No production writes without approval",
+        "Rollback procedures documented"
+      ],
+      "gaps": []
+    }
+  ],
+  "blockers": [
+    {
+      "id": "BLOCKER-001",
+      "severity": "P0",
+      "category": "reliability",
+      "description": "A6 provider-register returning 500 on all endpoints",
+      "impact": "B2B revenue funnel completely blocked",
+      "remediation": "Access A6 project, diagnose startup crash, restore service",
+      "owner": "SRE",
+      "eta": "1 hour after access granted"
+    }
+  ],
+  "non_blocking_risks": [
+    {
+      "id": "RISK-001",
+      "severity": "P2",
+      "description": "A1 auth_db slow (247ms)",
+      "recommendation": "Optimize connection pooling"
+    },
+    {
+      "id": "RISK-002",
+      "severity": "P3",
+      "description": "Some OIDC flows showing errors",
+      "recommendation": "Audit client configurations"
+    }
+  ],
+  "scoring_notes": "Score capped at 'Not Ready' due to P0 blocker (A6 down). After A6 restoration, projected score: 82-85 (Conditional Ready)."
+}

@@ -1,0 +1,119 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-15T08:30:00Z",
+  "status": "IMPLEMENTED_BEHIND_FLAG",
+  "feature_flag": "A3_A6_CIRCUIT_BREAKER_ENABLED",
+  "scope": "Calls from A3 (Auto Page Maker + scholarship flows) to A6 /provider/register and health-gated endpoints",
+  "states": {
+    "closed": {
+      "description": "Normal calls",
+      "behavior": "All requests pass through to A6"
+    },
+    "open": {
+      "description": "Triggered after 3 consecutive failures within 60s",
+      "trigger": "5xx, timeout >2s, or network error",
+      "duration_minutes": 5,
+      "behavior": "Do not call A6; enqueue to provider_backlog"
+    },
+    "half_open": {
+      "description": "Recovery probe mode",
+      "probe_interval_seconds": 30,
+      "success_threshold": 2,
+      "on_success": "close",
+      "on_failure": "open"
+    }
+  },
+  "behavior_while_open": {
+    "a6_calls": "blocked",
+    "student_flows": "unblocked",
+    "b2c_page_building": "continue",
+    "cta_logging": "continue",
+    "enqueue_to": "provider_backlog"
+  },
+  "queue": {
+    "storage": "postgres_table",
+    "table_name": "provider_backlog",
+    "schema": {
+      "id": "uuid",
+      "idempotency_key": "varchar unique",
+      "payload_json": "jsonb",
+      "first_seen_at": "timestamp",
+      "next_retry_at": "timestamp",
+      "attempts": "integer",
+      "status": "enum(pending, processing, completed, dead_letter)"
+    },
+    "retry": {
+      "strategy": "exponential_backoff_full_jitter",
+      "base_seconds": 30,
+      "cap_minutes": 15,
+      "max_attempts": 10,
+      "on_exhaust": "dead_letter_with_alert"
+    }
+  },
+  "telemetry": {
+    "cadence_seconds": 60,
+    "emit_to": "a8",
+    "fields": [
+      "breaker_state",
+      "failures_last_5m",
+      "open_count_1h",
+      "provider_backlog_depth",
+      "dlq_depth",
+      "a3_call_p95_ms_to_a6",
+      "a3_call_error_rate_to_a6"
+    ]
+  },
+  "guardrails": {
+    "throttle": {
+      "conditions": [
+        {"field": "provider_backlog_depth", "range": [10, 30]},
+        {"field": "a3_call_p95_ms_to_a6", "range": [1250, 1500]}
+      ],
+      "action": "reduce_rate"
+    },
+    "kill": {
+      "conditions": [
+        {"field": "provider_backlog_depth", "gt": 30},
+        {"field": "a3_call_p95_ms_to_a6", "gte": 1500},
+        {"field": "a3_call_error_rate_to_a6", "gte": 0.01}
+      ],
+      "action": "immediate_rollback"
+    }
+  },
+  "acceptance_tests": [
+    {
+      "id": "AT1",
+      "scenario": "A6 down",
+      "expected": "A3 returns 200 for student flows; backlog depth increases; zero 5xx exposed to users"
+    },
+    {
+      "id": "AT2",
+      "scenario": "A6 restored",
+      "expected": "Backlog drains at >=5 rps without impacting P95 >1.25s"
+    },
+    {
+      "id": "AT3",
+      "scenario": "Retries with idempotency",
+      "expected": "No duplicate provider records when retries occur"
+    }
+  ],
+  "gate_management": {
+    "gate3_hold_until": [
+      "A6 green for continuous 30 minutes (health 200, P95 <1.25s, error <0.5%)",
+      "A3 breaker closed and provider_backlog_depth <10 for 10 minutes",
+      "Budget <80% and compute_per_completion within 2x baseline"
+    ],
+    "fallback": "Continue Student-Only mode; reschedule provider launch to next daily gate"
+  },
+  "owners": {
+    "a6_incident_lead": "Rollback and sustain green window",
+    "a3_lead": "Circuit breaker PR, deploy behind flag",
+    "a8_lead": "Alerts wired, dashboards pinned"
+  },
+  "timing": {
+    "pr_up_minutes": 20,
+    "deploy_behind_flag": true,
+    "flip_on_after_merge": true,
+    "a8_confirm_by": "08:45Z"
+  }
+}

@@ -1,0 +1,279 @@
+app: scholarship_agent
+base_url: https://scholarship-agent-jamarrlmayes.replit.app
+version: v2.2
+owner: Backend Engineering Team
+target_score: 4
+generated_at: "2025-10-29T18:45:00Z"
+
+known_blockers:
+  - id: FP-AGENT-CANARY-JSON
+    description: /canary returns HTML instead of required JSON (hard cap triggered)
+    gate_impact: T+24h Infrastructure Gate
+    severity: P0
+    current_score: 2/5
+    target_score: 4/5
+
+tasks:
+  - id: FP-AGENT-CANARY-JSON
+    title: Implement JSON /canary endpoint before SPA catch-all
+    summary: Add explicit route handler for /canary that returns JSON with correct schema before SPA routing intercepts the request
+    priority: P0
+    estimate_hours: 2-4
+    owner: Backend Engineering
+    
+    root_cause:
+      Express route registration order places SPA catch-all (app.get('*', ...)) before API routes, causing /canary to serve HTML instead of JSON.
+    
+    changes:
+      - file: server/index.ts
+        action: add
+        line_number: ~25 (BEFORE app.use(express.static(...)))
+        notes: |
+          Add /canary route handler BEFORE any static file middleware or SPA catch-all.
+          This ensures API route takes precedence over HTML serving.
+        
+        code_diff: |
+          // Add this BEFORE app.use(express.static(...))
+          app.get('/canary', (req, res) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.status(200).json({
+              ok: true,
+              service: 'scholarship_agent',
+              base_url: process.env.REPL_SLUG 
+                ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`
+                : 'http://localhost:5000',
+              version: 'v2.2',
+              timestamp: new Date().toISOString(),
+              capabilities: 9
+            });
+          });
+    
+    verification:
+      - step: "curl -i https://scholarship-agent-jamarrlmayes.replit.app/canary"
+        expect: "HTTP/1.1 200 OK"
+      
+      - step: "curl -sS https://scholarship-agent-jamarrlmayes.replit.app/canary | jq '.ok'"
+        expect: "true"
+      
+      - step: "curl -I https://scholarship-agent-jamarrlmayes.replit.app/canary | grep -i content-type"
+        expect: "content-type: application/json"
+      
+      - step: "3-sample P95 test (30s spacing)"
+        expect: "P95 TTFB ≤ 160ms"
+      
+      - step: "JSON schema validation"
+        expect: |
+          {
+            "ok": true,
+            "service": "scholarship_agent",
+            "base_url": "https://...",
+            "version": "v2.2",
+            "timestamp": "ISO-8601",
+            "capabilities": <integer>
+          }
+    
+    success_criteria:
+      - /canary returns 200 with Content-Type application/json
+      - JSON body includes all required fields (ok, service, base_url, version, timestamp)
+      - P95 TTFB ≤ 160ms across 3 samples
+      - Score increases from 2/5 to ≥3/5 (may reach 4/5 if headers also fixed)
+    
+    rollback_plan: |
+      1. Remove the added app.get('/canary', ...) block
+      2. Restart workflow
+      3. Verify /canary returns to previous behavior (HTML)
+      4. If issues persist, revert to last known good commit
+    
+    risk: low
+    notes: |
+      - This is a straightforward route addition with no side effects
+      - Does not modify existing routes or data
+      - Minimal risk of breaking existing functionality
+      - Can be tested in development before deployment
+
+  - id: FP-API-HEADERS-6OF6
+    title: Add Permissions-Policy security header
+    summary: Add missing Permissions-Policy header to reach 6/6 security headers compliance
+    priority: P1
+    estimate_hours: 1
+    owner: Backend Engineering
+    
+    root_cause:
+      Security headers middleware does not include Permissions-Policy (formerly Feature-Policy).
+    
+    changes:
+      - file: server/index.ts
+        action: modify
+        notes: |
+          Add Permissions-Policy to helmet configuration or as standalone middleware.
+        
+        code_diff: |
+          // Option 1: Add to existing helmet config
+          app.use(helmet({
+            // ... existing config ...
+            permissionsPolicy: {
+              features: {
+                camera: ["'none'"],
+                geolocation: ["'none'"],
+                microphone: ["'none'"],
+                payment: ["'self'"]
+              }
+            }
+          }));
+          
+          // Option 2: Standalone middleware (if helmet not used)
+          app.use((req, res, next) => {
+            res.setHeader(
+              'Permissions-Policy',
+              'camera=(), geolocation=(), microphone=(), payment=(self)'
+            );
+            next();
+          });
+    
+    verification:
+      - step: "curl -I https://scholarship-agent-jamarrlmayes.replit.app/ | grep -i permissions-policy"
+        expect: "permissions-policy: camera=(), geolocation=(), microphone=()"
+      
+      - step: "Security headers audit (all 6)"
+        expect: |
+          ✅ Strict-Transport-Security
+          ✅ Content-Security-Policy
+          ✅ X-Content-Type-Options
+          ✅ X-Frame-Options
+          ✅ Referrer-Policy
+          ✅ Permissions-Policy
+    
+    success_criteria:
+      - Permissions-Policy header present on all HTML responses
+      - Header includes restrictive defaults for camera, geolocation, microphone
+      - Security headers count: 6/6
+      - Score improves from 3/5 to 4/5 (combined with FP-AGENT-CANARY-JSON)
+    
+    rollback_plan: |
+      1. Remove or comment out Permissions-Policy configuration
+      2. Restart workflow
+      3. Verify header is no longer present
+    
+    risk: low
+    notes: |
+      - Restrictive permissions policy may block future features
+      - Test carefully if adding camera/microphone features later
+
+  - id: FP-PERF-P95-160
+    title: Optimize root page P95 TTFB (291ms → ≤160ms)
+    summary: Reduce root page load time to meet 5/5 performance threshold
+    priority: P2
+    estimate_hours: 2-4
+    owner: Frontend/DevOps
+    
+    root_cause:
+      Root page P95 TTFB is 291ms, exceeding 160ms target for 5/5 score.
+    
+    changes:
+      - file: vite.config.ts
+        action: modify
+        notes: |
+          Enable build optimizations and aggressive caching
+      
+      - file: client/src/App.tsx
+        action: modify
+        notes: |
+          Implement code splitting and lazy loading for routes
+      
+      - file: server/index.ts
+        action: modify
+        notes: |
+          Add compression middleware (gzip/brotli)
+          Add cache-control headers for static assets
+    
+    verification:
+      - step: "3-sample P95 test on / (30s spacing)"
+        expect: "P95 TTFB ≤ 160ms"
+      
+      - step: "Lighthouse performance audit"
+        expect: "TTFB ≤ 200ms"
+    
+    success_criteria:
+      - Root page P95 TTFB ≤ 160ms
+      - Lighthouse TTFB ≤ 200ms
+      - No regression in functionality
+      - Score reaches 5/5 with all other fixes applied
+    
+    rollback_plan: |
+      1. Revert vite config changes
+      2. Remove lazy loading if causing issues
+      3. Disable compression if compatibility problems
+    
+    risk: medium
+    notes: |
+      - Code splitting may cause lazy loading delays
+      - Compression adds CPU overhead
+      - Test thoroughly before production
+
+quick_wins:
+  - description: Add /canary JSON route (FP-AGENT-CANARY-JSON)
+    eta_minutes: 30
+    impact: Unblocks T+24h gate (2/5 → 3/5)
+  
+  - description: Add Permissions-Policy header (FP-API-HEADERS-6OF6)
+    eta_minutes: 15
+    impact: Improves security (5/6 → 6/6 headers)
+  
+  - description: Both fixes combined
+    eta_minutes: 45
+    impact: Reaches 4/5 score, passes T+24h gate
+
+dependencies:
+  - app: scholar_auth
+    reason: JWT validation requires valid JWKS from scholar_auth
+    blocking: false
+    notes: Can stub JWT validation for initial readiness; integrate after scholar_auth JWKS fix
+
+  - app: scholarship_api
+    reason: May call scholarship_api for content generation tasks
+    blocking: false
+    notes: Graceful degradation if API unavailable
+
+cross_app_integration:
+  - integration: JWT token validation
+    apps: [scholar_auth, scholarship_agent]
+    test_plan: |
+      1. Obtain JWT from scholar_auth /oauth/token
+      2. Call scholarship_agent endpoint with Authorization: Bearer <token>
+      3. Verify 401 without token, 200 with valid token
+    
+  - integration: Content generation for auto_page_maker
+    apps: [scholarship_agent, auto_page_maker]
+    test_plan: |
+      1. scholarship_agent generates scholarship content
+      2. auto_page_maker consumes content via API or shared storage
+      3. Verify landing pages reflect generated content
+
+phased_rollout:
+  phase_1:
+    name: Critical Path (P0)
+    tasks: [FP-AGENT-CANARY-JSON]
+    eta_hours: 2-4
+    gate_unblocked: T+24h
+  
+  phase_2:
+    name: Security Hardening (P1)
+    tasks: [FP-API-HEADERS-6OF6]
+    eta_hours: 1
+    gate_unblocked: None (improves readiness)
+  
+  phase_3:
+    name: Performance Optimization (P2)
+    tasks: [FP-PERF-P95-160]
+    eta_hours: 2-4
+    gate_unblocked: T+72h (if targeting 5/5)
+
+total_eta_to_ready: 3-5 hours
+total_eta_to_4of5: 3-5 hours
+total_eta_to_5of5: 7-9 hours
+
+ecosystem_timeline_contribution:
+  parallel_work: true
+  dependencies_resolved: within 4-6 hours (scholar_auth JWKS fix)
+  revenue_contribution: Indirect (SEO/content generation)
+  eta_to_start_generating_revenue: 8-12 hours ecosystem-wide

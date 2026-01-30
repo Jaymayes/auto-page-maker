@@ -1,0 +1,42 @@
+APP: auto_com_center | APP_BASE_URL: https://auto-com-center-jamarrlmayes.replit.app
+STATUS: COMPLETE
+TIMEFRAME: 2025-12-31T04:35:00Z → 2025-12-31T04:45:00Z
+
+Code freeze acknowledged. Entering Watch Commander mode.
+
+What I will report (only on these signals)
+
+Success: provider_connected (A6 webhook) with org_id and account_id tail (last 6).
+Rescue in action: stripe_connect_link_regenerated (A6 client) fired; I’ll watch for follow‑through provider_connected.
+SEO fault: sitemap.xml fails to grow or returns non‑200.
+Timeout: No provider_connected by T+24h (page) or no listing_created by T+72h (ticket).
+Current watches and SLAs
+
+T+45–60 min since send: If no connect and we see no banner_impression / banner_click_complete_stripe, recommend soft personal reply on same email thread offering a 10–15 min live walkthrough.
+T+2–6 h: Expect ≥1 provider_connected. If none, I’ll ping with a brief status and recommended next touch.
+T+24 h: Page if provider_connected = 0 (for the 3 targets).
+T+72 h: Ticket if listing_created = 0 after first connect.
+What I’m monitoring in A8 (live)
+
+A6 funnel (immediate)
+banner_impression → banner_click_complete_stripe → provider_connected
+stripe_connect_link_regenerated (if rescue modal used)
+A7 content (parallel)
+pages_published_total and sitemap_url_count delta (Batch 001 +100)
+sitemap fetch latency and 4xx/5xx rate (guardrail)
+A1/A5 health
+A1 discovery/JWKS p95 ≤150ms, A5 /api/login p95 ≤200ms sustained
+Soft follow‑up (paste when needed at +45–60 min, same email thread)
+Subject: Quick help finishing your setup
+
+Hi [First name], just checking in—happy to stay on while you complete the Stripe screen (it’s about 5 minutes). If you prefer, I can hop on a 10–15 minute call now.
+
+Thanks,
+[Your Name]
+
+Green‑light to unfreeze (any one of)
+
+First provider_connected event arrives.
+Verified listing_created from any of the three orgs.
+A7 Batch 001 confirmed in sitemap and GSC shows first discovery clicks (I’ll ping when visible).
+Until then, I’ll stay silent unless one of the above triggers or an alert threshold fires.

@@ -1,0 +1,52 @@
+GO. Authorize opening the Phase 1 beta cohort to 50 students now.
+
+Immediate CEO directives (next 60 minutes)
+
+Open access for the 50-student cohort.
+Confirm alerting end-to-end: trigger synthetic load to validate P95/5xx/429/memory alerts deliver to on-call within 2 minutes.
+Capture Day 0 baselines at 18:55–19:00 UTC: P50/P95 latency, 5xx/429 rates, RPS, memory/CPU, cost per 1k requests, and top endpoints.
+Ensure cohort tagging is active: every event stamped with cohort=phase1_d0-d3 and traffic_source=beta.
+Additional monitoring to prepare now
+
+Real User Monitoring (RUM): add client-side timing (TTFB, DOMContentLoaded, LCP), error capture, and network failures, sampled at 10–20%.
+Endpoint SLIs: per-endpoint P50/P95/P99, saturation (CPU, memory), queue depth, DB latency, cache hit rate.
+Cost telemetry: infra $/1k requests by endpoint and by feature (search, save, apply), plus AI token cost per task where applicable.
+Abuse lens: top talkers by IP/user, geo distribution, request bursts; auto-suppress noisy IPs above warning threshold before hard limits trigger.
+User onboarding materials to create
+
+Beta Welcome (1 page): what to expect (D0–D3), how to get value in 10 minutes, feature tour, and how to give feedback.
+Responsible Use and Privacy: plainly explain data use, PII handling, opt-out, and consent; restate no academic dishonesty policy.
+Quickstart checklist: complete profile, run first search, save 3 scholarships, start 1 application, set funding goal, submit feedback.
+Support + Escalation: in-product bug report, response SLAs (P1 <15 min, P2 <2 hrs during beta), and incident comms channel.
+Automated reporting templates to set up
+
+19:00 UTC Snapshot (one-time today): baselines above, plus top search terms, CTR to scholarship detail, saves/applications started.
+Daily 09:00 Executive Summary (already planned): include student activation and cost KPIs below.
+24-hour Gate Review Pack (Oct 10 @ 18:00 UTC): pass/fail on the six gates, incident log with MTTR, student experience metrics, and cost vs. model deltas.
+72-hour Phase Review (Oct 12 @ 18:00 UTC): scale-readiness and ramp plan to 250 students.
+Phase 1 pass criteria (Go to Phase 2 at 24h if all green)
+Reliability and performance
+
+P95 latency ≤120 ms; target stretch ≤90 ms. Zero sustained breaches >5 min.
+5xx error rate ≤0.3% steady-state; zero P0 incidents; max 1 P1 with MTTR <60 min.
+429s ≤2% for 10 minutes; investigate any source exceeding thresholds; no legitimate beta users blocked from primary flows.
+Capacity headroom ≥10× beta peak on CPU/DB/cache; memory ≤85% sustained. Security and compliance
+Zero auth/PII leaks; all PII encrypted in transit/at rest; access logs reviewed; no high-severity vuln findings. Cost and efficiency
+Infra cost per 1k requests within ±20% of model forecast; AI task unit economics within 4x markup envelope. Student value (beta engagement)
+Activation rate ≥60% (first session completes: first search + at least 1 scholarship saved).
+Application intent ≥30% (starts an application or exports/applys via provider link).
+Early CSAT ≥4.2/5 from in-product micro-survey; collect at least 20 responses. Operations
+Support responsiveness: P1 triage <15 min; P2 <2 hrs during beta.
+Change freeze respected (D0–D1): only critical fixes with CEO or on-call lead approval.
+Decision timeline
+
+Now: Open beta and monitor.
+19:00 UTC: Deliver first snapshot; I will review and reply with any corrective directives.
+24-hour review (Oct 10 @ 18:00 UTC): If all six gates pass and student metrics meet targets, proceed to Phase 2 (250 students, D4–D7).
+72-hour checkpoint (Oct 12 @ 18:00 UTC): Confirm stability and prepare 5× scale playbook execution.
+Confirmations requested
+
+Confirm beta cohort opened and alert validation completed.
+Confirm RUM + cohort tagging are active (or provide ETA).
+Share links to the three artifacts: Beta Welcome, Responsible Use/Privacy addendum, and the automated report templates.
+If there are no blockers, proceed to open the cohort now and deliver the 19:00 UTC snapshot.

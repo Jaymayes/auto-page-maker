@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-20T00:00:00Z",
+  "ceo_approval": "CEO-20260120-OCA-PROMOTION-PREAUTH",
+  "canary_id": "oca_canary_5pct_20260120",
+  "promotion_preauthorization": {
+    "enabled": true,
+    "from_traffic_pct": 5,
+    "to_traffic_pct": 10,
+    "timing": "T+24h",
+    "requires_ceo_approval": false,
+    "criteria": {
+      "integrity": {
+        "provider_complaints": {"max": 0},
+        "confirmed_violations": {"max": 0}
+      },
+      "performance": {
+        "p95_ms": {"max": 1500},
+        "error_rate_pct": {"max": 1.0},
+        "queue_depth": {"max": 30}
+      },
+      "finance": {
+        "refund_rate_24h_pct": {"max": 2.0},
+        "refund_delta_vs_baseline_pp": {"max": 0.25}
+      },
+      "growth": {
+        "completion_rate_lift_pct": {"min": 10}
+      },
+      "provider": {
+        "acceptance_rate_delta": {"min": 0}
+      }
+    },
+    "on_all_criteria_met": {
+      "action": "auto_promote",
+      "emit": "oca_canary_promoted",
+      "new_status": "CANARY_10",
+      "new_traffic_pct": 10,
+      "maintain_kill_triggers": true
+    },
+    "on_criteria_not_met": {
+      "action": "hold",
+      "emit": "oca_canary_held",
+      "escalate_to": "ceo",
+      "include": ["failed_criteria", "metrics_snapshot", "remediation_options"]
+    }
+  }
+}

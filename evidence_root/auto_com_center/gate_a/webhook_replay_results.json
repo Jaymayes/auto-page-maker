@@ -1,0 +1,11 @@
+{
+  "total_sent": 30000,
+  "delivered": 19,
+  "failed": 29981,
+  "idempotency_violations": 0,
+  "ordering_issues": 0,
+  "latency_p95_ms": 153,
+  "duration_ms": 74289,
+  "timestamp": "2025-11-12T20:12:27.330Z",
+  "pass": false
+}

@@ -1,0 +1,1042 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Scholar DataService API",
+    "description": "V2 Sprint-2 DataService API for Scholar AI Advisor ecosystem. Provides secure, audited access to scholar data with FERPA compliance and role-based access control.",
+    "version": "2.0.0",
+    "contact": {
+      "name": "Scholar AI Advisor Team",
+      "url": "https://scholaraiadvisor.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v2/dataservice",
+      "description": "DataService API"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    },
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Fast health check endpoint for load balancer probes",
+        "operationId": "healthCheck",
+        "tags": ["Health"],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "summary": "Readiness Check",
+        "description": "Database ping readiness check for Kubernetes probes",
+        "operationId": "readinessCheck",
+        "tags": ["Health"],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service is ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service is not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "summary": "List Users",
+        "description": "Retrieve paginated list of users. FERPA-sensitive fields are redacted for consumer role.",
+        "operationId": "listUsers",
+        "tags": ["Users"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/ViewerRole" },
+          { "$ref": "#/components/parameters/Limit" },
+          { "$ref": "#/components/parameters/Offset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListResponse"
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "post": {
+        "summary": "Create User",
+        "description": "Create a new user record",
+        "operationId": "createUser",
+        "tags": ["Users"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateUserRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "summary": "Get User",
+        "description": "Retrieve a single user by ID. FERPA-sensitive fields are redacted for consumer role.",
+        "operationId": "getUser",
+        "tags": ["Users"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/ViewerRole" },
+          { "$ref": "#/components/parameters/ResourceId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "put": {
+        "summary": "Update User",
+        "description": "Update an existing user record",
+        "operationId": "updateUser",
+        "tags": ["Users"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/ResourceId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateUserRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "delete": {
+        "summary": "Delete User",
+        "description": "Delete a user record",
+        "operationId": "deleteUser",
+        "tags": ["Users"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/ResourceId" }
+        ],
+        "responses": {
+          "204": { "description": "User deleted" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/v1/providers": {
+      "get": {
+        "summary": "List Providers",
+        "description": "Retrieve paginated list of providers (B2B organizations)",
+        "operationId": "listProviders",
+        "tags": ["Providers"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/Limit" },
+          { "$ref": "#/components/parameters/Offset" },
+          {
+            "name": "is_active",
+            "in": "query",
+            "schema": { "type": "boolean", "default": true }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProviderListResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "post": {
+        "summary": "Create Provider",
+        "description": "Create a new provider (B2B organization)",
+        "operationId": "createProvider",
+        "tags": ["Providers"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateProviderRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Provider created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProviderResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/v1/providers/{id}": {
+      "get": {
+        "summary": "Get Provider",
+        "description": "Retrieve a single provider by ID",
+        "operationId": "getProvider",
+        "tags": ["Providers"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/ResourceId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProviderResponse" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "put": {
+        "summary": "Update Provider",
+        "description": "Update an existing provider",
+        "operationId": "updateProvider",
+        "tags": ["Providers"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/ResourceId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateProviderRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Provider updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ProviderResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "delete": {
+        "summary": "Delete Provider",
+        "description": "Delete a provider record",
+        "operationId": "deleteProvider",
+        "tags": ["Providers"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/ResourceId" }
+        ],
+        "responses": {
+          "204": { "description": "Provider deleted" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/v1/scholarships": {
+      "get": {
+        "summary": "List Scholarships",
+        "description": "Retrieve paginated list of active scholarships",
+        "operationId": "listScholarships",
+        "tags": ["Scholarships"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/Limit" },
+          { "$ref": "#/components/parameters/Offset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ScholarshipListResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "post": {
+        "summary": "Create Scholarship",
+        "description": "Create a new scholarship record",
+        "operationId": "createScholarship",
+        "tags": ["Scholarships"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateScholarshipRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Scholarship created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ScholarshipResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/v1/scholarships/{id}": {
+      "get": {
+        "summary": "Get Scholarship",
+        "description": "Retrieve a single scholarship by ID",
+        "operationId": "getScholarship",
+        "tags": ["Scholarships"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/ResourceId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ScholarshipResponse" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "put": {
+        "summary": "Update Scholarship",
+        "description": "Update an existing scholarship",
+        "operationId": "updateScholarship",
+        "tags": ["Scholarships"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/ResourceId" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateScholarshipRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scholarship updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ScholarshipResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "delete": {
+        "summary": "Delete Scholarship",
+        "description": "Delete a scholarship record",
+        "operationId": "deleteScholarship",
+        "tags": ["Scholarships"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" },
+          { "$ref": "#/components/parameters/ResourceId" }
+        ],
+        "responses": {
+          "204": { "description": "Scholarship deleted" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/v1/uploads": {
+      "post": {
+        "summary": "Create Upload Metadata",
+        "description": "Create upload metadata record and return upload_id for file upload",
+        "operationId": "createUpload",
+        "tags": ["Uploads"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateUploadRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Upload metadata created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UploadResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/v1/ledgers": {
+      "post": {
+        "summary": "Create Ledger Entries",
+        "description": "Create balanced double-entry ledger entries. Validates zero-sum per trace_id.",
+        "operationId": "createLedgerEntries",
+        "tags": ["Ledgers"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateLedgerEntriesRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ledger entries created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LedgerEntriesResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/v1/ledgers/reconcile": {
+      "get": {
+        "summary": "Reconcile Ledger",
+        "description": "Reconcile ledger entries by trace_id. Returns balance status and entry details.",
+        "operationId": "reconcileLedger",
+        "tags": ["Ledgers"],
+        "parameters": [
+          { "$ref": "#/components/parameters/TraceId" },
+          {
+            "name": "trace_id",
+            "in": "query",
+            "required": true,
+            "description": "Trace ID to reconcile ledger entries for",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reconciliation result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReconcileResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    },
+    "parameters": {
+      "TraceId": {
+        "name": "X-Trace-Id",
+        "in": "header",
+        "required": true,
+        "description": "Unique trace identifier for request tracking",
+        "schema": { "type": "string" }
+      },
+      "IdempotencyKey": {
+        "name": "X-Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "description": "Idempotency key for POST/PUT/DELETE operations",
+        "schema": { "type": "string" }
+      },
+      "ViewerRole": {
+        "name": "X-Viewer-Role",
+        "in": "header",
+        "required": false,
+        "description": "Viewer role for FERPA field filtering",
+        "schema": {
+          "type": "string",
+          "enum": ["consumer", "school_official", "admin", "system"],
+          "default": "consumer"
+        }
+      },
+      "ResourceId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Resource identifier",
+        "schema": { "type": "string" }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "schema": { "type": "integer", "default": 100, "maximum": 1000 }
+      },
+      "Offset": {
+        "name": "offset",
+        "in": "query",
+        "schema": { "type": "integer", "default": 0 }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Validation error",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ValidationError" }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Conflict (duplicate idempotency key)",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "message": { "type": "string" }
+        },
+        "required": ["error", "message"]
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": { "type": "array", "items": { "type": "string" } },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["healthy"] },
+          "service": { "type": "string" },
+          "version": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ReadinessResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["ready", "not_ready"] },
+          "database": { "type": "string", "enum": ["connected", "disconnected"] },
+          "latencyMs": { "type": "integer" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "email": { "type": "string" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "profileImageUrl": { "type": "string" },
+          "dateOfBirth": { "type": "string", "format": "date-time" },
+          "isMinor": { "type": "boolean" },
+          "doNotSell": { "type": "boolean" },
+          "privacyMode": { "type": "string", "enum": ["standard", "enhanced", "minor"] },
+          "isFerpaCovered": { "type": "boolean" },
+          "gpcHonored": { "type": "boolean" },
+          "onboardingStatus": { "type": "string", "enum": ["guest", "registered", "verified"] },
+          "implicitFitScore": { "type": "integer" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "profileImageUrl": { "type": "string" },
+          "dateOfBirth": { "type": "string", "format": "date-time" },
+          "isMinor": { "type": "boolean" },
+          "doNotSell": { "type": "boolean" },
+          "privacyMode": { "type": "string" },
+          "isFerpaCovered": { "type": "boolean" }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "profileImageUrl": { "type": "string" },
+          "dateOfBirth": { "type": "string", "format": "date-time" },
+          "isMinor": { "type": "boolean" },
+          "doNotSell": { "type": "boolean" },
+          "privacyMode": { "type": "string" },
+          "isFerpaCovered": { "type": "boolean" }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "$ref": "#/components/schemas/User" }
+        }
+      },
+      "UserListResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/User" } },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "limit": { "type": "integer" },
+              "offset": { "type": "integer" },
+              "total": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "Provider": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "organizationType": { "type": "string" },
+          "contactName": { "type": "string" },
+          "contactPhone": { "type": "string" },
+          "website": { "type": "string" },
+          "logoUrl": { "type": "string" },
+          "isVerified": { "type": "boolean" },
+          "isActive": { "type": "boolean" },
+          "isFerpaCovered": { "type": "boolean" },
+          "platformFeeRate": { "type": "integer" },
+          "payoutAccountId": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateProviderRequest": {
+        "type": "object",
+        "required": ["name", "email", "organizationType"],
+        "properties": {
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "organizationType": { "type": "string", "enum": ["university", "foundation", "corporation", "government"] },
+          "contactName": { "type": "string" },
+          "contactPhone": { "type": "string" },
+          "website": { "type": "string" },
+          "logoUrl": { "type": "string" },
+          "isFerpaCovered": { "type": "boolean" },
+          "platformFeeRate": { "type": "integer" }
+        }
+      },
+      "UpdateProviderRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "organizationType": { "type": "string" },
+          "contactName": { "type": "string" },
+          "contactPhone": { "type": "string" },
+          "website": { "type": "string" },
+          "logoUrl": { "type": "string" },
+          "isVerified": { "type": "boolean" },
+          "isActive": { "type": "boolean" },
+          "isFerpaCovered": { "type": "boolean" },
+          "platformFeeRate": { "type": "integer" }
+        }
+      },
+      "ProviderResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "$ref": "#/components/schemas/Provider" }
+        }
+      },
+      "ProviderListResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/Provider" } },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "limit": { "type": "integer" },
+              "offset": { "type": "integer" },
+              "total": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "Scholarship": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "amount": { "type": "integer" },
+          "deadline": { "type": "string", "format": "date-time" },
+          "level": { "type": "string" },
+          "major": { "type": "string" },
+          "state": { "type": "string" },
+          "city": { "type": "string" },
+          "requirements": { "type": "object" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "sourceUrl": { "type": "string" },
+          "sourceOrganization": { "type": "string" },
+          "providerId": { "type": "string" },
+          "providerName": { "type": "string" },
+          "isActive": { "type": "boolean" },
+          "isFeatured": { "type": "boolean" },
+          "isNoEssay": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CreateScholarshipRequest": {
+        "type": "object",
+        "required": ["title", "description", "amount", "deadline", "level"],
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "amount": { "type": "integer" },
+          "deadline": { "type": "string", "format": "date-time" },
+          "level": { "type": "string" },
+          "major": { "type": "string" },
+          "state": { "type": "string" },
+          "city": { "type": "string" },
+          "requirements": { "type": "object" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "sourceUrl": { "type": "string" },
+          "sourceOrganization": { "type": "string" },
+          "providerId": { "type": "string" },
+          "providerName": { "type": "string" },
+          "isActive": { "type": "boolean" },
+          "isFeatured": { "type": "boolean" },
+          "isNoEssay": { "type": "boolean" }
+        }
+      },
+      "UpdateScholarshipRequest": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "amount": { "type": "integer" },
+          "deadline": { "type": "string", "format": "date-time" },
+          "level": { "type": "string" },
+          "major": { "type": "string" },
+          "state": { "type": "string" },
+          "city": { "type": "string" },
+          "requirements": { "type": "object" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "sourceUrl": { "type": "string" },
+          "sourceOrganization": { "type": "string" },
+          "providerId": { "type": "string" },
+          "providerName": { "type": "string" },
+          "isActive": { "type": "boolean" },
+          "isFeatured": { "type": "boolean" },
+          "isNoEssay": { "type": "boolean" }
+        }
+      },
+      "ScholarshipResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "$ref": "#/components/schemas/Scholarship" }
+        }
+      },
+      "ScholarshipListResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/Scholarship" } },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "limit": { "type": "integer" },
+              "offset": { "type": "integer" },
+              "total": { "type": "integer" }
+            }
+          }
+        }
+      },
+      "CreateUploadRequest": {
+        "type": "object",
+        "required": ["ownerId", "ownerType", "filename", "mimeType", "sizeBytes"],
+        "properties": {
+          "ownerId": { "type": "string" },
+          "ownerType": { "type": "string", "enum": ["user", "provider"] },
+          "filename": { "type": "string" },
+          "mimeType": { "type": "string" },
+          "sizeBytes": { "type": "integer" },
+          "storageKey": { "type": "string" },
+          "isFerpaCovered": { "type": "boolean" },
+          "status": { "type": "string", "enum": ["pending", "processing", "scored", "failed"] }
+        }
+      },
+      "UploadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "upload_id": { "type": "string" },
+              "status": { "type": "string" }
+            }
+          }
+        }
+      },
+      "LedgerEntry": {
+        "type": "object",
+        "required": ["traceId", "entryType", "accountType", "accountId", "amountCents"],
+        "properties": {
+          "traceId": { "type": "string" },
+          "entryType": { "type": "string", "enum": ["debit", "credit"] },
+          "accountType": { "type": "string", "enum": ["revenue", "expense", "asset", "liability", "fee"] },
+          "accountId": { "type": "string" },
+          "amountCents": { "type": "integer" },
+          "currency": { "type": "string", "default": "USD" },
+          "description": { "type": "string" },
+          "referenceType": { "type": "string" },
+          "referenceId": { "type": "string" }
+        }
+      },
+      "CreateLedgerEntriesRequest": {
+        "type": "object",
+        "required": ["entries"],
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/LedgerEntry" },
+            "minItems": 1
+          }
+        }
+      },
+      "LedgerEntriesResponse": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/LedgerEntry" } },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "entryCount": { "type": "integer" },
+              "balanced": { "type": "boolean" }
+            }
+          }
+        }
+      },
+      "ReconcileResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "trace_id": { "type": "string" },
+              "entry_count": { "type": "integer" },
+              "is_balanced": { "type": "boolean" },
+              "balance_cents": { "type": "integer" },
+              "all_reconciled": { "type": "boolean" },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "entry_type": { "type": "string" },
+                    "account_type": { "type": "string" },
+                    "account_id": { "type": "string" },
+                    "amount_cents": { "type": "integer" },
+                    "is_reconciled": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    { "name": "Health", "description": "Health and readiness endpoints" },
+    { "name": "Users", "description": "User management with FERPA compliance" },
+    { "name": "Providers", "description": "B2B provider management" },
+    { "name": "Scholarships", "description": "Scholarship CRUD operations" },
+    { "name": "Uploads", "description": "Document upload metadata management" },
+    { "name": "Ledgers", "description": "Double-entry bookkeeping and reconciliation" }
+  ]
+}

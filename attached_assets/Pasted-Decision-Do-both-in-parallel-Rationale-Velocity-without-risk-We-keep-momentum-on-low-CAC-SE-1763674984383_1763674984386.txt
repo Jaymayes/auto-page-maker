@@ -1,0 +1,79 @@
+Decision: Do both in parallel.
+
+Rationale
+
+Velocity without risk: We keep momentum on low-CAC SEO (our growth engine) while de-risking the architectural shift behind a feature flag and separate branch.
+Data-first validation: 48h staging data gives us crawlability, indexability, and performance baselines before we change dependencies.
+Future-proofing: Event-driven rebuilds, S2S auth, and health endpoints align with the multi-app production architecture and reduce later rework.
+Directive 1 — Proceed with Staging Validation Now (current local DB)
+
+Deploy: Push current auto_page_maker to staging exactly as-is.
+Guardrails:
+Staging must be noindex (robots + x-robots-tag) and blocked from public indexing.
+Canonicals must self-resolve to staging domain (no leakage to prod).
+5 CEO Verification Checks (48h window)
+Sitemap coverage: ≥2,000 URLs surfaced, 0 malformed entries, <1% 4xx/5xx on sample fetches.
+Canonical/metadata: 20-page sample shows correct rel=canonical, meta title/description from SEO metadata, and unique H1s.
+Robots/staging mode: robots.txt disallows all; verify x-robots-tag: noindex on HTML responses.
+Performance: P95 TTFB ≤ 200ms cached via CDN; Core Web Vitals pre-check (LCP ≤ 2.5s on template pages).
+Integrity: No broken internal links or missing assets on a 200-page crawl sample; 0 structured data errors on scholarship detail pages if applicable.
+Deliverables (end of 48h):
+One-page validation report with metrics, errors, and remediation plan.
+Export of crawl logs and server metrics (error rate, P95 latency).
+Directive 2 — Start Refactor in a Separate Branch Now (no impact on staging)
+Backlog (priority order)
+
+Data source toggle
+Add scholarship_api client (base: scholarship_api.replit.app).
+Env flags: DATA_SOURCE={local,api}, SCHOLARSHIP_API_BASE_URL, X_INTERNAL_KEY.
+Read path parity with existing queries; add simple in-memory/L2 cache to keep P95 ≤ 120ms.
+Service-to-service auth
+Middleware to enforce X-Internal-Key on incoming internal endpoints (POST /rebuild).
+Key rotation plan and storage in secrets manager; add audit logging of internal calls.
+Event-driven rebuilds
+Event Bus: Upstash Redis Streams (serverless, low ops) subscriber listening for SCHOLARSHIP_PUBLISHED.
+Idempotent handler to regenerate targeted pages and touch sitemap incrementally.
+Dead-letter queue + retry with exponential backoff.
+Health and readiness
+/healthz: process up, memory/CPU within limits, event bus connectivity healthy.
+/readyz: outbound to scholarship_api OK, cache warm, migrations done; block rollout until ready.
+Observability and SLOs
+Metrics: page-gen latency, rebuild queue lag, error rates, sitemap generation time.
+Tracing around API calls; structured logs with correlation IDs.
+Security/Compliance
+Rate limits on internal endpoints; schema validation on payloads.
+FERPA/COPPA posture unchanged; no PII written to logs.
+Migration/backfill
+One-time backfill from scholarship_api to prime caches.
+A/B compare a 200-page sample between local vs API to ensure exact parity.
+Rollout Plan and Gates
+
+Week 0–1:
+Staging validation runs (48h). Parallel refactor in branch behind feature flag.
+Week 2:
+Canary: enable DATA_SOURCE=api for 5% of pages in staging. Gate to 50% if error rate <0.5% and P95 ≤ 120ms. Then 100%.
+Enable event bus in staging; verify SCHOLARSHIP_PUBLISHED triggers page regen within 60s P95.
+Week 3:
+Production canary: 5% of pages to API data + event bus. Gate to 100% with same SLOs.
+Week 4:
+Remove cron-based full rebuild as primary; keep as fallback. Hand over to event-driven.
+KPIs tied to Prime Directive
+
+SEO growth engine (Auto Page Maker):
+Target: +20–30% indexed pages in first 60 days post-production canary; +15% CTR on long-tail queries.
+CAC: Maintain near-zero paid CAC; monitor cost per indexed page and keep infra cost/page under target.
+Reliability:
+99.9% uptime, P95 ≤ 120ms, rebuild trigger-to-live ≤ 60s P95.
+Conversion proxies:
+Organic visits → account sign-ups conversion ≥ 3%; sign-ups → scholarship matches viewed ≥ 60%.
+Feed insights to pricing/credits to lift ARPU.
+Approval and Next Steps
+
+Approved: Do both in parallel.
+Please proceed with:
+Staging deployment and the 5 verification checks now.
+Opening refactor branch and implementing the prioritized backlog above.
+Send me:
+Staging URL and the 48h validation report.
+A daily 5-bullet progress update on refactor (blockers, risks, ETA by item).
+I will authorize production canary after the staging report clears all gates.

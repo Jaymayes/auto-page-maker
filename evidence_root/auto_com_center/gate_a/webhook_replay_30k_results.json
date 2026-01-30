@@ -1,0 +1,15 @@
+{
+  "total_sent": 30000,
+  "delivered": 30000,
+  "failed": 0,
+  "status_codes": {
+    "202": 30000
+  },
+  "latency_p50_ms": 123,
+  "latency_p95_ms": 231,
+  "latency_p99_ms": 302,
+  "duration_ms": 67183,
+  "avg_throughput_rps": 446.5415358051888,
+  "idempotency_violations": 0,
+  "ordering_violations": 0
+}

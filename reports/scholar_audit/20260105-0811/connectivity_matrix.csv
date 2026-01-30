@@ -1,0 +1,10 @@
+source,target,endpoint,http_code,latency_ms,status
+audit,scholar-auth,/health,200,172,pass
+audit,scholarship-api,/health,200,170,pass
+audit,scholarship-agent,/health,200,158,pass
+audit,scholarship-sage,/health,200,149,pass
+audit,student-pilot,/health,200,202,pass
+audit,provider-register,/health,200,213,pass
+audit,auto-page-maker,/health,200,462,pass
+audit,auto-com-center,/health,200,173,pass
+audit,auto-com-center,POST /api/events,200,388,pass

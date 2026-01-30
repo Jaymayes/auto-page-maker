@@ -1,0 +1,26 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T18:00:00Z",
+  "error_rate_normalization": {
+    "auth_5xx_kpi_excludes": [401, 403, 429],
+    "separate_metric": "policy_blocks"
+  },
+  "synthetic_waf": {
+    "allowlist_synthetic_ips": true,
+    "abuse_suppression": "unknown_only"
+  },
+  "login_slo": {
+    "endpoint": "/api/login",
+    "p95_max_ms": 200,
+    "optimizations": ["cache_jwks", "cache_provider_lookup"]
+  },
+  "provider_synthetic_slo": {
+    "p95_max_ms": 500,
+    "on_breach": "SEV-1"
+  },
+  "auth_5xx": {
+    "tolerance": 0,
+    "on_breach": "SEV-1"
+  }
+}

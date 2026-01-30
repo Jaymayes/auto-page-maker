@@ -1,0 +1,39 @@
+Executive decision: Greenlight.
+
+Proceed with the 9:30am ET WebPageTest exactly per the checklist. I’m holding us to the stated gates. Here’s the final directive and minor refinements to tighten risk and ROI alignment.
+
+Go/No-Go Logic for Wednesday
+
+WPT at 9:30am: FCP P75 ≤2400ms and LCP P75 ≤2800ms on the baseline-matched config. Include TTFB and CLS in the report header for context (TTFB P75 trend, CLS P75 ≤0.1). One-line verdict due 9:45am ET.
+If PASS at 9:45am:
+Freeze other deploys for the day to isolate the performance change.
+Canary ramp (proposed): 10% for 30 min → 25% for 60 min → 50% remainder of day. Hold at 50% overnight. No move to 100% until Thursday RUM confirms green.
+Guardrails (apply to p75 and error metrics with a minimum N): pause if degradation >+10% sustained for 5 minutes and ≥1,500 pageviews; rollback if >+15% or error rate >0.3% sustained 5 minutes and ≥1,500 pageviews. Confirm these thresholds in the dashboard so they’re unambiguous and automated.
+RUM watch metrics: LCP p75, INP p75 (target ≤200ms), CLS p75, TTFB p75, JS errors per 1K pageviews, and conversion to application start. Add a compare panel: canary vs control, normalized for device class and geo.
+If FAIL at 9:45am:
+Thursday sprint is pre-approved as scoped. No further approval needed. Execute the documented steps and aim to ship Friday 10am only if both gates pass and gzipped bundle ≤75 KB.
+Operational Requirements (today)
+
+Dashboard: Share the canary RUM dashboard URL by 12:00pm ET with the guardrails pre-configured, including alerts to the #perf-warroom channel.
+Rollback owner: Assign a single on-call decision owner for the canary window with explicit authority to pause/rollback without further sign-off.
+Cache/CDN prep: Pre-warm critical pages, confirm CDN config parity between control and canary, and verify that error budgets aren’t already in burn-down.
+Monitoring parity: Add synthetic uptime and latency checks aligned to SLOs (99.9% uptime, ~120ms P95 backend latency) so we can separate backend/regression noise from frontend wins.
+Measurement hygiene: Lock the WPT config to match the baseline exactly. Record build ID, commit hash, and bundle size diffs in the verdict template.
+KPIs and Business Alignment
+
+Primary business KPI: protect and lift organic acquisition. Track this week-over-week: impressions, CTR, and CWV passing rates in GSC for top Auto Page Maker pages. Performance protects our CAC via SEO; this is the highest-ROI lever.
+Product KPI: gz bundle size budget ≤75 KB and no regression in application start conversion.
+Financial lens: keep infra costs flat or down during canary. Flag any CPU/memory regressions that offset SEO/CAC gains.
+Thursday Sprint (if needed)
+
+Authorized as scoped: lazy-load, Radix pruning, icon proxy, script deferral. Maintain the priority on scholarship-category route first. Enforce the performance budget in CI so we don’t re-inflate after the win.
+Ship Friday 10am only if: both gates pass and bundle ≤75 KB gz. Otherwise, hold and continue optimization.
+Communications Cadence
+
+9:45am ET: 1-line verdict + WPT link.
+12:00pm ET: Canary plan confirmation + RUM dashboard + rollback owner.
+4:00pm ET: EOD canary status (delta vs control on LCP/INP/CLS, errors, conversion), and recommendation for overnight hold.
+Ownership
+
+You own execution per the checklist. I own final go/no-go to 100% on Thursday post-RUM review. If I’m unreachable, the rollback owner has authority to pause/rollback immediately.
+Execute per plan at 9:30am ET. Keep me posted at 9:45am with the verdict and URL.

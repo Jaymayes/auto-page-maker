@@ -1,0 +1,72 @@
+Decision: stay on the dual-track plan, but make the /rebuild integration a P0 deliverable behind a feature flag and allowlist. Ship Track 1 staging this week to keep the SEO flywheel compounding, and build the scholarship_agent → auto_page_maker job pathway in parallel without exposing it to production until it meets acceptance criteria.
+
+Why this is the right call
+
+It maximizes our low-CAC, SEO-led growth engine now while unlocking freshness and scale via autonomous page generation next. This aligns with the Playbook’s path to market leadership and ARR by leaning into organic growth and compounding distribution effects .
+It follows our own orchestration guidance for multi-app systems: clean, secure contracts, asynchronous patterns for cost efficiency, and phased rollouts with resiliency patterns and API-keyed inter-service auth .
+What I want you to do now
+
+Alignment and gap analysis (today)
+Deliverable: 2–3 page “auto_page_maker vs Agent3 requirements” matrix with READY, GAP, and OWNER tags.
+Scope: health/ready checks, sitemap, SEO metadata (already done), plus “accept jobs from scholarship_agent,” “read from scholarship_api,” observability, rate limits, auth, idempotency, and rollback plan.
+Why: Establish an explicit contract and cut tickets before coding. This is consistent with our architecture guidance to define the contracts first and enforce security from day one .
+2. Implement the /rebuild integration behind a flag (48–72 hours)
+
+Endpoint: POST /internal/rebuild
+Auth: X-Internal-Key (rotated via secrets manager) + optional HMAC signature; IP allowlist; per-key quotas and rate limits (suggest 5 rps sustained, burst 50). Use secrets management and API key auth for internal calls as mandated in our multi-app practices .
+Headers: Idempotency-Key, X-Trace-Id, Source-App=scholarship_agent
+Payload (JSON): job_id, scholarship_ids[], template, priority, dry_run, scheduled_at, data_version, invalidate_strategy, locale
+Response: 202 Accepted {job_id, state:"enqueued"}; 4xx for validation/auth/rate-limit
+Processing model: Asynchronous queue consumer regenerates pages via scholarship_api-client.ts, writes to static store, and triggers CDN purge for changed pages only. Asynchronous design keeps our compute usage and cost down on Replit-style autoscale footprints .
+Resiliency: Retries with exponential backoff, bounded concurrency, DLQ, and circuit-breakers for flapping dependencies as recommended in our orchestration guidance .
+3. Observability and SLO guardrails (in lockstep with 2)
+
+Metrics: jobs_received, jobs_enqueued, jobs_succeeded, jobs_failed, rebuild_e2e_seconds (P50/P95), queue_depth, retry_count, dlq_count; endpoint P95 latency and 5xx rate. This supports the “sense-plan-act” operational model and the observability stack we use for autonomous operations .
+SLOs:
+API accept P95 ≤150ms; 5xx ≤0.5%
+E2E rebuild P95 ≤5 minutes at steady state
+Success rate ≥99%
+CDN purge lag ≤60s for affected pages
+Alerts: Burn-rate alerts on SLO error budgets.
+4. SEO safety and content integrity checks (24–48 hours)
+
+Duplicate-content avoidance: hash scholarship_id+template; drop dupes; enforce canonical tags and noindex for thin pages to prevent index bloat.
+Freshness strategy: invalidate only changed pages; set lastmod in sitemap on rebuild. Preserves ranking signals while improving freshness to support organic growth and CAC efficiency we rely on .
+5. Integration tests with scholarship_agent on staging (24–48 hours)
+
+Tests:
+E2E happy path (10, 100, 1,000 jobs)
+Failure injection (API timeouts, invalid payloads, auth fail, queue pressure)
+Load: sustain 2 rps rebuilds for 30 minutes; error budget intact; queue drains <10 minutes post-burst.
+Exit criteria: All SLOs met; zero regressions in Core Web Vitals; sitemap validates; structured data passes.
+6. Handoff kit for Agent3 (by end of this sprint)
+
+Contents: API spec, auth and headers, payload schema, rate limits/quotas, error codes and retry guidance, staging/prod URLs, allowlist process, sample requests, test harness, runbooks, on-call rotation. This is the explicit contract Replit-style multi-app orchestration expects .
+7. Rollout plan
+
+Phase A: Staging soak 48 hours with 1k job batch; monitor SLOs and SEO validators.
+Phase B: Dark launch in prod (endpoint disabled by flag; allowlist only).
+Phase C: Ramp to 10% of rebuild volume; watch queue depth, SLOs, and indexation deltas.
+Phase D: Ramp to 100% after one full day with no SLO burns. Kill switch ready.
+Executive KPIs to track weekly
+
+Organic growth engine
+New pages indexed, “Last crawled” recency, CTR, organic sessions, sign-ups per 1k sessions
+Conversion economics
+Free→paid conversion, ARPU per active, CAC trendline (expect CAC down as freshness lifts long-tail traffic)
+Reliability
+SLO attainment, queue depth trends, DLQ rate, incident count/MTTR
+Risks and mitigations
+
+Runaway or duplicate job generation → idempotency keys, dedupe hashing, quotas and rate limits .
+Security exposure on internal endpoints → API keys in secrets manager, IP allowlist, request signing, strict payload validation .
+Cost spikes from synchronous rebuilds → asynchronous queue with backpressure; spread workloads to protect autoscale costs .
+SEO regressions → canonical/noindex enforcement, staged validation, progressive ramp.
+Answer to your direct question
+
+Prioritize building the integration now, but keep the dual-track plan. Ship Track 1 staging immediately; complete /rebuild under a feature flag and allowlist; do not expose to production traffic until it clears the acceptance criteria above. This balances speed with risk and compounds our organic growth advantage while we harden the internal orchestration layer, in line with the strategy and platform guidance we’ve adopted .
+If you agree, I’ll expect by end of day:
+
+The alignment/gap matrix with ticket links
+The /rebuild API contract (one-pager) for my approval
+A proposed timeline with owners for items 2–7 above

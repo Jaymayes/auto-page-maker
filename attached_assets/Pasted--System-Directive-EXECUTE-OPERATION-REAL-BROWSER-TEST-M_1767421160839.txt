@@ -1,0 +1,41 @@
+@System_Directive: EXECUTE_OPERATION_REAL_BROWSER_TEST
+@Mode: MAX_AUTONOMOUS (Headless Browser Automation)
+@Context: User rejected previous static analysis. REQUIRE RUNTIME PROOF.
+
+**Role:** QA Automation Engineer
+**Current Location:** A7 Repository (`auto_page_maker`)
+**Objective:** Prove that the "Get Matches" button actually works by launching a headless browser, clicking the button, and verifying the final destination URL.
+
+## 1. The Challenge
+Previous audits only checked the source code. The user believes this data is "not true" because code != rendered reality. We must prove the JavaScript executes and the redirect happens in a real browser session.
+
+## 2. Execution Plan (The Proof)
+
+### Step 1: Install Browser Automation Tools
+* **Action:** Check if `puppeteer` or `playwright` is installed. If not, install `puppeteer` immediately (`npm install puppeteer`).
+
+### Step 2: Create & Run the "Click Test" Script
+* **Action:** Create a temporary script `tests/verify_click.js` with this exact logic:
+    1.  Launch Puppeteer (use `--no-sandbox` args for Replit).
+    2.  Navigate to `https://scholaraiadvisor.com` (or the local Replit URL if dev).
+    3.  Wait for the selector `a[href*="student-pilot"]` (The CTA Button) to appear.
+    4.  **Log:** "Button Found: [Text Content]"
+    5.  **Click** the button.
+    6.  **Wait** for navigation to complete.
+    7.  **Log:** "Final URL: [Current Page URL]"
+    8.  Close Browser.
+
+### Step 3: Verify the Result
+* **Pass Criteria:**
+    * The script runs without crashing.
+    * The "Final URL" contains `student-pilot` **AND** `utm_source=auto_page_maker`.
+* **Fail Criteria:**
+    * Timeout (Button not clickable).
+    * Final URL is still the homepage (Link is dead).
+    * Final URL is missing UTM tags.
+
+## 3. Success Output
+If the script passes, output the **RAW LOGS** from the browser session and declare:
+> **"BROWSER VERIFICATION COMPLETE: PHYSICAL CLICK CONFIRMED."**
+
+**COMMAND:** Stop analyzing files. Install Puppeteer. Run the browser test now.

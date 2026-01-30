@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-20T00:30:00Z",
+  "ceo_approval": "CEO-20260119-OCA-PROMOTE-10PCT-PREAUTH",
+  "canary_id": "oca_canary_5pct_20260120",
+  "experiment_design": {
+    "holdout_control": {
+      "enabled": true,
+      "traffic_pct": 10,
+      "description": "No OCA notifications - measures true lift",
+      "receives_notifications": false,
+      "receives_oca_feature": false
+    },
+    "treatment_a": {
+      "traffic_pct": 45,
+      "template": "student-email-variant-a.html",
+      "subject": "Apply to {{scholarship_name}} in seconds — you write the essay",
+      "cta": "Review application"
+    },
+    "treatment_b": {
+      "traffic_pct": 45,
+      "template": "student-email-variant-b.html",
+      "subject": "Fast-Track your {{scholarship_name}} application (no AI essays, ever)",
+      "cta": "Open fast-track review"
+    }
+  },
+  "compliance_line": {
+    "text": "No AI essays. Students write; we only assist.",
+    "required_surfaces": ["email_variant_a", "email_variant_b", "modal", "integrity_panel"],
+    "validation": "must_render_identically"
+  },
+  "core_activation_metric": "first_document_upload",
+  "success_criteria": {
+    "completion_lift_vs_control_pct": {"min": 10},
+    "provider_acceptance": {"delta": "neutral_or_positive"},
+    "refund_rate_pct": {"max": 2.0}
+  }
+}

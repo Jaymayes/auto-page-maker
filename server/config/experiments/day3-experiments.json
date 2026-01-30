@@ -1,0 +1,56 @@
+{
+  "version": "2.0.0",
+  "updated_at": "2026-01-19T22:30:00Z",
+  "ceo_authorization": "CEO-20260119-EXPERIMENT-ROLLOUT-100",
+  "experiments": [
+    {
+      "id": "first_upload_ux_sticky_cta",
+      "name": "First-Upload UX: Sticky Resume CTA",
+      "traffic_pct": 100,
+      "previous_traffic_pct": 10,
+      "rollout_at": "2026-01-19T22:30:00Z",
+      "description": "Sticky 'Resume upload' CTA with prefilled step state",
+      "rationale": "Playbook V2.0 directive: first document upload is primary activation",
+      "success_metrics": {
+        "primary": "upload_completion_rate",
+        "secondary": "credit_conversion_rate"
+      },
+      "observed_lift": {
+        "upload_completion_pct": 7.26,
+        "credit_conversion_pct": 11.58
+      },
+      "a8_events": ["upload_started", "upload_completed", "credit_purchase"],
+      "status": "ROLLED_OUT_100PCT"
+    },
+    {
+      "id": "credit_pack_framing",
+      "name": "Credit Pack Framing Test",
+      "traffic_pct": 100,
+      "previous_traffic_pct": 10,
+      "rollout_at": "2026-01-19T22:30:00Z",
+      "description": "3-pack anchor + 1-pack value nudge",
+      "rationale": "Fuse Essay Coach value into core flows for implicit-fit matching",
+      "markup": "4x (unchanged)",
+      "success_metrics": {
+        "primary": "arpu_lift_pct"
+      },
+      "observed_lift": {
+        "arpu_pct": 15.35
+      },
+      "auto_disable": {
+        "refund_spike_threshold_pct": 1,
+        "window_hours": 24
+      },
+      "status": "ROLLED_OUT_100PCT"
+    }
+  ],
+  "cost_guardrails": {
+    "analyze_queue_depth_max": 30,
+    "analyze_p95_max_ms": 1500,
+    "breach_window_min": 15,
+    "throttle_action": "non_revenue_tasks_50pct",
+    "page_on_breach": ["ops", "finance"],
+    "spend_projection_ceiling_usd": 300,
+    "spend_breach_window_hours": 1
+  }
+}

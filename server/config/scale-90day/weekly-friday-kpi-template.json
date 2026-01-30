@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-16T22:30:00Z",
+  "report_type": "weekly_friday_1pager",
+  "sections": [
+    {
+      "name": "kpi_rollup",
+      "metrics": [
+        "uptime_pct",
+        "p95_latency_ms",
+        "error_rate_pct",
+        "revenue_b2c_net_usd",
+        "revenue_b2b_fees_usd",
+        "arpu_usd",
+        "ai_gross_margin_pct",
+        "refund_rate_pct",
+        "chargebacks"
+      ]
+    },
+    {
+      "name": "incidents",
+      "metrics": ["sev1_count", "sev2_count", "mttr_avg_min"]
+    },
+    {
+      "name": "cost_posture",
+      "metrics": ["weekly_spend_usd", "velocity_per_hour", "budget_utilization_pct", "top_cost_drivers"]
+    },
+    {
+      "name": "seo_growth",
+      "metrics": ["net_pages_indexed", "ctr_pct", "indexed_to_click_ratio", "organic_sessions"]
+    },
+    {
+      "name": "funnel_deltas",
+      "metrics": [
+        "visitor_to_signup_delta_pct",
+        "signup_to_first_upload_delta_pct",
+        "first_upload_to_paid_delta_pct"
+      ]
+    },
+    {
+      "name": "next_week_experiments",
+      "format": "ranked_by_roi",
+      "max_items": 5
+    }
+  ],
+  "delivery": {
+    "frequency": "weekly",
+    "day": "Friday",
+    "format": "markdown_1pager"
+  }
+}

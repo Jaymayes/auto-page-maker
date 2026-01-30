@@ -1,0 +1,350 @@
+{
+  "security_scanning_config": {
+    "version": "1.0",
+    "platform": "ScholarMatch Platform",
+    "scan_frequency": "daily",
+    "non_blocking_mode": true,
+    "risk_tolerance": {
+      "critical_vulnerabilities": 0,
+      "high_vulnerabilities": 5,
+      "medium_vulnerabilities": 20,
+      "low_vulnerabilities": 50
+    }
+  },
+  
+  "sast_configuration": {
+    "enabled": true,
+    "tools": [
+      {
+        "name": "ESLint Security Plugin",
+        "rules": {
+          "security/detect-unsafe-regex": "error",
+          "security/detect-buffer-noassert": "error",
+          "security/detect-child-process": "warn",
+          "security/detect-disable-mustache-escape": "error",
+          "security/detect-eval-with-expression": "error",
+          "security/detect-no-csrf-before-method-override": "error",
+          "security/detect-non-literal-fs-filename": "warn",
+          "security/detect-non-literal-require": "warn",
+          "security/detect-possible-timing-attacks": "warn",
+          "security/detect-pseudoRandomBytes": "error",
+          "security/detect-object-injection": "warn"
+        },
+        "severity_thresholds": {
+          "max_errors": 0,
+          "max_warnings": 20
+        }
+      }
+    ],
+    "file_patterns": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.js",
+      "**/*.jsx"
+    ],
+    "exclusions": [
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "*.test.*",
+      "*.spec.*"
+    ]
+  },
+
+  "dependency_scanning": {
+    "enabled": true,
+    "audit_level": "moderate",
+    "auto_fix": false,
+    "monitoring": {
+      "daily_scans": true,
+      "pr_scans": true,
+      "baseline_updates": "weekly"
+    },
+    "vulnerability_thresholds": {
+      "critical": {
+        "max_count": 0,
+        "action": "block_deployment"
+      },
+      "high": {
+        "max_count": 5,
+        "action": "require_review"
+      },
+      "moderate": {
+        "max_count": 20,
+        "action": "log_warning"
+      },
+      "low": {
+        "max_count": 50,
+        "action": "informational"
+      }
+    },
+    "exclusions": [
+      "devDependencies"
+    ]
+  },
+
+  "secrets_detection": {
+    "enabled": true,
+    "tools": [
+      {
+        "name": "TruffleHog",
+        "config": {
+          "only_verified": true,
+          "format": "json",
+          "branch_scanning": true
+        }
+      },
+      {
+        "name": "Custom Pattern Matching",
+        "patterns": [
+          {
+            "name": "API Keys",
+            "regex": "api[_-]?key.*[=:].*['\"][a-zA-Z0-9]{20,}['\"]",
+            "severity": "high"
+          },
+          {
+            "name": "Database URLs",
+            "regex": "database[_-]?url.*[=:].*['\"].*://.*['\"]",
+            "severity": "critical"
+          },
+          {
+            "name": "JWT Secrets",
+            "regex": "jwt[_-]?secret.*[=:].*['\"][a-zA-Z0-9]{32,}['\"]",
+            "severity": "high"
+          },
+          {
+            "name": "OpenAI Keys",
+            "regex": "openai[_-]?api[_-]?key.*[=:].*['\"]sk-[a-zA-Z0-9]{48}['\"]",
+            "severity": "high"
+          }
+        ]
+      }
+    ],
+    "exclusions": [
+      ".env.example",
+      "*.md",
+      "qa/**",
+      "docs/**"
+    ],
+    "false_positive_patterns": [
+      "YOUR_API_KEY_HERE",
+      "REPLACE_WITH_ACTUAL_KEY",
+      "example-key-value"
+    ]
+  },
+
+  "container_scanning": {
+    "enabled": false,
+    "reason": "No containerization implemented yet",
+    "future_config": {
+      "base_image_scanning": true,
+      "dependency_scanning": true,
+      "configuration_scanning": true,
+      "runtime_scanning": false
+    }
+  },
+
+  "infrastructure_scanning": {
+    "enabled": false,
+    "reason": "Running on Replit managed infrastructure",
+    "monitoring": {
+      "network_configuration": false,
+      "access_controls": false,
+      "encryption_status": false
+    }
+  },
+
+  "compliance_scanning": {
+    "enabled": true,
+    "standards": [
+      {
+        "name": "FERPA",
+        "description": "Family Educational Rights and Privacy Act",
+        "checks": [
+          "student_data_encryption",
+          "access_control_implementation",
+          "data_retention_policies",
+          "audit_trail_logging"
+        ]
+      },
+      {
+        "name": "COPPA",
+        "description": "Children's Online Privacy Protection Act",
+        "checks": [
+          "age_verification_mechanisms",
+          "parental_consent_tracking",
+          "data_collection_minimization",
+          "safe_data_handling"
+        ]
+      },
+      {
+        "name": "GDPR",
+        "description": "General Data Protection Regulation",
+        "checks": [
+          "consent_management",
+          "right_to_erasure",
+          "data_portability",
+          "privacy_by_design"
+        ]
+      }
+    ],
+    "automation_level": "basic",
+    "manual_review_required": true
+  },
+
+  "reporting_configuration": {
+    "formats": ["json", "markdown", "html"],
+    "distribution": {
+      "security_team": true,
+      "development_team": true,
+      "management": "summary_only"
+    },
+    "retention_period": "90_days",
+    "archival": {
+      "enabled": true,
+      "location": "qa/security/archive",
+      "compression": true
+    }
+  },
+
+  "integration_settings": {
+    "github_actions": {
+      "enabled": true,
+      "workflow_file": ".github/workflows/security-scan.yml",
+      "triggers": ["push", "pull_request", "schedule"],
+      "notifications": {
+        "pr_comments": true,
+        "slack_alerts": false,
+        "email_reports": false
+      }
+    },
+    "development_workflow": {
+      "pre_commit_hooks": false,
+      "ide_integration": false,
+      "ci_cd_gates": false
+    }
+  },
+
+  "risk_assessment": {
+    "current_risk_level": "medium",
+    "risk_factors": [
+      {
+        "category": "Data Sensitivity",
+        "level": "high",
+        "reason": "Handles student educational data (PII)"
+      },
+      {
+        "category": "External Dependencies",
+        "level": "medium",
+        "reason": "104+ dependencies with regular updates needed"
+      },
+      {
+        "category": "Authentication Complexity",
+        "level": "medium",
+        "reason": "JWT-based auth with multiple user types"
+      },
+      {
+        "category": "Third-party Integrations",
+        "level": "low",
+        "reason": "Limited external API integrations"
+      },
+      {
+        "category": "Infrastructure",
+        "level": "low",
+        "reason": "Managed Replit hosting environment"
+      }
+    ],
+    "mitigation_strategies": [
+      {
+        "risk": "Student Data Exposure",
+        "mitigation": "Comprehensive input validation and encryption at rest",
+        "priority": "critical"
+      },
+      {
+        "risk": "Dependency Vulnerabilities",
+        "mitigation": "Daily automated scanning with threshold enforcement",
+        "priority": "high"
+      },
+      {
+        "risk": "Code Injection",
+        "mitigation": "SAST scanning with security-focused ESLint rules",
+        "priority": "high"
+      },
+      {
+        "risk": "Secrets Exposure",
+        "mitigation": "Multi-tool secrets detection with pattern matching",
+        "priority": "medium"
+      }
+    ]
+  },
+
+  "security_metrics": {
+    "kpis": [
+      {
+        "name": "Mean Time to Detect (MTTD)",
+        "target": "< 24 hours",
+        "current": "Not measured"
+      },
+      {
+        "name": "Mean Time to Respond (MTTR)",
+        "target": "< 48 hours for critical",
+        "current": "Not measured"
+      },
+      {
+        "name": "Vulnerability Fix Rate",
+        "target": "> 95% within SLA",
+        "current": "Not measured"
+      },
+      {
+        "name": "False Positive Rate",
+        "target": "< 10%",
+        "current": "Not measured"
+      },
+      {
+        "name": "Security Scan Coverage",
+        "target": "100% of codebase",
+        "current": "~90% estimated"
+      }
+    ],
+    "tracking": {
+      "dashboard_url": "TBD",
+      "update_frequency": "daily",
+      "review_cycle": "weekly"
+    }
+  },
+
+  "upgrade_path": {
+    "phase_1": {
+      "name": "Basic Security Scanning",
+      "status": "completed",
+      "features": [
+        "SAST scanning with ESLint",
+        "Dependency vulnerability scanning",
+        "Secrets detection",
+        "Non-blocking CI integration"
+      ]
+    },
+    "phase_2": {
+      "name": "Advanced Security Monitoring",
+      "status": "planned",
+      "timeline": "3-6 months",
+      "features": [
+        "Runtime security monitoring",
+        "Behavioral anomaly detection",
+        "Advanced threat intelligence",
+        "Security metrics dashboard"
+      ]
+    },
+    "phase_3": {
+      "name": "Enterprise Security",
+      "status": "future",
+      "timeline": "6-12 months",
+      "features": [
+        "Container security scanning",
+        "Infrastructure as code security",
+        "Advanced compliance automation",
+        "Security orchestration"
+      ]
+    }
+  }
+}

@@ -1,0 +1,57 @@
+app: scholarship_api
+base_url: https://scholarship-api-jamarrlmayes.replit.app
+version: v2.2
+owner: Backend Engineering Team
+target_score: 4
+generated_at: "2025-10-29T17:30:00Z"
+
+tasks:
+  - id: FP-API-CANARY-JSON
+    title: Implement /canary endpoint (JSON)
+    priority: P0
+    estimate_hours: 1
+    
+    changes:
+      - file: server/index.ts
+        code_diff: |
+          app.get('/canary', (req, res) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.json({
+              ok: true,
+              service: 'scholarship_api',
+              base_url: process.env.REPL_SLUG 
+                ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`
+                : 'http://localhost:5000',
+              version: 'v2.2',
+              timestamp: new Date().toISOString()
+            });
+          });
+    
+    success_criteria:
+      - /canary returns 200 JSON
+      - Score improves to 4/5
+
+  - id: FP-SEC-HEADERS-6OF6
+    title: Add Permissions-Policy header
+    priority: P1
+    estimate_hours: 0.5
+    
+    changes:
+      - file: server/index.ts
+        code_diff: |
+          app.use(helmet({
+            permissionsPolicy: {
+              features: {
+                camera: ["'none'"],
+                microphone: ["'none'"],
+                geolocation: ["'none'"]
+              }
+            }
+          }));
+    
+    success_criteria:
+      - Permissions-Policy header present
+      - 6/6 security headers
+
+total_eta_to_ready: 1.5 hours
+total_eta_to_4of5: 1.5 hours

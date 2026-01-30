@@ -1,0 +1,97 @@
+{
+  "app_id": "auto_page_maker",
+  "base_url": "https://auto-page-maker-jamarrlmayes.replit.app",
+  "version": "v2.7",
+  "git_sha": "unknown",
+  "readiness": "CONDITIONAL GO",
+  "revenue_ready": "ETA: 168h",
+  "eta": "168h",
+  "timestamp": "2025-11-25T15:35:00Z",
+  "tests": {
+    "total": 15,
+    "passed": 15,
+    "failed": 0,
+    "categories": {
+      "global_compliance": {
+        "passed": 4,
+        "tests": [
+          "GET /healthz returns 200 with required fields",
+          "X-System-Identity header present",
+          "X-App-Base-URL header present",
+          "system_identity and base_url in JSON"
+        ]
+      },
+      "identity": {
+        "passed": 2,
+        "tests": [
+          "X-System-Identity: auto_page_maker",
+          "X-App-Base-URL: https://auto-page-maker-jamarrlmayes.replit.app"
+        ]
+      },
+      "prometheus_metrics": {
+        "passed": 2,
+        "tests": [
+          "app_info{app_id,base_url,version} gauge present",
+          "pages_rendered_total{status} counter present"
+        ]
+      },
+      "sitemap": {
+        "passed": 1,
+        "tests": [
+          "GET /sitemap.xml returns valid XML with 2987 URLs"
+        ]
+      },
+      "seo_elements": {
+        "passed": 4,
+        "tests": [
+          "rel=canonical on pages",
+          "schema.org JSON-LD markup",
+          "OpenGraph tags (og:type, og:title, og:description, og:url)",
+          "Twitter cards (twitter:card, twitter:title, twitter:description)"
+        ]
+      },
+      "security": {
+        "passed": 2,
+        "tests": [
+          "POST /api/v1/pages/generate returns 401 without auth",
+          "POST /api/v1/rebuild returns 401 without auth"
+        ]
+      }
+    }
+  },
+  "dependencies": {
+    "required": {
+      "google_search_console": {
+        "status": "pending",
+        "action": "Submit sitemap",
+        "url": "https://auto-page-maker-jamarrlmayes.replit.app/sitemap.xml"
+      }
+    },
+    "configured": {
+      "google_analytics": {"status": "configured"},
+      "database": {"status": "connected", "provider": "neon"},
+      "object_storage": {"status": "connected"}
+    },
+    "cross_app": {
+      "scholar_auth": {"endpoint": "/.well-known/openid-configuration", "status": "reachable"},
+      "scholarship_api": {"endpoint": "/healthz", "status": "not_deployed"},
+      "auto_com_center": {"endpoint": "/healthz", "status": "not_deployed"}
+    }
+  },
+  "metrics_sample": "app_info{app_id=\"auto_page_maker\",base_url=\"https://auto-page-maker-jamarrlmayes.replit.app\",version=\"v2.7\"} 1\npages_rendered_total{status=\"success\"} 5\npages_rendered_total{status=\"error\"} 0",
+  "slo": {
+    "p95_latency_healthz_ms": 100,
+    "p95_latency_version_ms": 50,
+    "target_p95_ms": 120,
+    "uptime_target": "99.9%",
+    "uptime_actual": "100%"
+  },
+  "seo": {
+    "sitemap_url_count": 2987,
+    "canonical_present": true,
+    "schema_org_present": true,
+    "og_tags_present": true,
+    "twitter_cards_present": true
+  },
+  "final_status_line": "auto_page_maker | https://auto-page-maker-jamarrlmayes.replit.app | Readiness: CONDITIONAL GO | Revenue-ready: ETA: 168h"
+}

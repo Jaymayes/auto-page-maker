@@ -1,0 +1,35 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "sev_level": "SEV-1",
+  "declared_at": "2026-01-19T18:30:00Z",
+  "traffic": {
+    "TRAFFIC_CAP_B2C_PILOT": 0.25,
+    "SAFETY_LOCK": "active",
+    "AUTO_REFUNDS": "enabled",
+    "b2b_sessions_drop_acceptable": "30-60s"
+  },
+  "telemetry_gate": {
+    "TELEMETRY_STRICT_MODE": false,
+    "TELEMETRY_REQUIRE_IDEMPOTENCY": false,
+    "accept_all_events": true,
+    "response_codes": [
+      200,
+      202
+    ],
+    "log_missing_header": true,
+    "compute_sha256_body": true,
+    "dedupe_post_hoc": true
+  },
+  "fleet_seo": {
+    "waf_block_sitemap": true,
+    "scheduler_tokens": "revoked",
+    "internal_jobs": "paused"
+  },
+  "probes": {
+    "localhost_disabled": true,
+    "metrics_p95_direct_disabled": true,
+    "unified_metrics_enabled": true,
+    "a8_p95_aggregate": true
+  }
+}

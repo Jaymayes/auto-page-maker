@@ -1,0 +1,234 @@
+# AGENT3 v2.6 Fix Plan: auto_com_center
+# Status: 1 open item (non-blocking for production)
+# Last Updated: 2025-10-31T17:05:00Z
+
+meta:
+  app_name: auto_com_center
+  app_base_url: https://auto-com-center-jamarrlmayes.replit.app
+  version: v2.6
+  overall_status: PRODUCTION_READY_WITH_ENHANCEMENTS
+  critical_blockers: 0
+  high_priority: 0
+  medium_priority: 1
+  low_priority: 0
+
+# Open Items
+
+open_items:
+  - id: FIX-001
+    title: "Implement Idempotency-Key Middleware for Write Endpoints"
+    description: |
+      U5 gate requires Idempotency-Key header support for all write operations (POST/PUT/PATCH/DELETE).
+      Current status: Rate limiting implemented (300 rpm reads, 120 rpm writes) but idempotency
+      middleware is not yet implemented.
+      
+      Specific endpoints requiring idempotency:
+      - POST /api/messages (primary use case per A8 requirements)
+      - POST /api/executive/kpi/generate
+      - POST /api/events/log
+      - POST /api/admin/rebuild-pages
+      - Any future write endpoints
+    severity: MEDIUM
+    impact: |
+      Without idempotency middleware, duplicate requests with the same Idempotency-Key may result in:
+      - Duplicate message sends (primary concern)
+      - Duplicate event logging
+      - Duplicate page generation
+      Current mitigation: Queue-level deduplication provides partial protection for messages.
+    owner: Agent3
+    assigned_to: Development Team
+    eta_hours: "2-4"
+    status: OPEN
+    priority: MEDIUM
+    blocking_production: false
+    
+    acceptance_criteria:
+      - Middleware intercepts all POST/PUT/PATCH/DELETE requests
+      - Checks for Idempotency-Key header
+      - Stores key + request hash in cache (Redis or in-memory) for 24h
+      - On replay with same key and same body: return original result (200/201)
+      - On replay with same key and different body: return 409 with error.code=IDEMPOTENCY_CONFLICT
+      - Unit tests cover all scenarios
+      - Integration tests verify POST /messages with Idempotency-Key
+    
+    implementation_plan:
+      - step: 1
+        action: "Create server/middleware/idempotency.ts"
+        details: |
+          - Import request ID middleware for correlation
+          - Use in-memory Map with TTL for cache (upgrade to Redis for production scale)
+          - Hash request body for comparison
+          - Store: { key: { body_hash, response, timestamp } }
+      - step: 2
+        action: "Register middleware in server/index.ts"
+        details: "Add after requestIdMiddleware, before route handlers"
+      - step: 3
+        action: "Add tests in e2e/idempotency.test.ts"
+        details: |
+          - Test: Same key, same body → 200 with cached response
+          - Test: Same key, different body → 409 IDEMPOTENCY_CONFLICT
+          - Test: Different key → normal processing
+          - Test: Key expiration after 24h
+      - step: 4
+        action: "Update U5 gate status to PASS in readiness report"
+        details: "Re-run verification and update deliverables"
+    
+    dependencies:
+      - X-Request-ID middleware (already implemented)
+      - Standard error format U4 (already implemented)
+    
+    risks:
+      - Memory growth if using in-memory cache without TTL cleanup
+      - Race conditions on concurrent requests with same key
+    
+    mitigations:
+      - Implement TTL-based cleanup (setInterval every 5 minutes)
+      - Use atomic cache operations (CAS) to prevent race conditions
+      - Monitor cache size via metrics
+    
+    testing_commands: |
+      # Test idempotency with duplicate requests
+      KEY="test-key-$(uuidgen)"
+      curl -X POST https://auto-com-center-jamarrlmayes.replit.app/api/messages \
+        -H "Content-Type: application/json" \
+        -H "Idempotency-Key: $KEY" \
+        -d '{"to":"test@example.com","subject":"Test"}'
+      
+      # Replay should return cached result
+      curl -X POST https://auto-com-center-jamarrlmayes.replit.app/api/messages \
+        -H "Content-Type: application/json" \
+        -H "Idempotency-Key: $KEY" \
+        -d '{"to":"test@example.com","subject":"Test"}'
+      
+      # Different body should return 409
+      curl -X POST https://auto-com-center-jamarrlmayes.replit.app/api/messages \
+        -H "Content-Type: application/json" \
+        -H "Idempotency-Key: $KEY" \
+        -d '{"to":"different@example.com","subject":"Different"}'
+    
+    references:
+      - "AGENT3 v2.6 Unified Execution Prompt - U5"
+      - "A8 auto_com_center Tests: POST /messages (Idempotency-Key)"
+      - "https://stripe.com/docs/api/idempotent_requests"
+
+# Completed Items (for tracking)
+
+completed_items:
+  - id: DONE-001
+    title: "Implement U0 Startup Handshake"
+    completed_date: "2025-10-31T17:00:00Z"
+    notes: "Handshake line displays on console with decorative borders"
+  
+  - id: DONE-002
+    title: "Update /canary to v2.6 Spec"
+    completed_date: "2025-10-31T17:00:00Z"
+    notes: "9 exact fields; revenue_role=supports; revenue_eta_hours=0-1"
+  
+  - id: DONE-003
+    title: "Implement U4 Standard Error Format"
+    completed_date: "2025-10-31T17:01:00Z"
+    notes: "Nested error object; no top-level request_id/status/timestamp"
+  
+  - id: DONE-004
+    title: "Fix Universal Security Headers Middleware Ordering"
+    completed_date: "2025-10-31T16:32:00Z"
+    notes: "Moved before all routes to ensure 100% coverage including JWKS/OIDC"
+  
+  - id: DONE-005
+    title: "Implement CORS Allowlist with 8 AGENT3 Origins"
+    completed_date: "2025-10-31T16:30:00Z"
+    notes: "Exact 8 origins; no wildcards; dev-mode localhost additions"
+  
+  - id: DONE-006
+    title: "Add SHARED_SECRET Compatibility Shim"
+    completed_date: "2025-10-31T16:31:00Z"
+    notes: "Fallback to AGENT_BRIDGE_SHARED_SECRET with deprecation warning"
+
+# Enhancement Backlog (non-blocking; post-launch)
+
+enhancements:
+  - id: ENH-001
+    title: "Upgrade Idempotency Cache to Redis"
+    description: "Replace in-memory cache with Redis for distributed idempotency support"
+    priority: LOW
+    eta_hours: "4-6"
+    justification: "In-memory sufficient for single-instance deployment; upgrade for multi-instance scale"
+  
+  - id: ENH-002
+    title: "Add Idempotency Metrics to Dashboard"
+    description: "Track cache hits, misses, conflicts, and size in /api/executive/kpi"
+    priority: LOW
+    eta_hours: "2-3"
+  
+  - id: ENH-003
+    title: "Implement Graceful Degradation for Command Center 404"
+    description: "Auto-retry registration with exponential backoff instead of single log"
+    priority: LOW
+    eta_hours: "1-2"
+    justification: "Current log-only approach acceptable; enhancement improves resilience"
+
+# Rollout Plan
+
+rollout:
+  phase_1:
+    name: "Production Deployment (Current State)"
+    gates_met: "U0-U4, U6-U8"
+    gates_pending: "U5 (idempotency)"
+    go_no_go: GO
+    rationale: "8/9 gates PASS; U5 partial with queue-level mitigation in place"
+    deployment_window: "Immediate"
+    rollback_trigger: "5xx rate >1% OR P95 >90ms sustained >5 min"
+  
+  phase_2:
+    name: "Idempotency Enhancement"
+    gates_met: "All U0-U8"
+    eta: "2-4 hours post FIX-001 completion"
+    deployment_window: "Low-traffic period (02:00-05:00 UTC recommended)"
+    testing_plan: |
+      1. Deploy idempotency middleware to staging
+      2. Run e2e/idempotency.test.ts
+      3. Load test with 100 duplicate requests
+      4. Verify cache size and TTL cleanup
+      5. Deploy to production with FEATURE_FLAG_ROLLOUT_PERCENT=10
+      6. Monitor for 1 hour; increment to 50%, then 100%
+    success_criteria: |
+      - Duplicate requests return cached response (no duplicate sends)
+      - 409 IDEMPOTENCY_CONFLICT on body mismatch
+      - Cache size stable <10MB
+      - No P95 regression
+
+# Monitoring and Alerts
+
+monitoring:
+  metrics:
+    - name: "idempotency_cache_size"
+      threshold: ">10MB"
+      action: "Alert ops team; consider Redis upgrade"
+    
+    - name: "idempotency_conflicts_rate"
+      threshold: ">1% of requests"
+      action: "Investigate client retry logic"
+    
+    - name: "P95_latency"
+      threshold: ">90ms sustained >5min"
+      action: "Open circuit via scholarship_sage"
+  
+  dashboards:
+    - "auto_com_center /canary health check"
+    - "Executive KPI dashboard (/api/executive/kpi/latest)"
+    - "Endpoint metrics by route (/api/metrics/endpoints)"
+
+# Sign-Off
+
+approval:
+  agent3: true
+  architect: false
+  ceo: false
+  
+notes: |
+  This fix plan documents a single open medium-priority item (idempotency middleware) that is
+  non-blocking for production deployment. Current queue-level deduplication provides mitigation.
+  
+  Production deployment approved with enhancement tracked for post-launch implementation.
+  
+  Next review scheduled after FIX-001 completion to update U5 gate status to PASS.

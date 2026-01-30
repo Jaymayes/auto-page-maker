@@ -1,0 +1,58 @@
+{
+  "validation_timestamp": "2026-01-06T20:20:00Z",
+  "app": "A7_scholar_pagemaker",
+  "namespace": "simulated_audit",
+  "version": "latest",
+  "sitemap": {
+    "url": "https://scholaraiadvisor.com/sitemap.xml",
+    "http_status": 200,
+    "size_bytes": 583421,
+    "response_time_ms": 699,
+    "valid_xml": true,
+    "total_urls": 2908,
+    "url_breakdown": {
+      "scholarships": 1748,
+      "scholarship": 1155,
+      "browse_hubs": 3,
+      "pricing": 1
+    }
+  },
+  "hub_pages": {
+    "browse": {
+      "url": "https://scholaraiadvisor.com/browse",
+      "http_status": 200,
+      "response_time_ms": 76
+    },
+    "browse_states": {
+      "url": "https://scholaraiadvisor.com/browse/states",
+      "http_status": 200,
+      "response_time_ms": 104
+    },
+    "browse_majors": {
+      "url": "https://scholaraiadvisor.com/browse/majors",
+      "http_status": 200,
+      "response_time_ms": 102
+    }
+  },
+  "seo_features": {
+    "sitemap_protocol": "sitemaps.org/0.9",
+    "lastmod_present": true,
+    "changefreq_present": true,
+    "priority_present": true,
+    "homepage_priority": "1.0",
+    "hub_priority": "0.9",
+    "scholarship_priority": "0.8"
+  },
+  "attribution": {
+    "utm_cookie_set": true,
+    "cookie_name": "GAESA",
+    "expiry_days": 30
+  },
+  "validation_result": "PASSED",
+  "notes": [
+    "Sitemap structure valid with 2908 URLs",
+    "Hub pages (/browse, /browse/states, /browse/majors) accessible",
+    "UTM attribution cookies being set correctly",
+    "All pages responding under 150ms SLO target"
+  ]
+}

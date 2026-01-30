@@ -1,0 +1,54 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T17:00:00Z",
+  "auto_rollback_thresholds": {
+    "auth_5xx": {
+      "trigger": ">=1",
+      "duration_minutes": 5,
+      "action": "pause_b2c_capture"
+    },
+    "a1_pool_utilization": {
+      "trigger": ">=80%",
+      "duration_minutes": 2,
+      "action": "pause_b2c_capture"
+    },
+    "core_p95": {
+      "apps": ["A1", "A2", "A3", "A4"],
+      "trigger": ">120ms",
+      "duration_minutes": 15,
+      "action": "pause_b2c_capture"
+    },
+    "aux_p95": {
+      "apps": ["A6", "A8"],
+      "trigger": ">200ms",
+      "duration_minutes": 15,
+      "action": "pause_b2c_capture"
+    },
+    "a3_error_burst": {
+      "trigger": ">3",
+      "window_seconds": 60,
+      "action": "pause_b2c_capture"
+    }
+  },
+  "on_breach": {
+    "b2c_capture": "pause",
+    "refunds": "keep_enabled",
+    "cir": "update_with_evidence"
+  },
+  "synthetic_login_test": {
+    "target_p95_ms": 500,
+    "on_fail_or_latency_exceeded": {
+      "severity": "SEV-1",
+      "traffic_cap": 0,
+      "immediate": true
+    }
+  },
+  "gate_1_readiness": {
+    "breaker": "closed_and_stable",
+    "slos": "all_hold",
+    "complaint_rate_max": 0.005,
+    "payments_auth_min": 0.97,
+    "refunds_10min": 1.0
+  }
+}

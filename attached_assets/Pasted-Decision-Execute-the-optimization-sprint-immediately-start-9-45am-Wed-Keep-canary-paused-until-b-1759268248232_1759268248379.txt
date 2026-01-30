@@ -1,0 +1,52 @@
+Decision: Execute the optimization sprint immediately (start 9:45am Wed). Keep canary paused until bundle ≤75 KB gz and gates pass.
+
+Authorizations and directives
+
+Post comms: Use the exact messages you drafted for #perf-warroom and #release-channel. Approved as written.
+Scope: Approved as proposed. No scope creep; no new features. Release branch is frozen except for the four optimization items.
+Checkpoints:
+12:00pm: ≤80 KB gz or escalate.
+2:00pm: ≤75 KB gz or escalate.
+DRIs:
+Perf lead (D): overall delivery and bundle target
+Frontend lead: lazy-loading + Radix pruning
+Design/FE utility owner: icon proxy change
+Analytics owner: script defer + attribution validation
+QA lead: test plan and sign-off
+Release manager: comms, gates, and ship/no-ship call
+Gates to ship
+
+Bundle: ≤75 KB gz (gzipped, canary artifact)
+CWV lab proxies (10-run WebPageTest):
+FCP ≤2.4s (median of medians)
+LCP ≤2.8s
+CLS ≤0.10
+INP ≤200ms
+Stability and quality:
+No increase in JS errors vs baseline (Sentry) during dry run
+Crash-free sessions ≥99.5%
+No regressions to SEO-critical elements (canonical, robots, structured data)
+Platform SLOs unchanged: 99.9% uptime, ~120ms P95 latency
+Execution timeline (accelerated)
+
+9:45am–12:00pm: Lazy-loading + Radix pruning; target ≤80 KB gz
+12:00pm–2:00pm: Icon proxy + script defer; target ≤75 KB gz
+2:00pm–3:00pm: QA pass (critical flows, SEO tags, analytics attribution)
+3:00pm–4:00pm: WebPageTest (10 runs) + Lighthouse CI
+5:00pm: Results review; final go/no-go set for Thursday AM
+Ship window: Thursday evening or Friday 10am if all gates pass
+Risk controls and contingencies
+
+If 12:00pm checkpoint >80 KB gz: immediately expand pruning (dead code, tree-shake configs), and cut non-essential below-fold modules behind dynamic import. Escalate to CEO/CTO at 12:15pm with delta plan and new estimates.
+If 2:00pm checkpoint >75 KB gz: no ship. Prepare hotfix plan to revert heaviest deltas or defer feature payload to next release.
+Validate analytics defer does not break revenue attribution; if risk, fallback to data-layer buffer with idle callback.
+Rationale
+
+Protects CWV and SEO-led, low-CAC growth engine; aligns with our $10M ARR trajectory.
+Enforces bundle discipline and avoids LCP regressions before they impact production.
+Next steps right now
+
+Post the approved messages to #perf-warroom and #release-channel.
+Kick off sprint at 9:45am.
+Meet for rapid review at 9:30am ET to confirm owners, checkpoints, and escalation protocol.
+Status: CANARY BLOCKED; proceed with immediate optimization sprint.

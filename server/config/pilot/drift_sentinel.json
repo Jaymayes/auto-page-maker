@@ -1,0 +1,44 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "enabled": true,
+  "tracking": {
+    "fields": [
+      "workspace_id",
+      "commit_sha",
+      "manifest_digest",
+      "build_artifact_sha"
+    ],
+    "snapshot_interval_minutes": 60
+  },
+  "alerts": {
+    "digest_mismatch": {
+      "enabled": true,
+      "action": "auto_block_publish",
+      "notify": ["on-call", "exec-channel"]
+    },
+    "endpoint_regression": {
+      "5xx_threshold": 0.02,
+      "404_threshold": 0.02,
+      "duration_minutes": 10,
+      "action": "disable_b2c_capture",
+      "keep_refunds": true,
+      "open_cir": true
+    }
+  },
+  "rollback_triggers": {
+    "payments_auth_failure": {
+      "threshold": 0.05,
+      "window_minutes": 30
+    },
+    "p95_latency": {
+      "threshold_ms": 200,
+      "duration_minutes": 15,
+      "paths": ["A1", "A2", "A3", "A4"]
+    },
+    "trust_breach": {
+      "duration_minutes": 30,
+      "metrics": ["fpr", "precision", "recall"]
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "cir_id": "CIR-20260119-001",
+  "authorized_at": "2026-01-19T16:30:00Z",
+  "status": "PRE_CANARY",
+  "b2c_status": "PAUSED",
+  "pre_canary_gates": {
+    "hold_duration_minutes": 10,
+    "a1": {
+      "db_connected": true,
+      "auth_5xx": 0,
+      "pool_utilization_max": 0.50,
+      "p95_max_ms": 120
+    },
+    "a3": {
+      "concurrency": 0,
+      "queues_paused": true,
+      "breaker_state": "open",
+      "database_url_absent": true
+    },
+    "a5_a7": {
+      "http_200": true,
+      "functional_markers": true,
+      "confirmations": "3-of-3"
+    },
+    "a8": {
+      "cir_active": true,
+      "streaming_metrics": true,
+      "codes_mapped": ["AUTH_DB_UNREACHABLE", "RETRY_STORM_SUPPRESSED"]
+    }
+  },
+  "canary_sequence": {
+    "step_1": {
+      "duration_minutes": 10,
+      "a3_concurrency": 1,
+      "breaker_state": "half_open",
+      "rate_limit_req_per_min": 5,
+      "abort_conditions": {
+        "any_auth_5xx": true,
+        "pool_utilization_above_80_for_2min": true,
+        "a3_errors_above_3_per_60s": true
+      }
+    },
+    "step_2": {
+      "trigger": "step_1_success",
+      "start_60min_green_clock": true,
+      "a3_concurrency": [2, 3],
+      "rate_limit_req_per_min": 20,
+      "breaker_active": true
+    }
+  },
+  "monitoring_interval_seconds": 60,
+  "metrics_emit_to": "A8"
+}

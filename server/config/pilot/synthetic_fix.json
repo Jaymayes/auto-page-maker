@@ -1,0 +1,23 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T18:00:00Z",
+  "synthetic_config": {
+    "base_url": "https://scholaraiadvisor.com",
+    "localhost_banned": true,
+    "follow_redirects": true,
+    "redirect_301_nonfatal": true,
+    "loop_detection": true
+  },
+  "metrics_contract": {
+    "expose_endpoint": "/metrics",
+    "format": "prometheus",
+    "aggregate_p95_in": "A8",
+    "deprecated": ["/metrics/p95"]
+  },
+  "report_windows": {
+    "include_recent_minutes": 15,
+    "safety_delay_minutes": 5,
+    "require_window_closed_timestamp": true
+  }
+}

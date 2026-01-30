@@ -1,0 +1,68 @@
+Decision: EXECUTE EMERGENCY CONFIGURATION ROLLOUT (A5 & A7)
+
+Why (Data/Insight): We are in a "Split-Brain" failure state.
+
+A8 Command Center reports "Green/Healthy" based on synthetic checks, but Ground Truth from A5 (Student Pilot) and A7 (Auto Page Maker) confirms critical failures.
+
+A5 (Revenue Engine): Is in TEST MODE (stripe: test_mode confirmed via /api/health). It cannot process real payments. Telemetry is failing with 403 Forbidden because the S2S_API_KEY is missing from its environment variables.
+
+A7 (Growth Engine): Is "flying blind" with 404 Not Found errors on telemetry because it lacks the S2S_API_KEY to authenticate with A8.
+
+Risk: We are driving traffic to a broken payment flow and cannot track SEO growth. This jeopardizes our launch revenue and data integrity.
+
+KPI Impact (Estimate):
+
+Revenue: $0 valid B2C revenue until A5 is rotated to sk_live_... keys.
+
+Data: 100% loss of A5/A7 telemetry in Command Center until keys are distributed.
+
+Trust: High churn risk if users see "Test Mode" errors.
+
+Risks & Mitigations:
+
+Risk: Manual key distribution via Replit Secrets is error-prone.
+
+Mitigation: Verify sk_live prefix in logs before resuming traffic. Use curl to smoke-test telemetry endpoints post-restart.
+
+Next Actions (Immediate Directives)
+Engineering (Owner: Tech Lead / Me)
+
+Action: Manually add S2S_API_KEY (value from A8) to A5 and A7 Replit Secrets.
+
+Action: Verify A5 STRIPE_SECRET_KEY is set to sk_live_....
+
+Action: RESTART A5 and A7 to apply changes.
+
+Deadline: Immediate.
+
+Verification (Owner: QA / Agent3)
+
+Action: Poll A5 logs for Stripe Mode: LIVE.
+
+Action: Poll A5/A7 logs for Telemetry: 200 OK.
+
+Deadline: T+5 minutes after restart.
+
+A8 Team (Owner: A8 Lead)
+
+Action: Patch /api/report to accept PRODUCT and REVENUE event types (currently returning 404/400).
+
+Deadline: T+15 minutes.
+
+Open Data Gaps/Assumptions:
+
+Assuming S2S_API_KEY value in A8 is correct and can be copied.
+
+Assuming A2/A4 whitelist/registry issues are secondary to the missing keys.
+
+CEO Sign-off:
+
+Status: RED.
+
+Directive: Fix the secrets. Restart A5/A7. Verify Ground Truth. Do not resume marketing until A5 is LIVE.
+
+Reference Strategy:
+
+Unit Economics: Broken payments = infinite CAC, zero LTV. Fix immediately.
+
+Reliability: "Test in Prod" is unacceptable for payments. Enforce sk_live verification.

@@ -1,0 +1,89 @@
+Role: You are a senior full‑stack QA + DevOps lead. Work in small, verifiable phases. Before starting each phase, print a numbered plan and ask my approval to continue. Deliver concrete artifacts in the repo for every phase. If env vars or credentials are missing, stop and ask.
+
+Scope: Audit, test, fix, and stage deploy the “Auto Page Maker” app (url: https://auto-page-maker-jamarrlmayes.replit.app). Detect the tech stack automatically and adapt commands accordingly (Node/Next.js/Vite, Python/Flask/FastAPI/Django, etc.).
+
+Non-negotiables:
+
+Follow a phased, hypothesis-driven debugging approach: reproduce -> isolate -> hypothesize -> fix -> validate -> document. For each bug, record the reproduction steps, root cause, and the fix in BUGLOG.md. Add regression tests before closing the bug.
+Implement layered testing: unit, integration/API, end‑to‑end/system, plus non‑functional tests (performance, security, accessibility, compatibility).
+Minimize regressions and AI rework by executing one phase at a time with explicit validation gates before proceeding.
+Phases and deliverables:
+
+Repo intake and stack detection
+Inventory files, dependencies, scripts, and build targets. Produce /qa/STACK_REPORT.md (app type, framework, runtime, package manager, test tools).
+Set up a reproducible dev environment. Create make-like scripts in /qa/scripts (bash or python) for install, test, lint, build, run.
+2. Static analysis and hygiene
+
+Add/enable linters and formatters: for JS/TS use eslint + typescript --noEmit + prettier; for Python use ruff/flake8 + mypy + black.
+Run and fix high-signal issues (no cosmetic churn). Output /qa/STATIC_ANALYSIS.md with key findings and diffs.
+3. Unit tests
+
+Detect or add a unit test framework (Jest/Vitest/PyTest). Achieve minimum coverage gate: lines 70% and critical modules 85% with explicit tests for core SEO/URL generation logic.
+Output /qa/UNIT_TEST_RESULTS.md with coverage and gaps. Add tests for any discovered defects.
+4. Integration/API tests
+
+Stand up local services. Add integration tests for data flows, API endpoints, and DB/FS interactions.
+Output /qa/INTEGRATION_RESULTS.md. Ensure idempotent test data.
+5. End‑to‑end tests
+
+Add Playwright (preferred) or Cypress to cover user-critical flows: page creation, metadata/OG tags, sitemap generation, canonical URLs, 404/redirects, and publish workflow.
+Output /qa/E2E_RESULTS.md with video/screenshots.
+6. Non‑functional testing
+
+Performance: run Lighthouse CI and capture P95 TTFB, LCP, CLS; set budgets (e.g., LCP < 2.5s on Fast 3G, CLS < 0.1). Export reports to /qa/perf.
+Accessibility: run axe-core in e2e for WCAG 2.1 AA checks; fix critical violations.
+Security: run SAST and dependency audit (npm audit/pip-audit), add secret scanning (gitleaks), and pin/upgrade vulnerable packages. Produce /qa/SECURITY_REPORT.md.
+Compatibility: cross-browser Playwright grid (Chromium, WebKit, Firefox) and responsive snapshots.
+Output /qa/NFR_SUMMARY.md consolidating performance, a11y, security, compatibility.
+7. Bug lifecycle
+
+For each failure or defect: reproduce -> isolate -> root-cause hypothesis -> minimal fix -> add regression test -> validate -> document in BUGLOG.md with references to commit and test.
+8. Production build and artifacts
+
+Produce an optimized production build. Ensure source maps are generated but excluded from public hosting unless behind auth.
+Generate ENV.sample with descriptions; add .env handling and .gitignore entries.
+9. Containerization and staging deployment
+
+Create a minimal, secure Dockerfile (multi-stage) and a docker-compose.yml for local parity.
+Add a staging deployment script: /ci/deploy_staging.sh. If on Replit Deployments, configure a Staging environment with immutable builds and env vars. Otherwise, prepare for Vercel/Render/Fly with IaC snippets.
+Output /qa/DEPLOY_READINESS.md with checklist status, unresolved risks, and rollback plan.
+10. CI/CD
+
+Add a GitHub Actions workflow in .github/workflows/ci.yml that runs: install, lint, type-check, unit, integration, e2e (headless), Lighthouse CI, SAST, dependency/secret scan, and build. Cache dependencies; upload artifacts and HTML reports.
+Add a protected main branch policy with required checks. Include a manual approval gate for production.
+11. SEO and content integrity for Auto Page Maker
+
+Verify automated page generation produces valid metadata (title, description, canonical), sitemaps, robots.txt, structured data (JSON-LD), and high Lighthouse SEO score.
+Add smoke tests ensuring noindex rules are correct for staging and index for production.
+12. Final handoff
+
+Deliver: STACK_REPORT.md, STATIC_ANALYSIS.md, UNIT_TEST_RESULTS.md, INTEGRATION_RESULTS.md, E2E_RESULTS.md, NFR_SUMMARY.md, SECURITY_REPORT.md, DEPLOY_READINESS.md, BUGLOG.md, ENV.sample, Dockerfile, docker-compose.yml, .github/workflows/ci.yml, /qa and /ci scripts, and a single CHANGELOG.md summarizing all changes.
+Present a short release note and next-step recommendations. Request my approval before promoting to production.
+Execution rules:
+
+Always execute one phase at a time and await my OK before the next. If a phase introduces regressions, roll back the last change and propose an alternative fix.
+Prefer small, composable PRs per phase with clear test evidence attached.
+Why this approach
+
+It applies a rigorous, iterative cycle for debugging—reproduce, isolate, hypothesize, fix, validate, document—so we’re not guessing and we prevent regressions with targeted tests and documentation .
+It enforces layered testing from unit to system and acceptance, which is the most efficient way to build quality and control risk .
+It includes non-functional testing for performance, security, compatibility, and compliance, which are essential for production viability and can drive costly architectural decisions if missed late .
+It uses a phased, cost‑controlled agent workflow that reduces looping, rework, and regressions—best practice for Replit Agent to minimize the “autonomy tax” and prevent costly detours; proceed one phase at a time with validation gates and only enable advanced features when warranted .
+Readiness checklist (approve only when all are “Yes”)
+
+Functional: All critical user journeys pass e2e; zero high/critical defects. Evidence: E2E_RESULTS.md and BUGLOG.md entries closed. Source: layered testing best practices .
+Performance: LCP ≤ 2.5s, CLS ≤ 0.1 on staging under realistic network; P95 server latency approximately ≤ 120ms for lightweight pages where applicable to our SLO mindset. Evidence: Lighthouse reports and perf budgets .
+Security: No high/critical SAST or dependency vulnerabilities; secrets scanning clean; ENV.sample provided; principle of least privilege on deployment. Evidence: SECURITY_REPORT.md .
+Accessibility: No critical axe violations; representative flows meet WCAG 2.1 AA. Evidence: NFR_SUMMARY.md .
+Compatibility: Chromium/WebKit/Firefox green on Playwright; responsive layouts verified. Evidence: NFR_SUMMARY.md .
+SEO: Valid sitemap.xml, robots.txt, canonical tags, JSON‑LD, and high Lighthouse SEO; staging is noindex, production is index. Evidence: NFR_SUMMARY.md.
+Observability: Basic logging, error tracking, and uptime checks configured; test reports archived in CI. Evidence: CI artifacts.
+CI/CD: All checks must pass on main; staging auto-deploy; production requires manual approval and rollback plan. Evidence: ci.yml run and DEPLOY_READINESS.md.
+CI/CD starter (GitHub Actions; add secrets as needed)
+
+Triggers: pull_request and push to main
+Jobs: setup (cache deps), lint+type-check, unit, integration, e2e (Playwright), lighthouse-ci, security (npm/pip audit + gitleaks), build, artifact upload, deploy_staging (on main, with approval)
+Gates: required checks on main before merge; production deploy is a separate, manual workflow This structure aligns with continuous testing in Agile/DevOps to keep velocity without sacrificing quality .
+Next step
+
+If you want, I’ll run this plan for you in phases and report back with the first STACK_REPORT.md and initial STATIC_ANALYSIS.md. Or share repo access so I can tailor the toolchain immediately.

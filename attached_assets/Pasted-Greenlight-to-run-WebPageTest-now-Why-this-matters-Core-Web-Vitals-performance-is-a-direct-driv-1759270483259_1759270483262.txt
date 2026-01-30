@@ -1,0 +1,59 @@
+Greenlight to run WebPageTest now.
+
+Why this matters: Core Web Vitals performance is a direct driver of organic growth (Auto Page Maker SEO) and B2C conversions. We will not ship a slow top-of-funnel.
+
+Execution orders (immediate)
+
+Run WPT per your config (Moto G4, Slow 4G, 4x CPU, 3–5 runs, median, cold + 1 repeat view) for:
+Landing page (/)
+Search/results (logged-out)
+Capture artifacts:
+Public WPT result links
+Filmstrip/video and waterfall
+Core Web Vitals: FCP, LCP, CLS, TBT/TTI
+Screenshot at LCP
+Post results with a brief note: “What was the LCP element? Which JS/CSS blocked first content? Is analytics correctly deferred?”
+Go/No-Go gates (interim)
+
+Pass target (greenlight to ship 86 KB bundle baseline):
+FCP ≤ 2.4s
+LCP ≤ 2.8s
+CLS ≤ 0.1
+TBT ≤ 300ms
+≤ 1 render-blocking JS before first content
+Analytics deferred visible in the waterfall
+If fail by ≤15% (e.g., LCP ≤ 3.2s or TBT ≤ 345ms):
+Execute Cuts 1–2 (lazy-load heavy non-critical widgets; function-level imports)
+Rebuild/redeploy; re-run WPT immediately
+If fail by >15% (e.g., LCP > 3.2s or TBT > 345ms):
+Execute Cuts 1–4 in one pass
+Additionally apply these zero/low-risk tweaks before rerun:
+Inline or preload only the critical CSS for above-the-fold; defer the rest
+font-display: swap; preconnect to font origin or host fonts locally
+Ensure hero/LCP image is compressed, correct dimensions, width/height set, and loaded via fetchpriority=high
+Verify brotli/gzip enabled and HTTP/2; long-lived cache headers for static assets; no source maps in prod
+Remove any unused third-party tags; confirm analytics truly idle-deferred
+Re-run WPT
+Decision cadence
+
+Post first WPT results within 45 minutes.
+If cuts are needed, complete within 30 minutes; re-run WPT; post updated results.
+1pm ET: Final go/no-go. If passing, we ship baseline and log tech debt (vite config, vendor splitting, route-level chunking, i18n splitting) for the scheduled optimization sprint.
+Owner assignments (for speed)
+
+Perf lead: own WPT runs, artifacts, and LCP/TBT diagnosis
+Frontend: execute Cuts 1–4 and the low-risk tweaks
+DevOps: verify compression, HTTP/2, caching headers; watch TTFB (goal ≤ 450–500ms; current dev 577ms is a flag)
+Analytics: confirm non-blocking load and idle-deferred events
+What I want in the report
+
+Median metrics for each page and each view (cold + repeat)
+LCP element details and exact resource chain causing delay
+Count of render-blocking JS/CSS before first content
+Top three opportunities from the waterfall (by blocking time/bytes)
+Recommendation: “Ship baseline” or “Apply cuts and rerun,” with ETA
+Business lens
+
+If WPT passes: we ship today. Performance is our lever for low-CAC SEO growth and conversion efficiency.
+If WPT misses after cuts: halt ship, escalate to a focused 0.5–1 day optimization sprint targeting LCP and TBT on the landing page first, then search.
+Proceed and report back with links and the summary above.

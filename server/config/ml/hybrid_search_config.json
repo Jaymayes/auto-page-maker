@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-01-17",
+  "hard_filters_implemented": [
+    "deadline",
+    "gpa",
+    "major",
+    "state",
+    "level"
+  ],
+  "hard_filter_behavior": {
+    "deadline": {
+      "description": "Exclude scholarships with deadlines in the past",
+      "default": true,
+      "override_param": "excludeExpired=false"
+    },
+    "gpa": {
+      "description": "Exclude scholarships where user GPA is below requirement",
+      "default": false,
+      "override_param": "minGpa=<user_gpa>"
+    },
+    "major": {
+      "description": "Filter to scholarships matching student major",
+      "default": false,
+      "fuzzy_match": true
+    },
+    "state": {
+      "description": "Filter to scholarships for student state/residency",
+      "default": false,
+      "exact_match": true
+    },
+    "level": {
+      "description": "Filter to scholarships matching education level",
+      "default": false,
+      "values": ["undergraduate", "graduate", "doctoral", "all"]
+    }
+  },
+  "vector_weight": 0.7,
+  "keyword_weight": 0.3,
+  "freshness_boost": 0.1,
+  "notes": "Hard filters are applied BEFORE semantic/vector scoring to eliminate false positives"
+}

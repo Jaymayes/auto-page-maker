@@ -1,0 +1,522 @@
+# AGENT3 v2.2 Fix Plan — scholar_auth
+# OIDC/SSO Identity Provider
+# Date: October 29, 2025
+# Current Readiness: 1/5
+# Target Readiness: 5/5 (SECURITY-CRITICAL for T+72h)
+
+meta:
+  app: scholar_auth
+  current_score: 1
+  target_score: 5
+  critical_blocker: true
+  gate_impact: "BLOCKS ALL GATES (T+24h, T+48h, T+72h)"
+  ecosystem_impact: "CATASTROPHIC - Entire ecosystem cannot authenticate users"
+  total_estimated_hours: 8-40 (depending on whether code exists)
+  priority: P0_CRITICAL
+  
+# ==============================================
+# P0: CRITICAL BLOCKERS (ECOSYSTEM-WIDE)
+# ==============================================
+
+fixes:
+  - id: FIX-SCHOLAR_AUTH-001
+    priority: P0_CRITICAL
+    title: "Deploy Actual scholar_auth Application (Currently Wrong App)"
+    issue: "URL https://scholar-auth-jamarrlmayes.replit.app serves ScholarMatch frontend UI instead of OIDC/SSO authentication service"
+    impact: "BLOCKS ALL GATES - No authentication means no user login across entire ecosystem"
+    estimated_hours: 8 (if code exists) to 40 (if building from scratch)
+    risk: critical
+    gate_blocker: "T+24h, T+48h, T+72h ALL BLOCKED"
+    
+    diagnosis:
+      current_state: "scholar_auth URL resolves to ScholarMatch scholarship discovery UI"
+      target_state: "OIDC/OAuth 2.0 authentication service with discovery, token, and JWKS endpoints"
+      root_cause: |
+        One of:
+        1. scholar_auth Repl not created/published
+        2. URL pointing to wrong Repl (auto_com_center monolith)
+        3. All apps are same monolith, internal routing not implemented
+        4. Deployment/DNS misconfiguration
+        
+      affected_apps: "ALL 8 apps (cannot authenticate users without scholar_auth)"
+      
+    investigation_steps:
+      - "Check if scholar_auth codebase exists in repository"
+      - "Verify Replit deployment for scholar-auth-jamarrlmayes"
+      - "Confirm URL routing configuration"
+      - "Determine if ecosystem is microservices or monolith"
+      - "Review Universal Prompt v1.1 assumptions about architecture"
+      
+    remediation_steps:
+      - step: 1
+        action: "Verify if scholar_auth codebase exists"
+        command: |
+          # Search for auth-related code in repository
+          find . -name "*auth*" -type d
+          grep -r "openid-configuration" . 2>/dev/null || echo "No OIDC code found"
+          grep -r "oauth/authorize" . 2>/dev/null || echo "No OAuth code found"
+        expected: "Find scholar_auth directory or OIDC implementation"
+        
+      - step: 2
+        action: "If code exists: Deploy to separate Repl"
+        description: |
+          Option A: Deploy Existing Code
+          
+          1. Create new Repl: scholar-auth-jamarrlmayes
+          2. Copy scholar_auth codebase
+          3. Configure environment variables:
+             - DATABASE_URL (separate auth DB or shared)
+             - JWT_SECRET
+             - OAUTH_CLIENTS (registered relying parties)
+             - SESSION_SECRET
+          4. Deploy/publish Repl
+          5. Verify URL resolves to auth service
+          
+      - step: 3
+        action: "If code does NOT exist: Build OIDC Service"
+        description: |
+          Option B: Build from Scratch (2-4 weeks)
+          
+          WARNING: This is a MAJOR BLOCKER. Building production-grade
+          OIDC/OAuth 2.0 service requires:
+          
+          Required Features:
+          - OIDC discovery endpoint (/.well-known/openid-configuration)
+          - OAuth 2.0 authorization endpoint (/oauth/authorize)
+          - Token endpoint (/oauth/token)
+          - JWKS endpoint (/.well-known/jwks.json)
+          - User registration/login
+          - Session management
+          - JWT signing and validation
+          - PKCE support
+          - Refresh tokens
+          - Consent management
+          
+          Recommended Approach:
+          Use existing library like:
+          - node-oidc-provider (https://github.com/panva/node-oidc-provider)
+          - passport.js with OAuth strategies
+          - Auth0 SDK
+          
+          Or consider:
+          - Use Replit Auth instead of custom OIDC
+          - Integrate external auth provider (Auth0, Okta, Keycloak)
+          
+      - step: 4
+        action: "Option C: Use Replit Auth Integration"
+        description: |
+          If building custom OIDC is too complex, use Replit's built-in auth:
+          
+          1. Search for replit-auth integration
+            use_integration(integration_id="connector:replit_auth", operation="propose_setting_up")
+          
+          2. Configure relying parties to use Replit Auth
+          3. Update all 8 apps to integrate with Replit Auth
+          4. Skip scholar_auth microservice entirely
+          
+          Pros: Fast, integrated, secure
+          Cons: Vendor lock-in, may not meet all requirements
+          
+      - step: 5
+        action: "Validate OIDC Discovery Endpoint"
+        command: |
+          curl -s https://scholar-auth-jamarrlmayes.replit.app/.well-known/openid-configuration | jq
+        expected: |
+          {
+            "issuer": "https://scholar-auth-jamarrlmayes.replit.app",
+            "authorization_endpoint": "https://scholar-auth-jamarrlmayes.replit.app/oauth/authorize",
+            "token_endpoint": "https://scholar-auth-jamarrlmayes.replit.app/oauth/token",
+            "jwks_uri": "https://scholar-auth-jamarrlmayes.replit.app/.well-known/jwks.json",
+            "scopes_supported": ["openid", "profile", "email"],
+            "response_types_supported": ["code", "token", "id_token"],
+            "subject_types_supported": ["public"],
+            "id_token_signing_alg_values_supported": ["RS256"]
+          }
+        note: "Must return JSON, not HTML"
+        
+      - step: 6
+        action: "Validate Health Endpoint"
+        command: |
+          curl -s https://scholar-auth-jamarrlmayes.replit.app/health | jq
+        expected: |
+          {
+            "status": "ok",
+            "timestamp": "2025-10-29T...",
+            "service": "scholar-auth",
+            "version": "1.0.0"
+          }
+        note: "Must return JSON, not HTML"
+        
+      - step: 7
+        action: "Validate JWKS Endpoint"
+        command: |
+          curl -s https://scholar-auth-jamarrlmayes.replit.app/.well-known/jwks.json | jq
+        expected: |
+          {
+            "keys": [
+              {
+                "kty": "RSA",
+                "use": "sig",
+                "kid": "...",
+                "n": "...",
+                "e": "AQAB"
+              }
+            ]
+          }
+        note: "Must contain at least one signing key"
+        
+      - step: 8
+        action: "Test OAuth Authorization Flow (Manual)"
+        description: |
+          1. Navigate to /oauth/authorize?client_id=test&redirect_uri=http://localhost/callback&response_type=code&scope=openid
+          2. Verify: Redirects to login page (not 404 or HTML)
+          3. After login: Redirects to callback with authorization code
+          4. Exchange code for tokens at /oauth/token
+          5. Verify JWT signature using JWKS
+          
+      - step: 9
+        action: "Re-run AGENT3 v2.2 Validation"
+        command: "Re-execute scholar_auth test suite"
+        expected: "5/5 score - all OIDC endpoints operational"
+        
+    validation:
+      - "GET /.well-known/openid-configuration returns JSON (not HTML)"
+      - "JSON contains required OIDC fields"
+      - "GET /health returns JSON health status"
+      - "OAuth endpoints exist and respond appropriately"
+      - "JWKS endpoint accessible"
+      - "Can complete full OAuth authorization flow"
+      - "JWTs validate correctly using JWKS"
+      - "Security headers present"
+      - "P95 TTFB ≤ 120ms"
+      
+    rollback:
+      - "If new deployment fails, document blocker for stakeholders"
+      - "Consider using Replit Auth as interim solution"
+      - "Cannot rollback - auth service doesn't exist to roll back to"
+      
+  # ==============================================
+  
+  - id: FIX-SCHOLAR_AUTH-002
+    priority: P0_CRITICAL
+    title: "Clarify Ecosystem Architecture (Microservices vs Monolith)"
+    issue: "Unknown whether ecosystem is 8 microservices or 1 monolith with internal routing"
+    impact: "AFFECTS UNIVERSAL PROMPT v1.1 ROLLOUT STRATEGY"
+    estimated_hours: 2 (decision + documentation)
+    risk: strategic
+    gate_blocker: "T+24h (requires architecture clarity)"
+    
+    diagnosis:
+      current_state: "Unknown architecture - scholar_auth URL serves wrong app"
+      target_state: "Clear architecture documented and validated"
+      root_cause: "Multiple URLs may point to same monolith deployment"
+      
+    investigation_steps:
+      - "Test all 8 URLs to see which are unique deployments"
+      - "Review repository structure (single codebase vs multiple)"
+      - "Check Replit workspace for number of Repls"
+      - "Review Universal Prompt v1.1 assumptions"
+      - "Consult team/documentation on intended architecture"
+      
+    decision_options:
+      option_a:
+        approach: "Microservices (8 separate apps)"
+        pros: "Matches Universal Prompt v1.1 assumptions; better isolation"
+        cons: "More complex deployment; 7 apps potentially missing"
+        effort: "40-80 hours (deploy 7 missing apps)"
+        
+      option_b:
+        approach: "Monolith with internal routing"
+        pros: "Simpler deployment; may already be built"
+        cons: "Requires Universal Prompt adaptation; less isolation"
+        effort: "8-16 hours (implement routing + update prompts)"
+        
+      option_c:
+        approach: "Hybrid (some separate, some internal)"
+        pros: "Flexible; optimize per service"
+        cons: "Complex to reason about"
+        effort: "16-32 hours (case-by-case analysis)"
+        
+    remediation_steps:
+      - step: 1
+        action: "Test all 8 URLs"
+        command: |
+          for url in \
+            https://auto-com-center-jamarrlmayes.replit.app \
+            https://scholar-auth-jamarrlmayes.replit.app \
+            https://student-pilot-jamarrlmayes.replit.app \
+            https://provider-register-jamarrlmayes.replit.app \
+            https://auto-page-maker-jamarrlmayes.replit.app \
+            https://scholarship-api-jamarrlmayes.replit.app \
+            https://scholarship-agent-jamarrlmayes.replit.app \
+            https://scholarship-sage-jamarrlmayes.replit.app
+          do
+            echo "Testing: $url"
+            curl -s $url | head -n 3
+            echo "---"
+          done
+        expected: "Identify which URLs serve unique apps vs duplicates"
+        
+      - step: 2
+        action: "Document findings"
+        file: "docs/architecture/ECOSYSTEM_TOPOLOGY.md"
+        changes: |
+          # Scholar AI Advisor Ecosystem Topology
+          
+          ## Deployment Architecture
+          
+          **Decision**: [Microservices | Monolith | Hybrid]
+          **Date**: 2025-10-29
+          
+          ## App Deployment Status
+          
+          | App | URL | Status | Notes |
+          |-----|-----|--------|-------|
+          | auto_com_center | https://auto-com-center... | ✅ Deployed | Main monolith |
+          | scholar_auth | https://scholar-auth... | ❌ Missing | Serves wrong app |
+          | student_pilot | https://student-pilot... | ? Unknown | Not yet tested |
+          | ... | ... | ... | ... |
+          
+          ## Routing Strategy
+          
+          [Document how apps route to each other]
+          
+          ## Universal Prompt v1.1 Implications
+          
+          [Document how architecture affects prompt routing]
+          
+      - step: 3
+        action: "Update Universal Prompt if Monolith"
+        file: "docs/system-prompts/universal.prompt"
+        changes: |
+          # If monolith architecture:
+          
+          Add routing section:
+          
+          ## Monolith Routing (if applicable)
+          
+          This deployment uses a monolith architecture with internal routing.
+          Apps are logical modules within a single codebase.
+          
+          Agent3 Router directs requests based on:
+          - URL path prefix (e.g., /auth/*, /student/*, /provider/*)
+          - Host header inspection
+          - Internal service discovery
+          
+          [Update router logic accordingly]
+          
+    validation:
+      - "All 8 URLs tested and categorized"
+      - "Architecture decision documented"
+      - "Universal Prompt updated (if needed)"
+      - "Stakeholders aligned on approach"
+      
+    rollback:
+      - "Revert documentation changes"
+      - "No code rollback needed (investigation only)"
+      
+  # ==============================================
+  
+  - id: FIX-SCHOLAR_AUTH-003
+    priority: P0_CRITICAL
+    title: "Validate All 8 App URLs (Baseline Assessment)"
+    issue: "Unknown which of the 8 apps are actually deployed"
+    impact: "CRITICAL for rollout planning - may discover 7 more missing apps"
+    estimated_hours: 1 (quick assessment)
+    risk: discovery
+    gate_blocker: "T+24h (need baseline before planning)"
+    
+    diagnosis:
+      current_state: "Only auto_com_center validated; other 7 unknown"
+      target_state: "All 8 URLs tested with deployment status documented"
+      root_cause: "Sequential testing approach; scholar_auth blocker halted process"
+      
+    remediation_steps:
+      - step: 1
+        action: "Quick smoke test all URLs"
+        command: |
+          # Test all 8 URLs for basic reachability
+          for app in auto_com_center scholar_auth student_pilot provider_register \
+                      auto_page_maker scholarship_api scholarship_agent scholarship_sage
+          do
+            url="https://${app}-jamarrlmayes.replit.app"
+            echo "=== $app ==="
+            echo "URL: $url"
+            
+            # Get status code and title
+            status=$(curl -s -o /dev/null -w "%{http_code}" $url)
+            title=$(curl -s $url | grep -o '<title>.*</title>' | head -1)
+            
+            echo "Status: $status"
+            echo "Title: $title"
+            echo ""
+          done > /tmp/ecosystem_quick_assessment.txt
+          
+          cat /tmp/ecosystem_quick_assessment.txt
+          
+      - step: 2
+        action: "Identify unique vs duplicate apps"
+        description: |
+          Compare page titles and content to determine which URLs serve
+          the same application vs unique applications.
+          
+          Look for:
+          - Identical titles → Same app
+          - Identical navigation → Same app
+          - Different service names → Unique apps
+          
+      - step: 3
+        action: "Update ecosystem readiness matrix"
+        file: "e2e/reports/ecosystem_readiness_matrix.csv"
+        changes: |
+          # Mark each app with preliminary status:
+          # - deployed: Unique app confirmed
+          # - missing: Wrong app or 404
+          # - pending: Not yet fully validated
+          
+      - step: 4
+        action: "Prioritize missing apps by gate criticality"
+        description: |
+          Gate Priority Matrix:
+          
+          T+24h (Infrastructure):
+          - scholar_auth: ❌ BLOCKER
+          - scholarship_api: ? BLOCKER
+          - scholarship_agent: ? BLOCKER
+          
+          T+48h (Revenue):
+          - student_pilot: ? BLOCKER
+          - provider_register: ? BLOCKER
+          
+          T+72h (SEO):
+          - auto_page_maker: ? BLOCKER
+          
+          Supporting:
+          - scholarship_sage: ? Non-blocking
+          
+    validation:
+      - "All 8 URLs tested"
+      - "Unique vs duplicate apps identified"
+      - "Missing apps documented"
+      - "Priority order established"
+      
+# ==============================================
+# CRITICAL PATH TO UNBLOCK GATES
+# ==============================================
+
+critical_path:
+  immediate_blockers:
+    - "FIX-SCHOLAR_AUTH-001: Deploy scholar_auth (8-40 hours)"
+    - "FIX-SCHOLAR_AUTH-002: Clarify architecture (2 hours)"
+    - "FIX-SCHOLAR_AUTH-003: Validate all URLs (1 hour)"
+    
+  t24h_gate_requirements:
+    - "scholar_auth: 4/5 minimum (currently 1/5)"
+    - "scholarship_api: 4/5 minimum (unknown)"
+    - "scholarship_agent: 4/5 minimum (unknown)"
+    - "ETA: 8-40 hours + unknown for other apps"
+    
+  t48h_gate_requirements:
+    - "student_pilot: 5/5 required (unknown)"
+    - "provider_register: 5/5 required (unknown)"
+    - "ETA: Unknown until apps validated"
+    
+  t72h_gate_requirements:
+    - "scholar_auth: 5/5 required (currently 1/5)"
+    - "auto_page_maker: 5/5 required (unknown)"
+    - "All apps: ≥ 4/5"
+    - "ETA: 8-40 hours for auth + unknown for others"
+
+# ==============================================
+# SUMMARY
+# ==============================================
+
+summary:
+  total_fixes: 3
+  p0_critical: 3
+  p1_high: 0
+  p2_medium: 0
+  p3_low: 0
+  
+  total_estimated_hours_minimum: 11  # Optimistic (code exists, arch is monolith)
+  total_estimated_hours_maximum: 43  # Pessimistic (build from scratch)
+  
+  ecosystem_blocker: true
+  gate_blocker: "ALL GATES (T+24h, T+48h, T+72h)"
+  
+  immediate_action_required:
+    - "URGENT: Determine if scholar_auth code exists"
+    - "URGENT: Deploy scholar_auth or decide on auth strategy"
+    - "URGENT: Clarify ecosystem architecture"
+    - "URGENT: Validate remaining 7 app URLs"
+    
+  cannot_proceed_until:
+    - "scholar_auth deployed and operational (BLOCKER)"
+    - "Architecture decision made (REQUIRED)"
+    - "All app URLs validated (BASELINE)"
+    
+  eta_to_5_5: "8-40 hours (depends on if code exists)"
+  eta_to_unblock_t24h: "11-43 hours minimum (assumes other apps are deployed)"
+  eta_to_full_ecosystem_ready: "Unknown (7 apps not yet validated)"
+  
+  deployment_readiness:
+    current: "1/5 - CRITICAL FAILURE"
+    t24h_gate: "BLOCKED (scholar_auth required)"
+    t48h_gate: "BLOCKED (no auth = no revenue)"
+    t72h_gate: "BLOCKED (security-critical missing)"
+    
+  recommendation: |
+    ⛔ STOP UNIVERSAL PROMPT v1.1 ROLLOUT
+    
+    Cannot proceed until:
+    1. scholar_auth deployed and operational
+    2. Architecture clarified (microservices vs monolith)
+    3. All 8 app URLs validated
+    4. Missing apps deployed or routing implemented
+    
+    This is a SHOWSTOPPER for the entire ecosystem.
+
+# ==============================================
+# RISK ASSESSMENT
+# ==============================================
+
+risks:
+  critical:
+    - "Authentication service completely missing"
+    - "Potentially 7 more apps missing (unvalidated)"
+    - "Universal Prompt assumes 8 apps; architecture unclear"
+    - "Rollout may require 2-4 weeks if apps need building"
+    
+  high:
+    - "Building OIDC from scratch is complex and error-prone"
+    - "Monolith routing may not support Universal Prompt assumptions"
+    - "No authentication blocks all user-facing features"
+    
+  medium:
+    - "Timeline uncertainty due to unknown app status"
+    - "Architectural decision affects long-term maintainability"
+    
+  mitigation:
+    - "Option 1: Use Replit Auth (fastest, 1-2 days)"
+    - "Option 2: Deploy existing code if available (3-5 days)"
+    - "Option 3: Use external provider (Auth0, Okta) (1 week)"
+    - "Option 4: Build from scratch (2-4 weeks)"
+    - "RECOMMENDED: Option 1 (Replit Auth) for fastest unblock"
+
+# ==============================================
+# NEXT STEPS
+# ==============================================
+
+next_steps:
+  - "STOP rollout planning until scholar_auth resolved"
+  - "URGENT: Search codebase for scholar_auth code"
+  - "URGENT: Make architecture decision"
+  - "URGENT: Test remaining 7 app URLs"
+  - "DECIDE: Build vs buy vs use Replit Auth"
+  - "DEPLOY: scholar_auth (whichever option chosen)"
+  - "RE-TEST: scholar_auth v2.2 validation (target 5/5)"
+  - "CONTINUE: Validate remaining apps after auth unblocked"
+
+# ==============================================
+# END OF FIX PLAN
+# ==============================================

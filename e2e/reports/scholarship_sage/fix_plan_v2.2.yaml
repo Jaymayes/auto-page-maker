@@ -1,0 +1,57 @@
+app: scholarship_sage
+base_url: https://scholarship-sage-jamarrlmayes.replit.app
+version: v2.2
+owner: Backend Engineering Team
+target_score: 4
+generated_at: "2025-10-29T18:30:00Z"
+
+tasks:
+  - id: FP-SAGE-MEMORY
+    title: Reduce memory utilization to <75%
+    priority: P0
+    estimate_hours: 4-6
+    
+    changes:
+      - file: server/index.ts
+        notes: |
+          - Reduce in-memory caching
+          - Implement cache size limits
+          - Clear old conversation history
+          - Profile and fix memory leaks
+    
+    success_criteria:
+      - Memory utilization <75%
+      - No memory leaks detected
+
+  - id: FP-API-CANARY-JSON
+    title: Add /canary endpoint
+    priority: P0
+    estimate_hours: 1
+    
+    changes:
+      - file: server/index.ts
+        code_diff: |
+          app.get('/canary', (req, res) => {
+            res.json({
+              ok: true,
+              service: 'scholarship_sage',
+              base_url: process.env.REPL_SLUG 
+                ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`
+                : 'http://localhost:5000',
+              version: 'v2.2',
+              timestamp: new Date().toISOString()
+            });
+          });
+
+  - id: FP-SAGE-ERROR-RATE
+    title: Reduce error rate to <0.15%
+    priority: P1
+    estimate_hours: 2
+    
+    notes: |
+      - Add circuit breakers for upstream calls
+      - Implement retries with exponential backoff
+      - Improve error handling
+
+total_eta_to_ready: 4-7 hours
+total_eta_to_4of5: 4-7 hours

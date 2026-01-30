@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "phase": "canary_phase2",
+  "activated_at": "2026-01-14T22:00:00Z",
+  "token": "CFO-20260114-STRIPE-LIVE-25",
+  "guardrails": {
+    "per_user_daily_cap_usd": 50,
+    "global_daily_cap_usd": 1500,
+    "max_single_charge_usd": 49,
+    "currency": "usd"
+  },
+  "auto_refund": {
+    "enabled": true,
+    "on_failure_types": ["card_declined", "processing_error", "insufficient_funds", "expired_card"],
+    "max_refund_delay_seconds": 60
+  },
+  "webhook_retries": {
+    "enabled": true,
+    "max_attempts": 5,
+    "backoff_strategy": "exponential",
+    "initial_delay_ms": 1000,
+    "max_delay_ms": 60000
+  },
+  "provider_payouts": {
+    "mode": "simulation",
+    "transfers_enabled": false,
+    "note": "No transfers until Phase 3"
+  },
+  "fraud_prevention": {
+    "max_fraud_rate_pct": 1.0,
+    "auto_block_threshold": 3,
+    "velocity_check_window_minutes": 15
+  },
+  "rollback_triggers": {
+    "success_rate_below_pct": 98,
+    "success_rate_window_minutes": 30,
+    "fraud_rate_above_pct": 1.0
+  }
+}

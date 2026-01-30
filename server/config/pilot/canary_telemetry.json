@@ -1,0 +1,42 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "emit_interval_seconds": 60,
+  "destination": "A8",
+  "metrics": {
+    "a1": [
+      "db_connected",
+      "pool_in_use",
+      "pool_idle",
+      "pool_total",
+      "pool_utilization_pct",
+      "auth_5xx",
+      "p95_ms"
+    ],
+    "a3": [
+      "breaker_state",
+      "req_rate",
+      "error_rate",
+      "backoff_state",
+      "queue_depth",
+      "dlq_count"
+    ],
+    "a5_a7": [
+      "http_200_markers",
+      "p95_ms"
+    ],
+    "aux_a6_a8": [
+      "p95_ms",
+      "5xx_rate"
+    ],
+    "cost": [
+      "compute_units_burned",
+      "retry_suppressed_count"
+    ]
+  },
+  "autonomy_tax": {
+    "track": true,
+    "fields": ["compute_units_burned", "retry_suppressed_count"],
+    "report_in_attestation": true
+  }
+}

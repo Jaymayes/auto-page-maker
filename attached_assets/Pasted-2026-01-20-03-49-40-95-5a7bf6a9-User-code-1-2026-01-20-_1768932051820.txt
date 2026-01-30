@@ -1,0 +1,108 @@
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+code: 1,
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+^
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+at An._handleErrorWhileConnecting (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1290:38)
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+at wrappedFn (node:internal/errors:538:14)
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+'📄 Generating ALL Major × State combinations (40×50 = 2,000 pages)...\n' +
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+' - Meta descriptions: 369 within 150-160 chars\n' +
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+'\n' +
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+' ⏭️ Unchanged: scholarships/computer-science-alabama (hash match, stats refreshed)\n' +
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+connect",o),this._clients=this._clients.filter(u=>u!==t),s&&(o.message="Connect\
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+at v.reportStreamError (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1201:46)
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+at WebSocket. (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:986:42)
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+at v.emit (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:397:12)
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+at ChildProcess.emit (node:events:524:28)
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+' ✓ Generated 2000 major × state pages (100% coverage)\n' +
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+at An._connectionCallback (file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1384:72)
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+'📄 Generating Specialized category pages...\n' +
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+at maybeClose (node:internal/child_process:1104:16)
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+' ✓ Generated 10 specialized category pages\n' +
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+' - Unique slugs: 2100\n' +
+2026-01-20 03:49:40.95
+5a7bf6a9
+User
+at ChildProcess.exithandler (node:child_process:422:12)
+2026-01-20 09:18:22.50
+5a7bf6a9
+User
+⚠️ SLI VIOLATION: /health P95=122ms (target: <120ms)
+2026-01-20 09:45:56.37
+5a7bf6a9
+User
+[SEO_PAGES] Error for topic "first-generation": null value in column "content" of relation "landing_pages" violates not-null constraint
+2026-01-20 09:45:56.63
+5a7bf6a9
+User
+[SEO_PAGES] Error for topic "STEM": null value in column "content" of relation "landing_pages" violates not-null constraint
+2026-01-20 09:45:57.14
+5a7bf6a9
+User
+[SEO_PAGES] Error for topic "transfer": null value in column "content" of relation "landing_pages" violates not-null constraint
+2026-01-20 09:45:57.39
+5a7bf6a9
+User
+[SEO_PAGES] Error for topic "graduate": null value in column "content" of relation "landing_pages" violates not-null constraint
+2026-01-20 09:45:57.89
+5a7bf6a9
+User
+[SEO_PAGES] Error for topic "international": null value in column "content" of relation "landing_pages" violates not-null constraint
+2026-01-20 09:52:21.34
+5a7bf6a9
+User
+⚠️ SLI VIOLATION: /api/health P95=124ms (target: <120ms)

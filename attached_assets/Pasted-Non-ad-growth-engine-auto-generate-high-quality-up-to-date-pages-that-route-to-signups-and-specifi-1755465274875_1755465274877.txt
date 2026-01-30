@@ -1,0 +1,179 @@
+Non-ad growth engine: auto-generate high-quality, up-to-date pages that route to signups and specific scholarships. 
+
+MVP features 
+
+Templates: programmatic pages for “Scholarships for [Major] in [State]”, “No-essay scholarships 2025”, “Local [City] scholarships”. 
+
+Content builder: KG retrieval + LLM to generate unique, factual summaries; include provenance snippets and live deadlines. 
+
+Quality gates: duplicate detection, toxicity checks, minimum facts threshold; human spot-check queue via Command Center. 
+
+Sitemaps and internal linking: dynamic sitemap.xml; breadcrumb and cluster linking; canonical tags; last-mod dates. 
+
+CTAs: contextual “Get matches” and “Apply on platform”; event tracking. 
+
+Analytics: GSC + privacy-friendly web analytics; cohort attribution to signups and applications. 
+
+Stack on Replit 
+
+Next.js with ISR/SSG; background content generator worker; cache invalidation on data updates. 
+
+Switch to usage-based billing with free sign-up Principles 
+
+Students: always free to search, match, save, track, and get email alerts. Pay only when consuming costly AI/automation. Provide generous monthly free credits to ensure access; sponsorships for low-income students. 
+
+Providers/Institutions: pay for compute-heavy and workflow-heavy usage (API, screening, application processing). No ads, no lead-selling. 
+
+Student metered units (suggested) 
+
+Essay assistant: 
+
+Outline generation: 1 unit 
+
+Feedback pass: 1 unit per 800–1,000 words 
+
+Autofill: 
+
+Prefill partner form: 2 units 
+
+Headless submit (where allowed): 5 units 
+
+PDF pack generation: 1 unit 
+
+Strategy planner refresh: 1 unit 
+
+SMS alerts: pass-through cost + small margin 
+
+Monthly free credits: e.g., 20 units/month; top-ups in bundles ($5 for 50 units, $15 for 200 units). Hard monthly spend cap with user control. 
+
+Provider/institution metered units 
+
+API ingestion/write: per 1,000 records (billed monthly, first 5k free). 
+
+Application processing: per application securely delivered (includes storage and logs). 
+
+Auto-screen/scoring: per application scored/summarized (LLM call). 
+
+Managed autofill mapping: per active form/month (covers maintenance). 
+
+Webhooks: free within fair-use; rate-limited beyond. 
+
+Stripe implementation 
+
+Metered products/prices for each unit type. 
+
+Report usage via Stripe’s usage_records for students and providers. 
+
+Wallet UX: show current credits, forecasted month-end charges, soft/hard caps, receipts. 
+
+Free credits issuance per month; promo codes for schools/non-profits. 
+
+Unit economics sanity 
+
+Tie unit prices to your marginal costs: LLM tokens, proxy minutes, Playwright runtime, storage, SMS. 
+
+Target 70–80% gross margin per unit on average after scale; start conservative with quotas to learn real costs. 
+
+Add circuit breakers: per-user daily and monthly caps; per-org rate limits; anomaly detection on usage spikes. 
+
+Security, compliance, and ethics 
+
+No sale of PII; no ads; opt-in sharing only where required for applications. 
+
+Human-in-loop for extraction and landing-page content. 
+
+Bias audits for predictive scoring; show transparent reason codes; allow user feedback. 
+
+Terms: student confirms authorship of final essays; tool is coaching, not impersonation. 
+
+COPPA/FERPA aware: 13+ signup; school integrations behind DPA/FERPA agreements. 
+
+Phased build and timeline (12–16 weeks to first meaningful release) 
+
+Weeks 1–2 
+
+Replit monorepo setup; environments and secrets. 
+
+App 1 skeleton: source registry, Scrapy + Playwright runners, proxy rotation, ToS scanner MVP. 
+
+Postgres/Neo4j/Meilisearch provisioned; schemas bootstrapped. 
+
+Weeks 3–4 
+
+App 1: extraction pipeline (spaCy + LLM with provenance); QA console; publishing to DB + index. 
+
+App 2: search and eligibility APIs; interactions logging. 
+
+App 5: landing page SSG with simple templates; sitemap; first 100 pages. 
+
+Weeks 5–6 
+
+App 3: onboarding, matches feed (eligibility only), save/dismiss, email alerts. 
+
+Stripe metered basics; free credits; usage capture for essay/autofill placeholders. 
+
+Observability and cost dashboards; kill switches. 
+
+Weeks 7–8 
+
+App 3: essay assistant v1 (outline + feedback), vault, planner v1. 
+
+App 2: collaborative filtering minimal; ranking hybrid online. 
+
+Bias checks and rationales for scoring labels. 
+
+Weeks 9–10 
+
+App 4: provider onboarding, verified listings, schema validation, basic analytics. 
+
+Autofill v1 for partners via API; PDF pack export. 
+
+Landing page generator v2 with quality gates; expand coverage. 
+
+Weeks 11–12 
+
+Harden ToS risk handling; expand scrapers; add dedupe heuristics. 
+
+Security review; rate limits; cost caps; legal review. 
+
+Pilot with 2–3 schools and 10–20 providers. 
+
+KPIs aligned to usage model 
+
+Students: WAU/MAU; % with completed profiles; free credits consumption; conversion to top-ups; cost per active student; applications started/completed; essay assistant NPS. 
+
+Providers: active orgs; listings/updates; applications processed; screening calls; net revenue/org; churn. 
+
+Data quality: extraction precision/recall; % listings with verified links; average time-to-update after deadline change. 
+
+Growth: SEO organic visits; landing page conversion; counselor referrals. 
+
+Risk controls 
+
+Cost spikes: per-user/org caps; dynamic model selection (switch to cheaper LLMs when possible); batching and caching; off-peak crawling. 
+
+Legal: keep ToS scanner conservative; partner-first ingestion; clear audit logs and contact channels for takedowns. 
+
+Model drift: continuous sampling, evaluator benchmarks, human audits; rollback models quickly. 
+
+SEO: quality-first; no thin or duplicative AI content; strict provenance and last-updated stamps. 
+
+Team to start 
+
+1 data/platform engineer (scraping + pipeline) 
+
+1 ML/NLP engineer (NER/RE, CF, scoring) 
+
+1 fullstack engineer (Next.js + API) 
+
+0.5 ops/legal/privacy (contract) 
+
+0.5 content QA/curation (contract) 
+
+What launches first 
+
+An ad-free, precise search with eligibility-only matching (free), SEO pages to feed it, and an essay assistant + planner with free credits (students), plus verified provider listings (free) and optional API/screening usage for providers. From there, iterate toward predictive scoring, autofill breadth, and deeper school/provider integrations. 
+
+This plan keeps students’ incentives aligned (no ads, no PII sale), uses your NLP/graph moat, and replaces subscriptions with transparent, usage-based fees only when expensive AI/automation is actually consumed. 
+
+ 

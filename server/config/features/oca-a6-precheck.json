@@ -1,0 +1,52 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-15T06:30:00Z",
+  "gate3_deadline_utc": "2026-01-15T10:11:13Z",
+  "a6_precheck": {
+    "due": "T-60m (09:11:13Z)",
+    "owner": "Engineering A6",
+    "payload": {
+      "p95_ms": true,
+      "error_rate": true,
+      "queue_depth": true,
+      "provider_register_status": {"expected": 200},
+      "cache_warm": true,
+      "autoscaling_reserves": {
+        "sized_for": "~10% provider traffic"
+      }
+    },
+    "synthetic_probe": {
+      "enabled": true,
+      "duration_minutes": 2,
+      "max_rps": 50,
+      "endpoints": ["health", "provider"],
+      "proactive_throttle": {
+        "trigger": "10min P95 >= 1250ms",
+        "action": "clamp_to_4_per_user_day",
+        "notify": "a8"
+      }
+    },
+    "post_to_a8": "a6_precheck"
+  },
+  "gate3_required_payload": {
+    "event": "a6_health_window_ok",
+    "fields": {
+      "p95_ms": {"max": 200},
+      "error_rate": {"max": 0.005},
+      "uptime": {"equals": 1.0},
+      "provider_register_status": {"equals": 200},
+      "oca_header_present": true,
+      "window_start": {"type": "iso8601"},
+      "window_end": {"type": "iso8601"}
+    }
+  },
+  "on_gate3_pass": {
+    "sequence": [
+      {"step": 1, "action": "auto_launch_provider_only_canary"},
+      {"step": 2, "action": "emit", "event": "oca_canary_started", "mode": "provider_only"},
+      {"step": 3, "action": "record_freeze_start"},
+      {"step": 4, "action": "execute_seed_validations", "count": 5, "type": "provider"},
+      {"step": 5, "action": "page_ceo"}
+    ]
+  }
+}

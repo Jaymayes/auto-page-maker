@@ -1,0 +1,92 @@
+# Scholarship API
+## Search and Match Core Engine
+
+### Role
+Low-latency search/match APIs; maximize relevant views, saves, and applications without PII leakage.
+
+### Objectives
+- Deliver P95 latency ≤120ms across all endpoints
+- Achieve high cache hit ratio for frequently accessed scholarships
+- Generate accurate and explainable scholarship matches
+- Maintain safe defaults under high load or AI service degradation
+
+### KPIs to Track
+- **P95 per endpoint**: 95th percentile latency for each API route (milliseconds)
+- **cache_hit_ratio**: Percentage of requests served from cache (basis points)
+- **scholarship_view_to_save**: Conversion from view to save action (basis points)
+- **save_to_apply**: Conversion from save to application start (basis points)
+- **match_quality_score**: Relevance score for AI-generated matches (0-100)
+
+### Required Events to Emit
+
+**Scholarship Interaction:**
+- `scholarship_viewed` with properties: { scholarshipId: string, viewSource: string, segment: string, anonymous: boolean }
+- `scholarship_saved` with properties: { scholarshipId: string, studentId: string, savedFrom: string }
+
+**Matching and Application:**
+- `match_generated` with properties: { studentId: string, scholarshipIds: string[], algorithm: string, matchScore: number }
+- `application_started` with properties: { scholarshipId: string, studentId: string, startedFrom: string }
+- `application_submitted` with properties: { scholarshipId: string, studentId: string, submittedAt: Date }
+
+### Guardrails
+
+**Performance:**
+- Redis primary cache with in-memory LRU fallback
+- Aggressive rate limiting per user/IP (100 req/min default)
+- Circuit breakers for AI service calls
+- Graceful degradation to cached/rule-based matches under AI latency spikes
+
+**Privacy:**
+- Zero PII in logs or error messages
+- No PII in event payloads (use IDs only)
+- Anonymous tracking support for unauthenticated users
+- Session IDs instead of user IDs where possible
+
+**Data Quality:**
+- Validate scholarship data on ingestion
+- Filter out expired or invalid scholarships
+- Ensure match explanations are accurate and helpful
+- Monitor for match quality degradation
+
+**Resilience:**
+- Fallback to cached results on database failures
+- Return partial results rather than errors when possible
+- Implement timeouts on all external service calls
+- Queue non-critical operations (analytics, logging)
+
+### Actions and Capabilities
+
+**Search and Discovery:**
+- Full-text search across scholarship titles, descriptions, criteria
+- Faceted filtering by amount, deadline, major, GPA, location
+- Sort by relevance, amount, deadline, match score
+- Autocomplete for search queries
+
+**AI-Powered Matching:**
+- Generate personalized scholarship recommendations
+- Segment scholarships (High Likelihood, Competitive, Long Shot)
+- Explainable match scores with reasoning
+- Continuous learning from user interactions
+
+**Cache Strategy:**
+- Hot scholarships cached aggressively (1-hour TTL)
+- Search results cached by query hash (15-min TTL)
+- User-specific matches cached per session
+- Cache warming for popular queries
+
+**API Endpoints:**
+- `GET /api/scholarships` - Search and filter
+- `GET /api/scholarships/:id` - Single scholarship details
+- `POST /api/matches` - Generate personalized matches
+- `GET /api/scholarships/trending` - Popular scholarships
+- `POST /api/scholarships/:id/save` - Save for later
+- `POST /api/scholarships/:id/apply` - Start application
+
+### Success Criteria
+- P95 latency consistently <120ms
+- Cache hit ratio >70%
+- View-to-save conversion >5%
+- Save-to-apply conversion >15%
+- Match quality score >75/100
+- Zero PII leakage incidents
+- 99.9% uptime on core endpoints

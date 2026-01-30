@@ -1,0 +1,225 @@
+{
+  "version": "2.0.0",
+  "created_at": "2026-01-19T23:30:00Z",
+  "updated_at": "2026-01-20T00:30:00Z",
+  "ceo_approval": "CEO-20260119-OCA-PROMOTE-10PCT-PREAUTH",
+  "canary_id": "oca_canary_5pct_20260120",
+  "reports": [
+    {
+      "checkpoint": "T+2h",
+      "type": "health_ping",
+      "destination": "a8",
+      "contents": {
+        "slo_by_variant": {
+          "variant_a": {"p95_ms": true, "error_rate_pct": true},
+          "variant_b": {"p95_ms": true, "error_rate_pct": true},
+          "control": {"baseline": true}
+        },
+        "queue_depth": true,
+        "funnel_by_variant_and_control": {
+          "variant_a": {"open": true, "click": true, "start": true, "complete": true},
+          "variant_b": {"open": true, "click": true, "start": true, "complete": true},
+          "control": {"organic_complete": true}
+        },
+        "suppression": {
+          "match_rate_pct": true,
+          "under_13_blocked": true,
+          "no_consent_blocked": true
+        },
+        "integrity": {
+          "complaints": {"expected": 0, "actual": true},
+          "violations": {"expected": 0, "actual": true},
+          "refusal_attempts": true,
+          "refusal_success_rate": true
+        },
+        "cost_telemetry": {
+          "cost_per_notified": true,
+          "cost_per_started": true,
+          "cost_per_completed": true,
+          "compute_per_completion": true
+        }
+      },
+      "format": "json",
+      "auto_generate": true
+    },
+    {
+      "checkpoint": "T+6h",
+      "type": "executive_midpoint",
+      "destination": ["a8", "slack_exec"],
+      "contents": {
+        "trend_vs_t2h": {
+          "slo_delta": true,
+          "funnel_delta": true
+        },
+        "slo_status": "summary",
+        "funnel_metrics": {
+          "open_rate": true,
+          "ctr": true,
+          "modal_completion": true,
+          "submit_success": true
+        },
+        "ab_test": {
+          "variant_a_metrics": true,
+          "variant_b_metrics": true,
+          "control_metrics": true,
+          "interim_ab_lift": true,
+          "interim_control_lift": true
+        },
+        "integrity": {
+          "refusal_rate": true,
+          "complaints": true,
+          "violations": true
+        },
+        "finance": {
+          "refund_rate": true,
+          "refund_delta": true,
+          "chargebacks": true
+        },
+        "provider": {
+          "acceptance_rate_vs_baseline": true,
+          "top_failure_signatures": true
+        },
+        "cost_telemetry": {
+          "cost_per_notified": true,
+          "cost_per_started": true,
+          "cost_per_completed": true,
+          "spend_vs_cap": true
+        },
+        "recommendation": {
+          "continue_hold_kill": true,
+          "rationale": true
+        }
+      },
+      "format": "markdown",
+      "auto_generate": true
+    },
+    {
+      "checkpoint": "T+24h",
+      "type": "canary_readout",
+      "destination": ["a8", "slack_exec", "repo"],
+      "contents": {
+        "executive_summary": true,
+        "slo_final": {
+          "p95_ms": true,
+          "error_rate_pct": true,
+          "queue_depth_max": true,
+          "uptime_pct": true
+        },
+        "funnel_final": {
+          "emails_sent": true,
+          "open_rate": true,
+          "ctr": true,
+          "modal_completion": true,
+          "submit_success": true
+        },
+        "ab_test_results": {
+          "variant_a_final": true,
+          "variant_b_final": true,
+          "control_final": true,
+          "winning_variant": true,
+          "ctr_lift": true,
+          "submit_lift": true,
+          "lift_vs_control": true,
+          "statistical_significance": true
+        },
+        "integrity_final": {
+          "total_refusal_attempts": true,
+          "refusal_success_rate": true,
+          "complaints": true,
+          "violations": true
+        },
+        "finance_final": {
+          "refund_rate": true,
+          "refund_delta_vs_baseline": true,
+          "revenue_impact": true
+        },
+        "provider_metrics": {
+          "acceptance_rate": true,
+          "acceptance_rate_delta_vs_baseline": true,
+          "time_to_review": true,
+          "issues_reported": true
+        },
+        "cost_telemetry_final": {
+          "total_spend_usd": true,
+          "spend_vs_cap_pct": true,
+          "cost_per_notified": true,
+          "cost_per_started": true,
+          "cost_per_completed": true,
+          "compute_per_completion": true
+        },
+        "roi_view": {
+          "arpu_lift": true,
+          "payback_period": true,
+          "unit_economics_vs_500_cap": true
+        },
+        "evidence_pack": {
+          "seed_validations": {
+            "count": 5,
+            "oca_header_verified": true,
+            "banner_verified": true,
+            "report_issue_verified": true,
+            "audit_entries_verified": true,
+            "a8_ids": true
+          },
+          "allure_links": true,
+          "sample_provider_packet": true,
+          "coppa_ferpa_log_excerpts": true,
+          "revenue_events_a2_to_a8": true
+        },
+        "promotion_gate_check": {
+          "integrity_pass": true,
+          "performance_pass": true,
+          "finance_pass": true,
+          "provider_pass": true,
+          "growth_pass": true,
+          "all_pass": true
+        },
+        "recommendation": {
+          "promote_to_10pct": true,
+          "token": "CEO-20260119-OCA-PROMOTE-10PCT-PREAUTH",
+          "hold": false,
+          "kill": false,
+          "rationale": true
+        }
+      },
+      "format": "markdown",
+      "artifact_path": "tests/perf/reports/oca-canary/",
+      "auto_generate": true
+    },
+    {
+      "checkpoint": "T+36h",
+      "type": "scale_promotion_brief",
+      "condition": "if_10pct_promoted",
+      "destination": ["a8", "ceo"],
+      "contents": {
+        "10pct_to_25pct_eligibility": {
+          "p95_last_6h_ms": {"max": 1200, "actual": true},
+          "error_pct": {"max": 0.7, "actual": true},
+          "completion_lift_vs_control_pct": {"min": 12, "actual": true},
+          "provider_acceptance_delta": {"min": 0, "actual": true},
+          "cost_per_completion_within_margin": true
+        },
+        "recommendation": {
+          "promote_to_25pct": true,
+          "rationale": true
+        }
+      },
+      "format": "markdown",
+      "requires_ceo_approval": true
+    }
+  ],
+  "alerting": {
+    "on_threshold_breach": {
+      "channels": ["slack_ops", "pagerduty"],
+      "severity": "P1"
+    },
+    "on_complaint": {
+      "channels": ["slack_exec", "pagerduty"],
+      "severity": "P0"
+    },
+    "on_gate_miss": {
+      "channels": ["ceo"],
+      "severity": "P0"
+    }
+  }
+}

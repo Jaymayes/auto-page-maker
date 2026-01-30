@@ -1,0 +1,73 @@
+Authority: Approved. We will proceed with an external E2E validation run (Agent 3) to de-risk SEO-driven acquisition, API reliability, and production deployment readiness before broader rollout. This directly supports our low-CAC growth engine and SLO commitments on availability and latency.
+
+What I need you to do now
+
+Publish a dedicated “validation” deployment (staging, not indexable)
+Yes, publish now to a separate live URL (e.g., https://validation-<app>.replit.app) so Agent 3 can test against a stable, immutable snapshot. Replit’s publish model creates a clean snapshot separate from the workspace, which is what we want for reproducibility and rollback control .
+Configure via the [deployment] section or Workflows to ensure prod-like behavior without coupling to dev settings (separate run/build commands) .
+Set staging env vars:
+APP_BASE_URL=https://validation-<app>.replit.app
+FRONTEND_ORIGINS=the two current replit frontends you listed
+VITE_GA_MEASUREMENT_ID=staging property only (avoid contaminating prod analytics) .
+SEO_SCHEDULER_ENABLED=true is fine for functionality checks, but ensure noindex is enforced (see below).
+Robots and indexing: Add X-Robots-Tag: noindex, nofollow and a robots.txt Disallow: / so testers can verify metadata without risking crawl/index on staging .
+2. Accounts and auth
+
+No new test accounts yet. This validation focuses on public pages and read-only APIs, which aligns with your current auth posture. We’ll do a second pass for auth flows once Replit Auth is activated.
+3. Database access
+
+Provide a time-boxed, read-only database credential (or read replica) scoped to SELECT on landing_pages, scholarships, business_events, daily_kpi_snapshots. Rotate immediately post-test. Store credentials in Replit Secrets; do not commit to code. Replit’s Secrets tool keeps credentials encrypted and available only at runtime, supporting least-privilege collaboration .
+Optional but preferred: mask or remove any PII fields in the replica, consistent with our Responsible AI and privacy-by-design posture .
+4. Observability for the run window
+
+Enable access to deployment logs and autoscale analytics so Agent 3 can confirm uptime, error rates, and request durations during the test window. Replit’s built-in analytics (page views, status codes, request durations) plus logs are sufficient for this validation pass .
+Keep the validation deployment up for at least 48 hours to capture steady-state signals.
+Scope and success criteria Agent 3 will validate
+A. Functional coverage
+
+Public routes: /, /scholarships/<slug>, /scholarship/<id>, sitemap, robots, /health, /readyz.
+APIs: GET /api/scholarships, /api/scholarships/:id, /api/scholarships/stats, /api/landing-pages/:slug(*). Success: 99%+ of sitemap URLs return 200 with non-empty content; detail pages resolve and include complete scholarship metadata; health checks stable for duration.
+B. Performance and reliability (SLO conformance)
+
+Latency: P95 ≤ 120 ms for read endpoints under light-to-moderate load; stats endpoint observed ≤ 50 ms P95 when warm-cached.
+Uptime: ≥ 99.9% over the 48-hr window; error rate < 0.1%.
+Evidence via Replit deployment logs and autoscale analytics (request durations, error codes) .
+C. SEO readiness (B2C organic engine)
+
+Landing pages: unique titles/H1/meta descriptions; canonical tags; JSON-LD present and valid for listing and detail pages; sitemap urls comprehensive and consistent with internal link graph.
+Staging safety: confirm noindex/noarchive headers and robots Disallow in staging to prevent accidental crawl while still enabling tag validation .
+Success: 0 critical SEO blockers; schema passes validation; 99%+ sitemap URLs respond with 200 and correct canonicalization.
+D. Security and configuration hygiene
+
+Headers: HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, and a CSP that allows required assets only.
+CORS strictly limited to FRONTEND_ORIGINS (no wildcard).
+Secrets: verified via Replit Secrets; no secrets in repo; deployment-specific config separated via [deployment] and/or Workflows .
+E. Data quality and KPIs
+
+Consistency checks on scholarships and landing_pages (no broken references, required fields coverage).
+Verify business_events and daily_kpi_snapshots populate as expected for page views and API hits during the run; Agent 3 will use read-only SQL to confirm aggregate counts align with logs.
+F. Light-load test guardrail
+
+Run a capped load test (e.g., ≤ 200 RPS peak, 10–15 min) across the read endpoints to validate stability without stressing the Replit plan; monitor request durations and error mix via analytics/logs .
+Deliverables I expect from Agent 3
+
+Validation report: pass/fail per criterion above, issues prioritized by severity and ARR impact (SEO blockers and uptime take precedence).
+Evidence pack: URL samples, headers, schema checks, latency distributions, log excerpts, and SQL snapshots (read-only).
+Release recommendation: ship/no-ship with remediation plan and owner per item.
+Your immediate action checklist
+
+Publish the staging “validation” deployment and share the live URL. Snapshot-based publishing will keep it stable during the run .
+Apply noindex and robots Disallow on staging; confirm in response headers and robots.txt .
+Provide read-only DB credentials (time-boxed, least-privilege) via Secrets; confirm rotation plan post-test .
+Share the testing window, any IPs to allowlist, and a contact for realtime escalations.
+Export a Postman collection or OpenAPI for the listed endpoints (optional but helpful).
+Answers to your specific questions
+
+Should I publish the app now? Yes—publish a separate validation deployment with noindex/robots Disallow and staging analytics.
+Create test accounts? Not for this wave; we’ll add auth flow testing in the next pass.
+Provide database credentials? Yes—read-only, time-bound, masked if any PII exists, delivered via Secrets.
+Any specific scenarios beyond your E2E? Yes—add: sitemap crawl coverage and integrity; JSON-LD validation on listing and detail pages; header/security review; capped load test; KPI table verification; CORS/Origins enforcement; logs/analytics correlation.
+Why this matters
+
+This external validation proves our Auto Page Maker SEO engine can scale acquisition organically with low CAC and meet our SLOs before we invest in broader rollout and partnerships. The snapshot-based deployment discipline, secret management, and built-in monitoring shorten MTTR and reduce launch risk on Replit, which is aligned with our lean, high-velocity operating model .
+Once you confirm the URL and credentials, I’ll greenlight Agent 3 to begin the 48-hour run and schedule a go/no-go review immediately after.

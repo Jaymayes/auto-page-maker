@@ -1,0 +1,152 @@
+# Executive Command Center
+## Central Executive Telemetry and Reporting Hub
+
+### Role
+Central executive telemetry and reporting hub; aggregate KPIs; generate daily executive brief; post alerts; **do not modify other apps**.
+
+### Objectives
+- Deliver accurate daily KPI brief at 09:00 UTC
+- Surface SLO breaches and missing data immediately
+- Provide executive visibility to drive decisions toward $10M ARR target
+- Maintain data integrity and provenance in all reports
+
+### KPIs to Track and Report
+
+#### B2C Domain
+- Free-to-paid conversion rate
+- ARPU from credits
+- CTR by segment (High Likelihood, Competitive, Long Shot)
+
+#### B2B Domain
+- Active scholarship providers
+- Revenue from 3% platform fee
+- Top-decile concentration
+
+#### SEO Domain
+- Pages live (total published landing pages)
+- Indexation rate
+- Organic sessions
+
+#### CAC/Payback Domain
+- SEO-led customer acquisition cost
+- Payback period in days
+
+#### SLO Domain (per app)
+- Uptime percentage
+- P95 latency
+- Error rate
+
+### Required Events to Emit
+
+**Scheduler Events:**
+- `scheduler_job_run` with properties: { status: 'started' | 'completed', duration?: number, jobType: string }
+
+**Data Quality Events:**
+- `kpi_missing_data` with properties: { domain: string, metric: string, reason: string }
+- `kpi_slo_breach` with properties: { app: string, metric: string, threshold: number, actual: number }
+- `kpi_data_integrity_risk` with properties: { domain: string, issue: string, severity: 'low' | 'medium' | 'high' }
+
+### Guardrails
+
+**Data Integrity:**
+- Never fabricate metrics or interpolate missing values
+- Explicitly label sentinel "no_data" vs true zero values
+- Preserve requestId tracing through all operations
+- Archive JSON + Markdown artifacts in `/tmp/ops/executive/`
+
+**Reporting Accuracy:**
+- Surface missing metrics prominently in reports
+- Flag data integrity risks separately from missing data
+- Include data source hashes for provenance
+- Timestamp all snapshots with data collection time
+
+**System Stability:**
+- Continue execution even if Slack notification fails
+- Never block on artifact generation
+- Gracefully handle collector failures
+- Log all errors but maintain scheduled execution
+
+### Actions and Capabilities
+
+**Daily Automated Actions (09:00 UTC):**
+1. Collect metrics from all domain collectors (SEO, SLO, B2C, B2B, CAC)
+2. Validate and aggregate metrics with integrity checks
+3. Generate JSON artifact (`kpi_daily_YYYY-MM-DD.json`)
+4. Generate Markdown brief (`kpi_daily_brief_YYYY-MM-DD.md`)
+5. Store snapshot in `daily_kpi_snapshots` table
+6. Post to Slack if `SLACK_WEBHOOK_URL` configured
+7. Update snapshot with Slack delivery status
+
+**API Endpoints:**
+- `GET /api/executive/kpi/latest` - Most recent KPI snapshot
+- `GET /api/executive/kpi/history?limit=30` - Historical snapshots
+- `GET /api/executive/kpi/snapshot/:id` - Specific snapshot by ID
+- `POST /api/executive/kpi/generate` - Manual trigger for testing
+
+**Business Events Logging:**
+- `POST /api/events/log` - Accept business events from other services
+
+### Report Format
+
+**JSON Artifact Structure:**
+```json
+{
+  "meta": {
+    "requestId": "uuid",
+    "generatedAt": "ISO8601",
+    "dataTimestamp": "ISO8601"
+  },
+  "kpis": {
+    "b2c": { "conversionRate": 0, "arpu": 0, ... },
+    "b2b": { "activeProviders": 0, "revenue": 0, ... },
+    "seo": { "pagesLive": 2101, "indexationRate": null, ... },
+    "slo": { "uptimePercent": 9990, "p95Latency": 95, ... },
+    "cac": { "seoLed": null, "paybackPeriodDays": null }
+  },
+  "missingMetrics": ["seo_indexation_rate", ...],
+  "dataIntegrityRisks": ["SLO uptime below target: 99.85%", ...]
+}
+```
+
+**Markdown Brief Structure:**
+```markdown
+# Daily Executive KPI Brief - YYYY-MM-DD
+
+## Executive Summary
+[Overall health, critical alerts, trending metrics]
+
+## B2C Performance
+[Conversion, ARPU, CTR by segment]
+
+## B2B Performance
+[Active providers, revenue, concentration]
+
+## SEO Performance
+[Pages live, indexation, organic sessions]
+
+## SLO Performance
+[Uptime, latency, error rates by app]
+
+## CAC & Payback
+[Acquisition cost, payback period]
+
+## Missing Metrics
+[Clearly marked gaps in data collection]
+
+## Data Integrity Risks
+[SLO breaches, anomalies, quality concerns]
+```
+
+### Integration Points
+- **Metric Collectors**: Import and aggregate from SEO, SLO, B2C, B2B, CAC collectors
+- **Storage Layer**: Write snapshots to `daily_kpi_snapshots` table
+- **Slack**: Post formatted briefs with retry logic (3 attempts, exponential backoff)
+- **Business Events**: Log scheduler runs and data quality issues to `business_events`
+
+### Success Criteria
+- Daily brief generated reliably at 09:00 UTC
+- All real metrics (SEO, SLO) show accurate data
+- Missing metrics clearly distinguished from zero values
+- SLO breaches surface within minutes of occurrence
+- Artifacts preserved for audit and historical analysis
+- Slack notifications deliver consistently when configured

@@ -1,0 +1,33 @@
+{
+  "version": "2.1.0",
+  "phase": "hypercare_100pct",
+  "activated_at": "2026-01-16T04:30:00Z",
+  "mode": "staged_live",
+  "cfo_token_consumed": "CFO-20260114-PAYOUT-RAISE-250",
+  "limits": {
+    "per_provider_daily_cap_usd": 250,
+    "global_daily_cap_usd": 5000,
+    "rolling_holdback_pct": 10,
+    "min_payout_usd": 25
+  },
+  "safety": {
+    "refund_rate_threshold_pct": 1.0,
+    "dispute_rate_threshold_pct": 1.0,
+    "auto_pause_on_breach": true,
+    "manual_review_on_anomaly": true,
+    "manual_review_window_hours": 4
+  },
+  "schedule": {
+    "payout_frequency": "weekly",
+    "payout_day": "Friday",
+    "minimum_balance_usd": 25,
+    "processing_delay_days": 14,
+    "mode": "simulation",
+    "go_live_after": "T+24h fully green"
+  },
+  "audit": {
+    "require_verification": true,
+    "max_unverified_payout_usd": 50,
+    "log_all_transfers": true
+  }
+}

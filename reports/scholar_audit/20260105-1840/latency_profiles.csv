@@ -1,0 +1,9 @@
+service,endpoint,p50_ms,p95_ms,p99_ms,min_ms,max_ms,samples
+scholar-auth,/health,169,206,206,143,1192,20
+scholarship-api,/health,147,180,180,128,501,20
+scholarship-agent,/health,133,239,239,120,1224,20
+scholarship-sage,/health,136,181,181,118,268,20
+student-pilot,/health,170,239,239,150,642,20
+provider-register,/health,150,192,192,122,226,20
+auto-page-maker,/health,271,324,324,182,576,20
+auto-com-center,/health,133,182,182,107,183,20

@@ -1,0 +1,49 @@
+Decision: Proceed with Option A. Keep current limits (1000/15min per IP; 2000/15min per origin; 3000/15min per auth user). Authorize Phase 1 beta launch to 50 students now.
+
+Rationale (executive):
+
+Security-first and aligned with real-world distribution; beta traffic won’t be single-IP.
+System performance and headroom validated (P50=26ms, P99=74ms; 433 RPS sustained).
+All acceptance gates passed; the single-IP load test is an artificial scenario that should not drive prod limits.
+Directives and next steps
+
+Launch and ramp plan (authorized)
+Phase 1 (D0–D3): 50 students
+Phase 2 (D4–D7): 250 students
+Phase 3 (D8+): 1,000 students
+Freeze any non-critical changes during D0–D1. On-call coverage in place.
+2. Go/hold gates for each phase
+Advance only if all are true over the preceding 24h window:
+
+Reliability: Availability ≥99.9%; 5xx error rate ≤0.2%
+Performance: P95 latency ≤120ms; P99 latency ≤200ms
+Rate limiting: <1% of total requests receive 429; any single ASN/IP driving >2% of 429s is investigated
+Abuse protection: Per-user auth limiter triggers ≤0.1% of requests; zero confirmed token abuse
+Capacity headroom: Sustained CPU <60% per critical service; queue depths stable; >10× projected peak RPS headroom
+Cost guardrail: Infra/AI cost per 1k requests within target to preserve 4× AI service markup and overall margin
+3. Monitoring and alerts (enable before flipping on Phase 1)
+
+Dashboards: latency (P50/P95/P99), 5xx/429 rates, limiter hit rates by IP/ASN, auth limiter triggers, RPS, CPU/memory, queue depth, provider endpoint health
+Alerts (Pager):
+P95 >120ms for 5 consecutive minutes
+5xx >0.5% for 5 minutes
+429 >2% for 10 minutes (exclude obvious load-test or attack signatures)
+Any single IP/ASN >1,500 req/15min repeatedly across 30 minutes
+Daily executive summary: key KPIs, incidents, limiter top talkers, cost per 1k requests
+4. Testing policy update (do not change prod limits)
+
+Staging: Allowlist load-testing IPs or use a “loadtest” API key that bypasses IP limiter in STAGING ONLY. Never in production.
+Production: If we need periodic capacity checks, use distributed load testing across ≥25 IPs to reflect real traffic patterns, off-peak, capped to avoid tripping DDoS protections.
+Document this in QA SOP and link it from the validation report.
+5. Contingencies and exceptions
+
+School/corporate NAT hot spot: If a verified partner network hits limits, temporarily allowlist their CIDR or raise their per-origin limit to 2,500/15min with a 7-day expiry and monitoring. No blanket increases.
+Incident response: If error budget burn >10% in a 24h window or 429s exceed 3% for 30 minutes, hold the ramp, investigate, and remediate before proceeding.
+6. Documentation
+
+File the CEO_BETA_LAUNCH_VALIDATION.md in our internal knowledge base. Add the updated testing policy and the ramp gates to the same doc.
+Approval to execute
+
+Proceed with Phase 1 deployment now under the above guardrails.
+Enable monitoring/alerts immediately and send the first executive dashboard snapshot 60 minutes post-launch.
+Schedule a 24-hour post-launch review with a go/no-go for Phase 2.

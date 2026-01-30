@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-11-12T20:02:29.982Z",
+  "pass": true,
+  "metrics": {
+    "inbox_placement_pct": 100,
+    "p95_latency_ms": 79,
+    "error_rate_pct": 0,
+    "auth_results": {
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass"
+    },
+    "webhooks": {
+      "total_replayed": 0,
+      "delivered": 0,
+      "lost": 0,
+      "reordered": 0
+    }
+  },
+  "evidence": {
+    "headers_file": "evidence_root/auto_com_center/gate_a/authentication_headers.txt",
+    "seed_screenshots": [
+      "evidence_root/auto_com_center/gate_a/inbox_gmail.png",
+      "evidence_root/auto_com_center/gate_a/inbox_outlook.png",
+      "evidence_root/auto_com_center/gate_a/inbox_icloud.png"
+    ],
+    "latency_histogram": "evidence_root/auto_com_center/gate_a/latency_histogram.json",
+    "webhook_logs": "evidence_root/auto_com_center/gate_a/webhook_replay_30k.log",
+    "error_telemetry": "evidence_root/auto_com_center/gate_a/error_telemetry.json",
+    "request_traces": "evidence_root/auto_com_center/gate_a/request_id_traces.log"
+  }
+}

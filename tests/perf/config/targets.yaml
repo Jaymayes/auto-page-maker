@@ -1,0 +1,251 @@
+apps:
+  a1_auth:
+    name: Scholar Auth
+    base_url: https://auth.scholarmatch.io
+    staging_url: http://localhost:5001
+    routes:
+      - path: /health
+        method: GET
+        description: Health check
+        slo_p95_ms: 100
+      - path: /oidc/auth
+        method: GET
+        description: OIDC authorization
+        slo_p95_ms: 150
+      - path: /oidc/token
+        method: POST
+        description: Token exchange
+        slo_p95_ms: 150
+    concurrency_ceilings:
+      smoke: 5
+      baseline: 20
+      ramp_max: 60
+      spike: 100
+      soak: 20
+
+  a2_api:
+    name: Scholar API/Ingest
+    base_url: https://api.scholarmatch.io
+    staging_url: http://localhost:5002
+    routes:
+      - path: /health
+        method: GET
+        description: Health check
+        slo_p95_ms: 100
+      - path: /v1/events
+        method: POST
+        description: Event ingest
+        slo_p95_ms: 125
+      - path: /v1/events/batch
+        method: POST
+        description: Batch ingest
+        slo_p95_ms: 200
+    concurrency_ceilings:
+      smoke: 5
+      baseline: 20
+      ramp_max: 60
+      spike: 100
+      soak: 20
+      burst: 100
+
+  a3_agent:
+    name: Scholarship Agent
+    base_url: https://agent.scholarmatch.io
+    staging_url: http://localhost:5003
+    routes:
+      - path: /health
+        method: GET
+        description: Health check
+        slo_p95_ms: 100
+      - path: /preflight
+        method: POST
+        description: Preflight check
+        slo_p95_ms: 150
+      - path: /orchestration/run
+        method: POST
+        description: Orchestration run
+        slo_p95_ms: 500
+        requires_idempotency_key: true
+    concurrency_ceilings:
+      smoke: 5
+      baseline: 20
+      ramp_max: 60
+      spike: 100
+      soak: 20
+
+  a4_sage:
+    name: Scholarship Sage
+    base_url: https://sage.scholarmatch.io
+    staging_url: http://localhost:5004
+    routes:
+      - path: /health
+        method: GET
+        description: Health check
+        slo_p95_ms: 100
+      - path: /chat/completions
+        method: POST
+        description: LLM chat completions
+        slo_p95_ms: 2000
+        notes: LLM latency varies; target stable at c=15
+    concurrency_ceilings:
+      smoke: 5
+      baseline: 15
+      ramp_max: 30
+      spike: 50
+      soak: 15
+
+  a5_pilot:
+    name: Student Pilot
+    base_url: https://app.scholarmatch.io
+    staging_url: http://localhost:5005
+    routes:
+      - path: /health
+        method: GET
+        description: Health check
+        slo_p95_ms: 100
+    notes: Frontend E2E only; Playwright tests handle flows
+
+  a6_provider:
+    name: Provider Portal
+    base_url: https://provider.scholarmatch.io
+    staging_url: http://localhost:5006
+    routes:
+      - path: /health
+        method: GET
+        description: Health check
+        slo_p95_ms: 100
+      - path: /register
+        method: POST
+        description: Provider registration
+        slo_p95_ms: 150
+      - path: /api/billing
+        method: GET
+        description: Billing info
+        slo_p95_ms: 150
+        validation:
+          provider_fee_pct: 3
+          ai_markup: 4
+          expected_fee: 30
+          expected_ai_markup: 40
+    concurrency_ceilings:
+      smoke: 5
+      baseline: 10
+      ramp_max: 40
+      spike: 80
+      soak: 10
+
+  a7_pagemaker:
+    name: Scholar PageMaker
+    base_url: https://scholaraiadvisor.com
+    staging_url: http://localhost:5000
+    routes:
+      - path: /health
+        method: GET
+        description: Health check
+        slo_p95_ms: 100
+      - path: /sitemap.xml
+        method: GET
+        description: XML Sitemap
+        slo_p95_ms: 500
+        notes: Dynamic 2900+ URLs; warm cache target
+      - path: /
+        method: GET
+        description: Homepage
+        slo_p95_ms: 150
+      - path: /browse
+        method: GET
+        description: Browse hub
+        slo_p95_ms: 150
+      - path: /browse/states
+        method: GET
+        description: States browse
+        slo_p95_ms: 150
+      - path: /browse/majors
+        method: GET
+        description: Majors browse
+        slo_p95_ms: 150
+    concurrency_ceilings:
+      smoke: 5
+      baseline: 20
+      ramp_max: 60
+      spike: 100
+      soak: 20
+
+  a8_command:
+    name: Command Center
+    base_url: https://command.scholarmatch.io
+    staging_url: http://localhost:5008
+    routes:
+      - path: /health
+        method: GET
+        description: Health check
+        slo_p95_ms: 100
+      - path: /api/executive/overview
+        method: GET
+        description: Executive dashboard
+        slo_p95_ms: 150
+        known_issue: A8-PERF-001
+        current_p95_ms: 1085
+      - path: /api/dashboard/status
+        method: GET
+        description: Dashboard status
+        slo_p95_ms: 150
+    concurrency_ceilings:
+      smoke: 5
+      baseline: 20
+      ramp_max: 60
+      spike: 100
+      soak: 20
+
+test_settings:
+  namespace: perf_test
+  environment: staging
+  version: ${VERSION}
+  global_slo:
+    uptime_pct: 99.9
+    p95_latency_ms: 150
+    p95_stretch_ms: 120
+    error_rate_pct: 1
+
+slo_exceptions:
+  sitemap:
+    p95_warm_ms: 500
+    reason: Dynamic generation of 2900+ URLs
+  llm_chat:
+    p95_ms: 2000
+    max_concurrency: 15
+    error_rate_pct: 1
+    reason: LLM latency inherently variable
+  a2_ingest:
+    p95_ms: 125
+    reason: High-throughput event pipeline
+
+known_issues:
+  - id: A8-PERF-001
+    app: a8_command
+    route: /api/executive/overview
+    description: Dashboard P95 exceeds SLO (~1085ms)
+    remediation: Add caching layer for aggregated dashboard data
+    status: OPEN
+
+phases:
+  - name: smoke_health
+    description: Verify health endpoints
+    gate: error_rate <1% and P95 ≤150ms
+  - name: baseline
+    description: Steady-state load
+    duration: 15m
+    vus: 20
+  - name: ramp
+    description: Linear ramp up
+    duration: 20m
+    start_vus: 10
+    end_vus: 60
+  - name: spike
+    description: Sudden load spike
+    duration: 10m
+    pattern: 5→100→5 VUs
+  - name: soak
+    description: Long stability test
+    duration: 60m
+    vus: 20

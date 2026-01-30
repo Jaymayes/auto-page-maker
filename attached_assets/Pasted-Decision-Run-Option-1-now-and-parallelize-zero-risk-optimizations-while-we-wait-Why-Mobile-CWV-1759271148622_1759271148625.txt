@@ -1,0 +1,42 @@
+Decision: Run Option 1 now and parallelize zero‑risk optimizations while we wait.
+
+Why: Mobile CWV on slow 4G is a direct lever on SEO-driven acquisition (our lowest CAC engine) and on B2C conversion. We don’t wait idle for results—we buy time with safe cuts that never hurt UX.
+
+Actions (immediate)
+
+You: Click both pre-configured WebPageTest links and paste the two result URLs here.
+Eng (now, 20–30 min, parallel to tests):
+Fonts: add font-display: swap; preload primary text font; ensure WOFF2; remove unused weights.
+LCP element: ensure fetchpriority="high" and decoding="async"; if image, set width/height and responsive sizes; preload if not inlined.
+CSS: inline minimal critical CSS for above-the-fold; defer non-critical CSS.
+Network: enable Brotli; preconnect to critical third-party origins; verify long-cache headers on static assets.
+JS: verify analytics/deferred scripts use async/defer and requestIdleCallback; remove any non-critical render-blocking scripts.
+Acceptance gates for go/no-go (Moto G4, 4G, Dulles, WPT first view)
+
+LCP ≤ 2.8s
+Speed Index ≤ 3.5s
+TBT ≤ 200 ms
+CLS ≤ 0.10
+TTFB ≤ 600 ms (US East)
+If we miss
+
+Miss by ≤15% (e.g., LCP 3.0–3.2s): execute Cuts 1–2 immediately
+Further lazy-load non-critical UI (date pickers, modals, heavy filter UIs)
+Function-level imports and dead code cull; remove any bundled polyfills not needed for Chrome/Android target
+Miss by >15% (e.g., LCP >3.2s): execute Cuts 1–4 + infra tweaks
+Critical CSS + font optimization (if not already)
+Verify image compression and next-gen formats; ensure proper dimensions and caching
+Confirm modulepreload for Vite manifest; eliminate duplicate runtime/polyfill costs
+Server/infra: investigate TTFB (enable edge caching, HTML SWR for landing; ensure no cold-start path for first hit)
+Timeline
+
+Now: Kick off Option 1 (click-to-run). Eng applies zero-risk tweaks in parallel.
++10 min: Post WPT result URLs here.
++30–45 min: If needed, apply Cuts 1–4.
++60 min: Re-run WPT and confirm pass/fail against gates.
+EOD: Go/no-go.
+KPIs this supports
+
+B2C: Improved LCP/TTFB → higher organic discovery and conversion on landing; protects CAC via SEO.
+Platform reliability: Keeps us within SLO expectations for perceived performance on mobile.
+Please run Option 1 now and share the two WebPageTest result URLs. If you prefer the scripted route, run Option 2 and paste the userUrls returned. I’ll analyze immediately and issue the go/no-go call.

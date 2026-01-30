@@ -1,0 +1,71 @@
+{
+  "version": "2.0.0",
+  "created_at": "2026-01-20T00:00:00Z",
+  "updated_at": "2026-01-20T01:30:00Z",
+  "ceo_approval": "CEO-20260119-OCA-PROMOTE-10PCT-PREAUTH",
+  "canary_id": "oca_canary_5pct_20260120",
+  "gate_events": {
+    "a6_health_window_ok": {
+      "event_name": "a6_health_window_ok",
+      "required_fields": {
+        "p95_ms": {"type": "number", "max": 200},
+        "error_rate": {"type": "number", "max": 0.005},
+        "uptime": {"type": "number", "equals": 1.0},
+        "provider_register_status": {"type": "number", "equals": 200},
+        "oca_header_present": {"type": "boolean", "equals": true},
+        "window_start": {"type": "iso8601"},
+        "window_end": {"type": "iso8601"}
+      },
+      "owner": "Engineering Lead",
+      "deadline_hours": 12,
+      "on_receive": "check_all_gates"
+    },
+    "legal_copy_signed": {
+      "event_name": "legal_copy_signed",
+      "required_fields": {
+        "doc_hash": {"type": "string", "format": "SHA256"},
+        "approver_id": {"type": "string", "example": "GC_7721"},
+        "repo_path": {"type": "string"},
+        "commit_sha": {"type": "string"},
+        "signed_at": {"type": "iso8601"}
+      },
+      "owner": "General Counsel",
+      "deadline_hours": 4,
+      "failover": {
+        "condition": "deadline_missed",
+        "action": "provider_only_banner",
+        "notify": "ceo"
+      },
+      "on_receive": "check_all_gates"
+    },
+    "a8_preflight_verifications_ok": {
+      "event_name": "a8_preflight_verifications_ok",
+      "required_fields": {
+        "kill_drill_proof": {"type": "object", "passed": true},
+        "ab_compliance_screenshots": {"type": "object", "passed": true},
+        "holdout_integrity": {"type": "object", "passed": true},
+        "cost_telemetry_dry_run": {"type": "object", "passed": true},
+        "variant_safeguard_test": {"type": "object", "passed": true},
+        "log_hygiene_sample": {"type": "object", "passed": true},
+        "all_passed": {"type": "boolean", "equals": true},
+        "verified_by": {"type": "string"},
+        "verified_at": {"type": "iso8601"}
+      },
+      "owner": "Ops/SRE",
+      "deadline": "immediate",
+      "on_receive": "check_all_gates"
+    }
+  },
+  "gate_logic": {
+    "trigger_condition": "a6_health_window_ok AND legal_copy_signed AND a8_preflight_verifications_ok",
+    "on_all_received": "execute_auto_launch"
+  },
+  "auto_launch_sequence": [
+    {"step": 1, "action": "record_freeze_start", "emit": "code_freeze_started"},
+    {"step": 2, "action": "flip_feature_flag", "status": "CANARY_5", "traffic_pct": 5},
+    {"step": 3, "action": "enable_provider_banner"},
+    {"step": 4, "action": "send_canary_emails", "ab_split": "50/50"},
+    {"step": 5, "action": "execute_seed_validation", "packets": 5},
+    {"step": 6, "action": "emit_event", "event": "oca_canary_started", "page_ceo": true}
+  ]
+}

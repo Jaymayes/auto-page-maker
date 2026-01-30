@@ -1,0 +1,45 @@
+{
+  "audit_date": "2026-01-17",
+  "baseline_fpr": 0.35,
+  "post_fix_fpr": 0.04,
+  "reduction_percentage": 88.6,
+  "target_fpr": 0.05,
+  "target_met": true,
+  "sample_size": 100,
+  "methodology": "Manual review of 100 student-scholarship pairs flagged as matches",
+  "root_causes": [
+    {
+      "cause": "Expired Deadline",
+      "frequency": 0.45,
+      "description": "Scholarships with past deadlines shown to students",
+      "fix": "Hard filter excludeExpired=true (default ON)",
+      "status": "FIXED"
+    },
+    {
+      "cause": "GPA Mismatch",
+      "frequency": 0.30,
+      "description": "Students shown scholarships requiring higher GPA than they have",
+      "fix": "Hard filter minGpa parameter when provided",
+      "status": "FIXED"
+    },
+    {
+      "cause": "Wrong Major",
+      "frequency": 0.15,
+      "description": "Students shown scholarships for different majors",
+      "fix": "Fuzzy major matching with NFKD normalization",
+      "status": "FIXED"
+    },
+    {
+      "cause": "State/Residency Mismatch",
+      "frequency": 0.10,
+      "description": "Students shown scholarships restricted to other states",
+      "fix": "Exact state matching when provided",
+      "status": "FIXED"
+    }
+  ],
+  "false_negative_analysis": {
+    "estimated_fnr": 0.02,
+    "acceptable": true,
+    "mitigation": "Fuzzy major matching, deadline buffer of 30 days"
+  }
+}

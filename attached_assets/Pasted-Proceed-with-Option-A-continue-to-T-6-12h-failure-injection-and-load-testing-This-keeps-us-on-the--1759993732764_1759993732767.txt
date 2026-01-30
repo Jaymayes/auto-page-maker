@@ -1,0 +1,36 @@
+Proceed with Option A: continue to T+6–12h failure injection and load testing. This keeps us on the fastest path to a safe private beta while validating non-functional readiness at scale, which is essential as products mature and user retention depends on performance and reliability, not just functionality .
+
+Objectives and pass/fail gates (tie to SLOs)
+
+Latency and reliability: P95 <120ms for reads, <250ms for writes; error rate <0.5% across steady-load and burst tests; no data loss or corruption in failure scenarios. Non-functional testing should explicitly cover load, stress, scalability, and volume dimensions .
+Resource headroom: Memory <70% P95, CPU <75% avg during soak; investigate any sustained growth indicating leaks. Use deployment Logs/Resources and Request Durations to pinpoint bottlenecks and regressions during tests .
+Resiliency behaviors: Retries with backoff, timeouts, and circuit breakers operate as designed; no duplicate writes (idempotency) during transient failures. These are baseline patterns for robust microservices workflows and should be proven under fault conditions .
+Security posture intact under stress: Secrets remain in the vault; no sensitive data in logs. Validate via our Secrets management practice during tests .
+Scope for T+6–12h
+
+Failure injection (run under realistic load)
+Database latency injection (e.g., +200–500ms) and brief connection drops to validate backoff/timeout tuning and circuit breaking .
+Connection pool exhaustion and transaction contention (simulated hot-row updates) to catch race/deadlock handling and idempotency gaps; concurrency defects often surface only under stress .
+Disk-full and out-of-memory simulations to verify graceful degradation and alerting.
+Rollback drill: Flip USE_DB_STORAGE on/off under traffic; target MTTR under 5 minutes (exercise our rollback path while requests flow) .
+2. Load and soak tests
+
+Profiles: read-heavy (90/10), mixed (70/30), and write-bursty spikes; step from 100 rps to target peak and a 60–120 min soak. Performance testing should cover expected and extreme loads to validate stability and scalability behaviors .
+Success criteria: meet the latency/error gates above, no slow-query p95 >500ms, and stable memory/CPU with no upward drift over the soak.
+Observability and reporting
+
+Use deployment Logs, Resources, and Request Durations to capture p50/p95/p99, error codes, and resource utilization; annotate test phases in logs for clean analysis .
+Produce a concise Test Readout with GO/NO-GO for private beta, highlighting any gating issues and proposed fixes. Non-functional outcomes should directly inform the release decision, per best practices for mature readiness .
+Why this now
+
+This phase de-risks production by validating the resilience patterns (retries/backoff/circuit breakers) we rely on for cost-efficient, scalable operation and fast recovery under Replit’s usage-based model, where inefficiencies can become expensive under load .
+Assignments and timing
+
+Reliability/Perf Agent: Owns test execution and data collection.
+Infra Agent: Owns failure toggles, rollback drills, and secrets validation.
+Deliverables due at T+12h: one-page metrics summary, issues list with severity, and recommended GO/NO-GO.
+Open questions (please confirm before kickoff)
+
+Deployment type for this service (Autoscale vs Reserved VM). If Autoscale, ensure max-instances is set to cap costs during stress; we’ll rely on built-in analytics for request durations and traffic breakdowns .
+Target private beta traffic assumptions (peak concurrent users/RPS) to calibrate the top step of the load test.
+If you approve, I’ll authorize immediate start on T+6–12h with the above gates. If you prefer a brief pause, I can review the CEO_DBSTORAGE_MIGRATION_STATUS.md and return with a redline of any remaining risks before we proceed.

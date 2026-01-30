@@ -1,0 +1,26 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T17:30:00Z",
+  "breaker_time_gate": {
+    "max_half_open_hours": 4,
+    "max_reopen_count": 2,
+    "on_breach": {
+      "action": "auto_pause_b2c",
+      "traffic_cap": 0,
+      "open_rca_task": true
+    }
+  },
+  "close_policy": {
+    "consecutive_successes": 50,
+    "windows": 2,
+    "window_duration_minutes": 5,
+    "emit_event": "breaker_closed"
+  },
+  "monitoring": {
+    "track_half_open_start": true,
+    "track_reopen_count": true,
+    "alert_at_3h": true,
+    "alert_at_reopen_1": true
+  }
+}

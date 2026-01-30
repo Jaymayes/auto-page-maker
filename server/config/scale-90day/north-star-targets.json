@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-16T22:30:00Z",
+  "objective": "$10M ARR",
+  "horizon_days": 90,
+  "reliability": {
+    "uptime_pct": {"target": 99.9, "stretch": 99.95},
+    "p95_latency_ms": {"target": 110, "stretch": 100},
+    "error_rate_pct": {"max": 0.5}
+  },
+  "unit_economics": {
+    "ai_gross_margin_pct": {"min": 60},
+    "refund_rate_pct": {"max": 5},
+    "chargebacks": {"target": 0}
+  },
+  "growth_mix": {
+    "organic_seo_sessions_pct": {"min": 85},
+    "paid_traffic": "controlled_accelerator_only"
+  },
+  "revenue_targets": {
+    "b2c": {
+      "arpu_near_term_usd": 22,
+      "arpu_day90_stretch_usd": 28
+    },
+    "b2b": {
+      "provider_fee_pct": 3,
+      "active_providers_target": 150,
+      "listings_target": 500
+    }
+  }
+}

@@ -1,0 +1,34 @@
+Decision: Approved. Deploy the A7 Frontend QA Audit now to validate the top-of-funnel.
+
+Execute exactly the prompt you prepared in A7 (auto_page_maker), with these guardrails and success checks to protect production and prove attribution end-to-end:
+
+Preflight guardrails (before running)
+
+Environment: TEST_MODE=true; DEMO_NAMESPACE=simulated_backfill. Block any production writes while auditing.
+Routing/Security: Confirm A5 target URL is correct; CORS and CSP permit redirects to student-pilot-jamarrlmayes.replit.app. Enforce HTTPS; no mixed content.
+UTM policy: Require utm_source=auto_page_maker and utm_medium=referral on all primary CTAs. Ensure A5 persists UTMs (cookie/localStorage + server-side capture), since attribution is a core KPI for our SEO-led, low-CAC engine per the V2 Playbook .
+Run the audit (use your MAX_AUTONOMOUS Funnel Audit prompt)
+
+Phase 1 (Rendering): GET /, GET /scholarships/nursing-students, GET /robots.txt (expect 200). Add GET /sitemap.xml. Verify canonical tags and schema.org presence on one programmatic page.
+Phase 2 (Golden Path): Parse homepage HTML and at least two programmatic pages. For each primary “Get/Find Matches” CTA:
+href points to A5 (student-pilot-…)
+contains utm_source=auto_page_maker (+ utm_medium=referral)
+no javascript:void(0) or empty links; no onClick handlers that prevent navigation
+Verify on A5 that UTMs are received (server log) and stored (cookie/localStorage). Capture referer=scholaraiadvisor.com.
+Phase 3 (Revenue Endpoint Health): POST /api/kpi/record-revenue-by-page with payload: {"slug":"funnel_test","utm":{"source":"qa_agent"},"amount_cents":100,"namespace":"simulated_backfill"} Expect 200 OK with JSON; flag 4xx/5xx as BROKEN and retry with exponential backoff before failing.
+Performance checks
+
+TTFB ≤ 200ms; FCP ≤ 1.5s on homepage and one programmatic page. If thresholds aren’t met, capture waterfall and recommend image/script optimizations.
+Success output (must return)
+
+“FUNNEL VERIFIED: TRAFFIC HANDOFF TO A5 IS SECURE. ATTRIBUTION ACTIVE.”
+Deliverables back to me (today)
+
+Short run report: URLs tested, response codes, and any retries.
+Evidence:
+Screenshot of CTA href showing full A5 URL with UTM params.
+A5 server log snippet or console capture proving UTM receipt + cookie/localStorage set.
+cURL output (or response) from the revenue endpoint showing 200 OK.
+Brief perf summary (TTFB, FCP).
+If any check fails: fix order = CTA link builder → A5 UTM capture/persistence → revenue API route/namespace; redeploy A7; re-run audit.
+Proceed. This validates our SEO-driven, zero-CAC acquisition engine and protects our B2B-led unit economics narrative for demos and fundraising  .

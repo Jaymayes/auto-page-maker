@@ -1,0 +1,38 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "sev_level": "SEV-1",
+  "effective_at": "2026-01-19T23:30:00Z",
+  "telemetry_code_patch": {
+    "strict_mode": false,
+    "on_428_5xx": "accept_and_spool",
+    "retry_strategy": "none",
+    "attempts": 1,
+    "on_success": "spool_with_fingerprint",
+    "x_fingerprint": "sha256(body)",
+    "remote_retries_during_sev1": false
+  },
+  "spool_io": {
+    "path": "/tmp/telemetry",
+    "cap_mb": 100,
+    "rotation": "gzip",
+    "write_through": true,
+    "fsync_on_batch_close": true,
+    "write_timeout_seconds": 2,
+    "alert_on": ["ENOSPC", "EACCES"],
+    "memory_queue_drop": "only_after_durable_write"
+  },
+  "probe_suppression": {
+    "disable_metrics_p95": true,
+    "disable_localhost_checks": true,
+    "scrape_only": "/metrics",
+    "compute_p95_in": "A8",
+    "waf_sitemap_block": "active"
+  },
+  "self_ddos_guard": {
+    "command_center_stopped": true,
+    "require_patched_image": true,
+    "synthetic_ip_allowlist": true,
+    "abuse_ip_rate_limit": "active"
+  }
+}

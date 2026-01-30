@@ -1,0 +1,80 @@
+Here’s a copy/paste prompt you can run with your debugging agent (e.g., “Debug with Agent” in Replit, OpenAI/Claude code interpreter, or a local DevOps assistant). It systematically hunts down the root cause of a white screen in a Vite + React SPA served by an Express backend and proposes minimal diffs to fix it.
+
+Prompt: White screen root-cause investigation and fix
+
+Context
+
+App: ScholarMatch (React + Vite frontend in client/, Express backend in server/)
+Deploy URL: https://auto-page-maker-jamarrmlayes.replit.app
+Symptom: Landing on the site shows a blank white page.
+Goal: Identify the exact cause(s) and provide minimal code/config patches to restore the UI.
+What to do
+
+Reproduce and collect evidence
+Fetch top-level HTML and response headers:
+curl -sI https://auto-page-maker-jamarrmlayes.replit.app
+curl -s https://auto-page-maker-jamarrmlayes.replit.app | sed -n '1,200p'
+Parse index.html and extract all <script type="module" src="..."> and <link rel="modulepreload" href="..."> URLs. For each, request with curl -sI to verify 200 and correct Content-Type. If any 404/blocked-of-type, record them.
+Capture CSP headers (Content-Security-Policy) and note script-src, default-src, connect-src. If scripts are blocked, identify which directive is failing.
+Use Playwright or Puppeteer headless to open the Deploy URL and collect:
+Browser console logs (errors/warnings)
+Network failures
+JS exceptions and stack traces Example (Node): const { chromium } = require('playwright'); (async () => { const browser = await chromium.launch(); const page = await browser.newPage(); page.on('console', m => console.log('console:', m.type(), m.text())); page.on('pageerror', e => console.error('pageerror:', e.message, e.stack)); await page.goto('https://auto-page-maker-jamarrmlayes.replit.app', { waitUntil: 'domcontentloaded', timeout: 30000 }); await page.waitForTimeout(3000); await browser.close(); })();
+If the page JS fails to load, verify Vite base paths and asset URLs in index.html vs server static mount path.
+2. Check server build/serve configuration
+
+Inspect server code for static hosting and SPA fallback:
+Does the server serve the built frontend? Look for something like: app.use(express.static(path.join(__dirname, '../client/dist'))); app.get('*', (_req, res) => res.sendFile(path.join(__dirname, '../client/dist/index.html')));
+If paths differ (e.g., build to dist/ but server points to client/dist/ or vice versa), record the mismatch.
+Open vite.config.(ts|js). Verify:
+base is '/' (or consistent with deployment path)
+build.outDir matches what the server serves
+If using a monorepo, ensure client build goes to a directory the server actually serves.
+Look for Helmet/CSP setup. Confirm script-src includes 'self' and allows modulepreload. If CSP includes 'nonce' or 'sha' but build emits external scripts without those, that can cause a white screen.
+3. Validate environment usage on the client
+
+Search for import.meta.env.VITE_* references. Ensure every usage has a safe fallback and none throws at runtime if undefined.
+Build client locally (pnpm i && pnpm --filter client build) and run a static preview (pnpm --filter client preview). Visit localhost preview with Playwright to see if the white screen reproduces.
+4. Common root causes to test explicitly
+
+Asset 404: If index.html references /assets/*.js but the server does not mount that folder, fix static path or Vite outDir.
+CSP blocks: If CSP blocks module scripts or modulepreload, adjust Helmet config (script-src 'self'; upgrade modulepreload, add 'strict-dynamic' only if you add nonces correctly).
+SPA routing: If the server lacks a catch-all to index.html, deep links may 404. Add app.get('*', ...) after API routes.
+Import or runtime errors: Any uncaught exception during initial render causes a white screen. Report the exact error and file/line.
+5. Produce minimal patches (diffs)
+
+If static paths are wrong: patch server to serve the correct build output and add SPA fallback.
+If Vite base/outDir mismatch: patch vite.config and package.json build script.
+If CSP is blocking scripts: patch Helmet to include: contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], connectSrc: ["'self'", "https://api.openai.com", "https://www.google-analytics.com"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", "data:"], fontSrc: ["'self'", "data:"], } } and ensure no inline scripts are required; otherwise, add a nonce mechanism and wire it into index.html.
+If SPA fallback is missing: add the catch-all route after all API routes.
+If env usage crashes the client: add defaults and guards; ensure VITE_* vars are only read on client and server uses process.env.
+6. Verify fix
+
+Build and run in production mode locally (NODE_ENV=production). Serve with the patched server. Use Playwright to confirm no console errors and that the root route renders UI.
+In deployment logs, confirm 200s for index.html and assets, and CSP allows scripts.
+Output:
+Root cause summary
+Console/network transcript
+Applied diffs
+Post-fix screenshot or HTML snippet proving non-white render
+Regression checklist
+Constraints
+
+Prefer the smallest viable change.
+Do not weaken CSP more than necessary.
+Keep Vite base as '/' unless the app is deployed under a subpath.
+Keep all responses as JSON or unified text; include code diffs with file paths.
+Acceptance criteria
+
+Visiting https://auto-page-maker-jamarrmlayes.replit.app renders the UI (no white screen).
+No red errors in console.
+All main JS chunks return 200 with correct MIME type.
+CSP no longer blocks required scripts.
+SPA deep links render via index.html fallback.
+Notes
+
+If the server currently requires DATABASE_URL to boot, but we’re using USE_SAMPLE_DATA=true, ensure that does not affect static serving.
+If Replit’s deployment serves static files via a CDN path, confirm that Vite’s asset paths match that origin.
+End of prompt
+
+If you want, I can run a quick remote triage checklist right now: check CSP, asset 404s, and index.html script URLs from your deployed domain and tell you which of the three is failing.

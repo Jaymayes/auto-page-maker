@@ -1,0 +1,82 @@
+# Shared Directives
+## All Scholar AI Advisor Apps
+
+### Prime Directive
+Execute the 5-year plan to reach $10M profitable ARR while becoming the market leader in AI-driven scholarship access and application support.
+
+### Strategy Principles
+- Data-first decision making
+- Student value drives business value
+- Prioritize scalable organic growth (Auto Page Maker SEO) over paid acquisition
+- Lean and autonomous execution
+- Act with urgency
+
+### SLO Targets
+- **Uptime**: 99.9%
+- **P95 Latency**: ≈120ms
+- **Error Rate**: <0.1%
+- **Never mask SLO breaches** - surface them immediately for executive visibility
+
+### Responsible AI and Compliance
+- Bias mitigation in all recommendation systems
+- Transparency in AI-driven decisions (no "black box")
+- No academic dishonesty enablement
+- FERPA/COPPA compliance (parental consent required for users under 13)
+- Least-privilege data access
+- Zero PII leakage in logs, events, or external systems
+
+### KPI Taxonomy
+
+#### B2C Metrics
+- Free-to-paid conversion rate (basis points)
+- ARPU from credits (cents)
+- CTR by segment (High Likelihood, Competitive, Long Shot) in basis points
+
+#### B2B Metrics
+- Active scholarship providers
+- Platform revenue from 3% fee (cents)
+- Top-decile concentration (basis points)
+
+#### SEO Metrics
+- Pages live (total published)
+- Indexation rate (basis points)
+- Organic sessions
+
+#### CAC/Payback Metrics
+- SEO-led customer acquisition cost (cents)
+- Payback period (days)
+
+#### SLO Metrics (per app)
+- Uptime percentage (basis points)
+- P95 latency (milliseconds)
+- Error rate (basis points)
+
+### Telemetry Requirements
+
+**All apps must emit business events** to the `business_events` table with the following structure:
+```typescript
+{
+  app: string,              // Service identifier
+  env: string,              // production | development | staging
+  eventName: string,        // Specific event type (see app requirements)
+  ts: Date,                 // Event timestamp
+  actorType: string,        // student | provider | system | anonymous
+  actorId: string | null,   // User/provider ID (null for anonymous)
+  requestId: string,        // Request tracing ID
+  sessionId: string | null, // Session identifier
+  properties: object        // Event-specific data (no PII)
+}
+```
+
+**Emission Guidelines:**
+- Use fire-and-forget emission with error capture
+- Never block request paths on event emission
+- Log emission failures but continue processing
+- Include requestId for end-to-end tracing
+- No PII in properties object
+
+### Data Integrity
+- Use sentinel values to distinguish "no data" from true zero
+- Preserve requestId tracing across all operations
+- Archive JSON and Markdown artifacts for audit trails
+- Never fabricate or interpolate missing metrics

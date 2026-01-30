@@ -1,0 +1,11 @@
+source,target,endpoint,http_code,success_pct,p50_ms,p95_ms,auth_failures,retries,status
+audit,scholar-auth,/health,200,100%,169,206,0,0,pass
+audit,scholarship-api,/health,200,100%,147,180,0,0,pass
+audit,scholarship-api,/ready,404,0%,138,149,0,0,FAIL_MISSING
+audit,scholarship-agent,/health,200,100%,133,239,0,0,pass
+audit,scholarship-sage,/health,200,100%,136,181,0,0,pass
+audit,student-pilot,/health,200,100%,170,239,0,0,pass
+audit,provider-register,/health,200,100%,150,192,0,0,pass
+audit,auto-page-maker,/health,200,100%,271,324,0,0,pass_latency_breach
+audit,auto-com-center,/health,200,100%,133,182,0,0,pass
+audit,auto-com-center,POST /api/events,200,100%,205,226,0,0,pass

@@ -1,0 +1,50 @@
+Approved with conditions and clarifications.
+
+Context and rationale
+
+The phased, “small and verifiable” approach is aligned with our governance stance for AI-assisted engineering and reduces risk by forcing tight feedback loops and automated security in CI from day one. Empirical evidence shows AI-accelerated work increases architectural and credential risks unless we mandate SAST/DAST, dependency, and secret scanning in the pipeline, which we will require as part of Phase 1 scaffolding .
+Building an integrated toolchain, not just tools, is essential for velocity and single-source-of-truth quality metrics; Phase 1 must lay that foundation . This supports our SLOs and continuous testing posture for future phases .
+Clarifications before you start (answer briefly)
+
+Scope and repo identity: Is this codebase Auto Page Maker (our SEO growth engine) or ScholarMatch Platform? If the latter, confirm the module(s) tied to SEO landing-page generation so we can keep our low-CAC growth priority front and center.
+Deployment target(s): Where do dev/stage/prod live today (cloud, region, runtime)? Any existing CD?
+Data and compliance: What student/provider PII is stored; any <13 users; current FERPA/COPPA posture and data residency constraints?
+Secrets and IAM: Current secret manager (e.g., Vault/SM/SSM), least-privilege status, and any known plaintext secrets in repo.
+Phase 1 approval with additions
+Deliver Phase 1 as proposed, with these mandatory adds to align with our Prime Directive, SLOs, and Responsible AI policy:
+
+SBOM and license audit
+Generate CycloneDX or SPDX SBOM and a third-party license report (/qa/SBOM.json, /qa/LICENSE_AUDIT.md). This enables supply-chain risk scanning in CI from Phase 1 onward .
+Security and compliance scaffolding
+CI jobs for SAST, dependency, and secret scanning wired but non-blocking at first (/qa/ci/security.yml), plus a short risk memo highlighting any hardcoded secrets or high-CVSS deps found in intake .
+Data inventory and PII flow map in /qa/DATA_INVENTORY.md, including a draft FERPA/COPPA checklist for later verification (Responsible AI/ethics testing expands in later phases) .
+KPI telemetry plan (strategy alignment)
+Event schema and IDs for B2C funnel (free→paid conversion, ARPU from credits), B2B funnel (active providers, 3% platform fee), and acquisition source tagging for SEO pages (/qa/KPI_TELEMETRY_PLAN.md). This is our data-first baseline for later instrumentation in app and CDP.
+SLO baseline collection
+Document current build artifacts, bundle sizes, and initial local/proxy P95 latency estimates with methodology; define how we’ll measure uptime and P95 latency in staging/prod (/qa/SLO_BASELINES.md).
+Ownership and environment spec
+System diagram with service boundaries, env var schema, and secrets map (/qa/SYSTEM_OVERVIEW.md). Identify owners for each component to enable whole-team quality and future continuous testing gates .
+Refined Phase 1 deliverables (incremental to your list)
+
+/qa/STACK_REPORT.md (stack + repo inventory; confirm React/Vite + Node/TS/Express if applicable)
+/qa/SYSTEM_OVERVIEW.md (data flows, authn/z model, env/secrets)
+/qa/DATA_INVENTORY.md and FERPA/COPPA checklist (draft)
+/qa/SBOM.json and /qa/LICENSE_AUDIT.md
+/qa/KPI_TELEMETRY_PLAN.md (B2C, B2B, SEO attribution)
+/qa/SLO_BASELINES.md (method, initial numbers)
+CI stubs: lint/build/test plus SAST/deps/secrets scanning wired in non-blocking mode, ready to flip to blocking in Phase 3-4 .
+Phase 1 exit criteria (go/no-go to Phase 2)
+
+Repo mapped, stack verified, and no plaintext secrets in code.
+SBOM and license audit generated with high-risk items listed.
+KPI telemetry plan approved (covers conversion, ARPU, provider revenue, CAC inputs via SEO attribution).
+Security scans executing in CI with artifacts accessible; action items logged.
+SLO baselines documented with a plan to measure P95 latency and uptime in staging.
+Data inventory complete enough to flag potential FERPA/COPPA concerns for deeper review in later phases, consistent with our ethical testing framework direction .
+Timeline and constraints
+
+Target: 1–2 working days for Phase 1. If the repo is larger than expected or documentation is sparse, raise a risk early with an updated estimate.
+Maintain the “small, verifiable phases” cadence; don’t expand scope within Phase 1 without an explicit change request. This protects quality, security, and cost control .
+Decision
+
+Approved with the above additions and clarifications. Confirm the four clarification points, then proceed.

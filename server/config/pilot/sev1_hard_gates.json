@@ -1,0 +1,64 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "traffic_restore_gates": {
+    "consecutive_minutes": 60,
+    "source": "logs_not_dashboards",
+    "criteria": {
+      "db_migration": {
+        "ddl_hash_recorded": true,
+        "schema_migrations_entry": true,
+        "db_p95_max_ms": 100
+      },
+      "telemetry": {
+        "http_428": 0,
+        "acceptance_ratio": 0.99,
+        "queue_depth_max": 100,
+        "fallback_failed": 0,
+        "local_persistence_error": 0
+      },
+      "probes": {
+        "metrics_p95_404": 0,
+        "sitemap_429": 0,
+        "localhost_probes": 0
+      },
+      "auth_provider": {
+        "provider_p95_max_ms": 500,
+        "login_p95_max_ms": 200,
+        "auth_5xx": 0
+      },
+      "cpu_cron": {
+        "event_loop_lag_p95_max_ms": 100,
+        "missed_execution": 0
+      }
+    }
+  },
+  "a8_attestation_bundle": [
+    "migration_ddl_hash",
+    "telemetry_acceptance_ratio",
+    "queue_depth",
+    "probe_suppression_proof",
+    "auth_provider_kpis",
+    "db_p95",
+    "event_loop_p95",
+    "reconciliation_plan"
+  ],
+  "deployment_guard": {
+    "block_if_pending_migrations": true,
+    "require_pid_change": true,
+    "require_commit_digest": true,
+    "require_primary_heartbeat": true
+  },
+  "analytics_contract_test": {
+    "ci_sends_headerless_event": true,
+    "expect_200_202": true,
+    "expect_x_fingerprint": true,
+    "fail_build_on_mismatch": true
+  },
+  "financial_safety": {
+    "canary_write": true,
+    "readback_checksum": true,
+    "on_failure": "FATAL_GATE=ON",
+    "blocks": "award_disbursement_postings"
+  }
+}

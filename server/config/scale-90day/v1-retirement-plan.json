@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-16T22:30:00Z",
+  "v1_status": "read_only_observation",
+  "retirement_day": 7,
+  "retirement_date": "2026-01-23T22:30:00Z",
+  "actions": {
+    "archive_data": true,
+    "revoke_access": true,
+    "produce_checksum": true,
+    "data_retention_manifest": true
+  },
+  "security": {
+    "key_rotation_t48h": "2026-01-18T22:30:00Z",
+    "legacy_key_denylist": true,
+    "privacy_mini_audit": {
+      "coppa_posture": "verify",
+      "ferpa_posture": "verify",
+      "pii_logs_check": true,
+      "api_key_enforcement_samples": true
+    }
+  }
+}

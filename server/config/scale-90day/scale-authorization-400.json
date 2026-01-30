@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-19T22:30:00Z",
+  "authorization": "CEO-20260119-CONDITIONAL-SCALE-400",
+  "status": "CONDITIONAL",
+  "current_budget_usd": 300,
+  "target_budget_usd": 400,
+  "activation_date": "Day 4 (2026-01-20)",
+  "gate_check_time": "06:00 UTC",
+  "owner": "Finance/Ops",
+  "scale_gates": {
+    "cac_max_usd": 7,
+    "arpu7_vs_cac_ratio_min": 2.0,
+    "refund_max_pct": 3,
+    "stripe_success_min_pct": 98.5,
+    "incidents": 0
+  },
+  "on_gate_pass": {
+    "action": "lift_budget_to_400",
+    "throttles_active": true,
+    "slo_guardrails_active": true
+  },
+  "on_gate_fail": {
+    "action": "hold_at_300",
+    "notify": ["ceo", "ops", "finance"]
+  },
+  "campaign_staging": {
+    "day4_campaigns_staged": true,
+    "instant_activation_on_green": true
+  }
+}

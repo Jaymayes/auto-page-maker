@@ -1,0 +1,12 @@
+{
+  "hard_filters": ["deadline", "gpa", "residency", "major"],
+  "deadline_buffer_days": 30,
+  "gpa_tolerance": 0.1,
+  "major_fuzzy_threshold": 0.8,
+  "strictMajorMatch": true,
+  "vector_weight": 0.7,
+  "keyword_weight": 0.3,
+  "freshness_boost": 0.1,
+  "version": "1.0.0",
+  "updated_at": "2026-01-17T18:45:00Z"
+}

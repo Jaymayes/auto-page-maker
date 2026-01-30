@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fast-Track your {{scholarship_name}} application</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  
+  <p>Hi {{first_name}},</p>
+
+  <p>You're eligible for <strong>{{scholarship_name}}</strong> ({{award_amount}}). Fast-track your application — no AI essays, ever:</p>
+
+  <ul style="margin: 20px 0; padding-left: 20px;">
+    <li><strong>We pre-fill administrative fields</strong> (contact, GPA, eligibility). You can edit before sending.</li>
+    <li><strong>Attach your essay</strong> (written by you) — we'll never write it for you.</li>
+    <li><strong>Review everything</strong> before you submit.</li>
+  </ul>
+
+  <p style="background: #f8f9fa; padding: 12px 16px; border-left: 4px solid #2563eb; margin: 20px 0;">
+    <strong>We will never write your essay.</strong> Our AI coaches you on clarity and structure — you do the writing.
+  </p>
+
+  <p style="text-align: center; margin: 30px 0;">
+    <a href="{{app_url}}/apply/{{scholarship_id}}?utm_source=email&utm_medium=oca&utm_campaign=oca_canary_student_v1&utm_term={{cohort_id}}&utm_content={{variant_id}}&x-a8-cid={{a8_campaign_id}}&x-a8-eid={{event_id}}" 
+       style="background: #2563eb; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
+      Open fast-track review
+    </a>
+  </p>
+
+  <p style="font-size: 0.9em; color: #666;">
+    Deadline: {{deadline}} | Provider: {{provider_name}}
+  </p>
+
+  <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+  <p style="font-size: 0.85em; color: #666;">
+    Scholar AI Advisor<br>
+    123 Education Lane, San Francisco, CA 94105<br>
+    <a href="{{app_url}}/preferences" style="color: #2563eb;">Email preferences</a> | 
+    <a href="{{app_url}}/unsubscribe?email={{email_encoded}}" style="color: #2563eb;">Unsubscribe</a>
+  </p>
+
+</body>
+</html>

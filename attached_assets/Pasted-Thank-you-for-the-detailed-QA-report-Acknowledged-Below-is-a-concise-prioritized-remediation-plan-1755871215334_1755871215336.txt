@@ -1,0 +1,360 @@
+Thank you for the detailed QA report. Acknowledged. Below is a concise, prioritized remediation plan with proposed code-level fixes, configuration changes, and validation steps for each issue.
+
+Top-level plan and ETA
+
+Immediate (same day): CRIT-001, CRIT-002, CRIT-003
+Next 1–2 days: HIGH-001, HIGH-003, HIGH-004, MED-003
+Next 2–3 days: HIGH-002, MED-001, MED-002, LOW-001
+Cleanup (end of week): LOW-002, LOW-003, LOW-004, LOW-005
+Critical fixes
+
+CRIT-001: OpenAI API timeout/hanging on landing page generation
+
+Fix:
+Correct conditional to use OpenAI when OPENAI_API_KEY is present (also MED-003).
+Add a hard timeout (4–5s) around the OpenAI call with automatic fallback content.
+Ensure the landing page endpoint never hangs: always respond with AI content or fallback within timeout.
+Proposed patch (server/services/contentGenerator.ts):
+Use AbortController or a Promise.race timeout wrapper.
+Return structured fallback content on any error or timeout.
+Validate:
+curl POST request returns content within 5 seconds.
+Simulate timeouts by setting OPENAI_API_KEY but blocking outbound or using a very low timeout.
+Log includes a single warning, no unhandled promise rejections.
+CRIT-002: Authentication disabled when JWT_SECRET missing
+
+Fix:
+Require JWT_SECRET in production; fail fast on boot if missing.
+In non-production, allow dev fallback only if explicitly enabled by an env flag (e.g., ALLOW_ANON_DEV=true).
+Ensure all protected routes check auth; remove any bypass code paths.
+Proposed patch (server/config/environment.ts):
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) throw Error('JWT_SECRET is required in production');
+Validate:
+With NODE_ENV=production and missing JWT_SECRET, app refuses to start with clear error.
+With JWT_SECRET set, protected endpoints require valid tokens and return 401 otherwise.
+CRIT-003: App exits when Agent Bridge variables missing
+
+Fix:
+Treat Agent Bridge integration as optional.
+Do not process.exit when SHARED_SECRET or other Agent vars are missing; instead, set agentIntegrationEnabled=false and log a one-time warning.
+Proposed patch (server/config/environment.ts and agent init):
+Feature-gate the integration behind a boolean derived from presence of required vars.
+Validate:
+App boots without Agent variables and serves core features.
+When variables are present, integration initializes.
+High-priority fixes
+
+HIGH-001: Missing navigation implementations
+
+Fix:
+Implement useNavigate handlers for:
+Browse All Scholarships: navigate('/scholarships')
+Category cards: navigate(/scholarships?category=${slug})
+Get Matches: navigate('/onboarding' or '/matches' depending on flow)
+Validate:
+Clicking these elements navigates correctly and still tracks analytics.
+HIGH-002: GA disabled without VITE_GA_MEASUREMENT_ID
+
+Fix:
+Initialize GA only when env is present; otherwise, suppress repeated console errors (log one-time warning in development).
+Provide deploy instructions to set VITE_GA_MEASUREMENT_ID.
+Validate:
+With key set, page views/events are sent (verify in Realtime report).
+Without key, no console spam and no runtime errors.
+HIGH-003: Save/unsave toast logic inverted
+
+Fix:
+Flip the logic to show “Saved” when adding and “Removed” when removing.
+Validate:
+Manual click test shows correct messages and states.
+HIGH-004: Case-sensitive landing page slug lookup
+
+Fix:
+Normalize slugs to NFC lowercase on both storage and lookup. Consider remove/replace diacritics if needed for SEO stability.
+Validate:
+Accessing with any case returns same page. Add tests for mixed-case slugs.
+Medium fixes
+
+MED-001: Total amount display formatting
+
+Fix:
+Format under $1M in standard currency (e.g., $17,500), and ≥$1M as $x.xM.
+Validate:
+$17,500 -> “$17,500”; $1,200,000 -> “$1.2M”.
+MED-002: Deadline timezone handling
+
+Fix:
+Treat deadlines as end-of-day in their specified timezone; if none, assume a default (UTC) and document it.
+Use date-fns-tz or Luxon to compute days remaining consistently.
+Validate:
+Write tests covering deadlines across timezones; verify day boundaries.
+MED-003: Fallback executes even with API key
+
+Fix:
+Correct the conditional to use OpenAI when OPENAI_API_KEY is truthy.
+Validate:
+With key set and network working, OpenAI is used; when key missing or timeout, fallback is used.
+Low fixes
+
+LOW-001: Non-functional anchor in scholarship title
+
+Fix:
+Replace href="#" with Link to scholarship details route, or switch to a button if there is no detail view.
+Validate:
+Title click navigates correctly or is not focusable if not a link.
+LOW-002: TODOs in code
+
+Fix:
+Close or ticket each TODO; implement missing features or remove/comment with issue IDs.
+LOW-003: Hardcoded sample data in production
+
+Fix:
+Guard with env flag USE_SAMPLE_DATA=true only in development.
+Add a real data source or clearly documented seed fixture for non-production.
+Validate:
+In production, no hardcoded data is served.
+LOW-004: Browserslist warning
+
+Fix:
+Update caniuse-lite database and lockfile.
+Command: npx update-browserslist-db@latest
+Validate:
+No warning during dev build.
+LOW-005: Inconsistent capitalization
+
+Fix:
+Adopt a UI copy style guide and helper functions (e.g., titleCase for categories; sentence case for messages).
+Validate:
+Visual sweep for consistency.
+Selected code changes (representative)
+
+server/services/contentGenerator.ts (timeouts + conditional + fallback)
+Use OpenAI when available, time out in 4.5s, and fallback on any error.
+Pseudocode snippet:
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
+
+function withTimeout(promise, ms) {
+return new Promise((resolve, reject) => {
+const t = setTimeout(() => reject(new Error('timeout')), ms);
+promise.then(v => { clearTimeout(t); resolve(v); }, e => { clearTimeout(t); reject(e); });
+});
+}
+
+export async function generateLandingContent(promptParts) {
+if (!openai) {
+return generateFallbackContent(promptParts);
+}
+try {
+const completion = await withTimeout(
+openai.chat.completions.create({
+model: 'gpt-4o-mini',
+messages: [{ role: 'user', content: promptParts.join('\n') }],
+temperature: 0.7
+}),
+4500
+);
+const text = completion.choices?.[0]?.message?.content?.trim();
+return text || generateFallbackContent(promptParts);
+} catch (err) {
+console.warn('OpenAI error, using fallback:', err.message);
+return generateFallbackContent(promptParts);
+}
+}
+
+function generateFallbackContent(promptParts) {
+// simple, deterministic fallback content generation
+return Discover scholarships tailored to you. ${promptParts.join(' ')}.slice(0, 1200);
+}
+
+2. Landing page generation endpoint (ensure response never hangs)
+
+Wrap generator call in try/catch and always return JSON with a status field.
+app.post('/api/landing-pages/generate', async (req, res) => {
+try {
+const { template, templateData, slug } = req.body;
+const content = await generateLandingContent(buildPrompt(template, templateData));
+return res.status(200).json({ slug, content, source: process.env.OPENAI_API_KEY ? 'openai' : 'fallback' });
+} catch (e) {
+return res.status(200).json({ slug: req.body?.slug, content: generateFallbackContent([]), source: 'fallback', note: 'error path' });
+}
+});
+
+3. server/config/environment.ts (auth + agent bridge gating)
+
+const isProd = process.env.NODE_ENV === 'production';
+
+if (isProd && !process.env.JWT_SECRET) {
+throw new Error('JWT_SECRET is required in production.');
+}
+
+export const agentBridge = {
+enabled:
+!!process.env.SHARED_SECRET &&
+!!process.env.COMMAND_CENTER_URL &&
+!!process.env.AGENT_BASE_URL &&
+!!process.env.AGENT_NAME &&
+!!process.env.AGENT_ID,
+config: {
+SHARED_SECRET: process.env.SHARED_SECRET,
+COMMAND_CENTER_URL: process.env.COMMAND_CENTER_URL,
+AGENT_BASE_URL: process.env.AGENT_BASE_URL,
+AGENT_NAME: process.env.AGENT_NAME,
+AGENT_ID: process.env.AGENT_ID
+}
+};
+
+// During bootstrap:
+if (!agentBridge.enabled) {
+console.warn('Agent Bridge disabled: missing configuration; continuing without it.');
+} else {
+initAgentBridge(agentBridge.config);
+}
+
+4. Slug lookup normalization (server/storage.ts)
+
+Ensure normalized slug keys and lookups.
+function normalizeSlug(s) {
+return (s || '').normalize('NFC').toLowerCase();
+}
+
+// When storing:
+this.landingPagesBySlug[normalizeSlug(slug)] = page;
+
+// When reading:
+getLandingBySlug(slug) {
+return this.landingPagesBySlug[normalizeSlug(slug)] || null;
+}
+
+5. Save/unsave logic and toast (client/src/components/scholarship-card.tsx)
+
+Example:
+const handleSave = async () => {
+try {
+if (isSaved) {
+await api.unsaveScholarship(id);
+setIsSaved(false);
+toast.success('Removed from your saved scholarships');
+} else {
+await api.saveScholarship(id);
+setIsSaved(true);
+toast.success('Saved to your scholarships');
+}
+} catch {
+toast.error('Could not update saved state, try again.');
+}
+};
+
+6. Navigation handlers (client/src/pages/landing.tsx and scholarship-card.tsx)
+
+Example:
+const navigate = useNavigate();
+
+const onBrowseAll = () => {
+analytics.track('browse_all_clicked');
+navigate('/scholarships');
+};
+
+const onCategoryClick = (slug) => {
+analytics.track('category_clicked', { slug });
+navigate(/scholarships?category=${encodeURIComponent(slug)});
+};
+
+const onGetMatches = () => {
+analytics.track('get_matches_clicked');
+navigate('/onboarding');
+};
+
+7. GA initialization guard (frontend)
+
+Initialize only when env is present; warn once in dev:
+const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
+if (GA_ID) {
+// load gtag script + config
+} else if (!import.meta.env.PROD) {
+if (!window.GA_WARNED) {
+console.warn('Google Analytics disabled: VITE_GA_MEASUREMENT_ID not set.');
+window.GA_WARNED = true;
+}
+}
+
+8. Total amount formatting (client/src/pages/landing.tsx)
+
+Utility:
+function formatTotalAmount(amount) {
+if (amount < 1_000_000) return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+return $${(amount / 1_000_000).toFixed(1)}M;
+}
+
+9. Deadline timezone handling (client/src/components/scholarship-card.tsx)
+
+Using date-fns-tz:
+import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
+import { endOfDay, differenceInCalendarDays } from 'date-fns';
+
+function daysUntilDeadline(deadlineISO, tz = 'UTC') {
+const zonedDeadlineEOD = endOfDay(utcToZonedTime(new Date(deadlineISO), tz));
+const nowInTz = utcToZonedTime(new Date(), tz);
+return differenceInCalendarDays(zonedDeadlineEOD, nowInTz);
+}
+
+10. Non-functional anchor fix (client/src/components/scholarship-card.tsx)
+
+Replace <a href="#"> with <Link> or <button>:
+<Link to={`/scholarships/${id}`} className="title-link">{title}</Link>
+11. Sample data guard (server/storage.ts)
+
+Only use sample data when USE_SAMPLE_DATA=true; otherwise read from DB/service.
+const useSample = process.env.USE_SAMPLE_DATA === 'true';
+if (useSample) loadSampleData(); else await loadRealData();
+
+12. Browserslist update (tooling)
+
+Run:
+npx update-browserslist-db@latest
+Commit lockfile updates.
+13. Capitalization consistency
+
+Define copy standards:
+Headings: Title Case
+Buttons: Title Case
+Body text: Sentence case
+Add helpers or lightweight i18n transform as needed.
+Environment/config checklist
+
+Required in production:
+JWT_SECRET
+Optional, feature-gated:
+SHARED_SECRET, COMMAND_CENTER_URL, AGENT_BASE_URL, AGENT_NAME, AGENT_ID
+Analytics:
+VITE_GA_MEASUREMENT_ID (frontend build-time env)
+Development toggles:
+USE_SAMPLE_DATA=true (dev only)
+ALLOW_ANON_DEV=true (if you want to bypass auth locally)
+Acceptance criteria per critical item
+
+CRIT-001:
+Endpoint returns a JSON response within ≤5 seconds with either OpenAI or fallback content.
+Any OpenAI errors do not propagate to client; logs shows one warning.
+CRIT-002:
+In production, missing JWT_SECRET prevents boot with a clear error.
+With JWT_SECRET set, protected endpoints require valid JWT and respond 401/403 otherwise.
+CRIT-003:
+App boots without Agent Bridge env variables and logs a single warning.
+With variables set, integration initializes and runs without blocking boot.
+Regression tests to add
+
+Unit:
+contentGenerator: chooses OpenAI when key present; falls back on timeout/error; respects 4.5–5s timeout.
+Slug normalization: mixed case and diacritics.
+Amount formatting for boundaries (<1M, =1M, >1M).
+Deadline date math across timezones and DST boundaries.
+Integration:
+Auth guards on /api/saves, /api/applications, /api/matches.
+Landing page generation endpoint returns within SLA.
+Follow-ups requested
+
+Confirm intended route for “Get Matches” (onboarding vs direct matches).
+Provide or confirm default timezone for scholarship deadlines when timezone is absent.
+Confirm the source of real scholarship data (DB/API) to remove production sample data.
+Once I have confirmation on the two user flow items (Get Matches target route and default deadline timezone), I can convert the above into a single PR with commits per issue group and add tests and env docs.

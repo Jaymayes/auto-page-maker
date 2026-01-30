@@ -1,0 +1,5 @@
+{"run_id":"CEOSPRINT-20260114-MIGRATE-V2-036","ts":"2026-01-13T08:59:01Z","protocol":"v30_driftguard","v2_staging":true,"checksums":{
+"checksums.json":"c8f8511000aff7e7816b6af59932ac9d336c2bbb03facdfe39426d8db496e796",
+"v2_repos_index.json":"a54b24d97ea5cc381ab71f19bf0028663188b76d479e8314ff352e38742d323f",
+"go_no_go_cutover.md":"ba6e211e153d1ff49d722a141cb7cca23aad57e1a62dd4b3bda533609d4af2dd",
+"staging_validation_report.md":"f3f71b51037d2aebedb79fd2a6a4a95fa33761291698f398031afa3da737800a"}}

@@ -1,0 +1,91 @@
+{
+  "audit_timestamp": "2026-01-05T18:40:00Z",
+  "mode": "read_only_diagnostic",
+  "commit_shas": "all unknown (runtime inspection only)",
+  "services": {
+    "A1": {
+      "name": "scholar_auth", "version": "1.0.0", "url": "https://scholar-auth-jamarrlmayes.replit.app",
+      "purpose": "Identity & Authentication (JWT RS256, Clerk, Replit OIDC)",
+      "health_status": "ok", "p50_ms": 169, "p95_ms": 206,
+      "inbound_apis": ["/api/auth/*", "/api/users/*", "/.well-known/jwks.json"],
+      "outbound_apis": ["Postmark email", "Clerk", "Replit OIDC"],
+      "auth_method": "JWT RS256", "data_stores": ["auth_db (PostgreSQL)"],
+      "a8_ingestion": "configured but silent (no native events)"
+    },
+    "A2": {
+      "name": "scholarship_api", "version": "unknown", "url": "https://scholarship-api-jamarrlmayes.replit.app",
+      "purpose": "Data Backbone / Scholarship Database",
+      "health_status": "healthy", "p50_ms": 147, "p95_ms": 180,
+      "inbound_apis": ["/api/scholarships/*", "/health"],
+      "outbound_apis": [],
+      "auth_method": "API Key / JWT", "data_stores": ["PostgreSQL"],
+      "issues": ["/ready returns 404 - CONFIRMED (5/5 probes)"],
+      "ready_contract": "MISSING"
+    },
+    "A3": {
+      "name": "scholarship_agent", "version": "1.0.0", "url": "https://scholarship-agent-jamarrlmayes.replit.app",
+      "purpose": "AI Matching Orchestration",
+      "health_status": "healthy", "p50_ms": 133, "p95_ms": 239,
+      "inbound_apis": ["/api/match/*"],
+      "outbound_apis": ["A2 scholarship_api", "OpenAI"],
+      "auth_method": "JWT", "data_stores": [],
+      "note": "Orchestration required for revenue flow if matching triggers payments"
+    },
+    "A4": {
+      "name": "scholarship_sage", "version": "1.0.0", "url": "https://scholarship-sage-jamarrlmayes.replit.app",
+      "purpose": "AI Learning Assistant",
+      "health_status": "healthy", "p50_ms": 136, "p95_ms": 181,
+      "inbound_apis": ["/api/sage/*", "/api/essay/*"],
+      "outbound_apis": ["A2", "OpenAI"],
+      "auth_method": "JWT", "data_stores": ["PostgreSQL"]
+    },
+    "A5": {
+      "name": "student_pilot", "version": "unknown", "url": "https://student-pilot-jamarrlmayes.replit.app",
+      "purpose": "B2C Student Application",
+      "health_status": "ok", "p50_ms": 170, "p95_ms": 239,
+      "inbound_apis": ["/api/students/*", "/api/applications/*"],
+      "outbound_apis": ["A1", "A2", "A3", "A8 telemetry", "Stripe"],
+      "auth_method": "Session + JWT", "data_stores": ["PostgreSQL"],
+      "a8_events": 87, "stripe_mode": "live"
+    },
+    "A6": {
+      "name": "provider_register", "version": "1.0.0", "url": "https://provider-register-jamarrlmayes.replit.app",
+      "purpose": "B2B Provider Onboarding & Revenue",
+      "health_status": "ok", "p50_ms": 150, "p95_ms": 192,
+      "inbound_apis": ["/api/providers/*", "/api/webhooks/stripe"],
+      "outbound_apis": ["Stripe Connect", "A8 telemetry"],
+      "auth_method": "Stripe Webhook Sig + JWT", "data_stores": ["PostgreSQL", "cache"],
+      "stripe_mode": "live", "fee_model": "3% provider fee, 4x AI markup"
+    },
+    "A7": {
+      "name": "auto_page_maker", "version": "v2.9", "url": "https://auto-page-maker-jamarrlmayes.replit.app",
+      "purpose": "SEO Traffic Engine",
+      "health_status": "healthy", "p50_ms": 271, "p95_ms": 324,
+      "inbound_apis": ["/api/pages/*", "/scholarships/*"],
+      "outbound_apis": ["A1 auth", "A8 telemetry", "IndexNow", "SendGrid"],
+      "auth_method": "S2S JWT + API Key", "data_stores": ["PostgreSQL", "email_provider"],
+      "issues": ["P50 271ms > 150ms target - SendGrid health check adds latency"],
+      "sendgrid_contribution_ms": "~100-200ms on /health"
+    },
+    "A8": {
+      "name": "auto_com_center", "version": "1.0.0", "url": "https://auto-com-center-jamarrlmayes.replit.app",
+      "purpose": "Command Center / Telemetry Hub",
+      "health_status": "ok", "p50_ms": 133, "p95_ms": 182,
+      "inbound_apis": ["POST /api/events", "/api/events/recent", "/health"],
+      "outbound_apis": [],
+      "auth_method": "Bearer Token + v3.5.1 headers",
+      "data_stores": ["PostgreSQL"],
+      "role": "Telemetry Sink (Single Source of Truth)",
+      "issues": ["Stale incident banners", "$0 revenue due to test mode filter"]
+    }
+  },
+  "telemetry_protocol": {
+    "version": "v3.5.1",
+    "endpoint": "POST /api/events",
+    "required_headers": ["content-type", "x-scholar-protocol", "x-app-label", "x-event-id"]
+  },
+  "stripe_modes": {
+    "A5": "live", "A6": "live",
+    "A8_filter": "excludes STRIPE_MODE=test from Finance tiles"
+  }
+}

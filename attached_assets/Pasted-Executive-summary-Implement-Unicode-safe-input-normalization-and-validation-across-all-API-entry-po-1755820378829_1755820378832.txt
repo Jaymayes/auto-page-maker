@@ -1,0 +1,148 @@
+Executive summary
+Implement Unicode-safe input normalization and validation across all API entry points. Normalize to NFC, standardize line endings, and block control/zero-width characters in identifier fields while preserving international text in essays and messages. This prevents account spoofing, duplicate records, and parser inconsistencies for global users without impacting SEO or agent functions. Fast to ship, no new vendors, and backward compatible.
+
+{
+"recommendation_title": "Unicode-safe input normalization and validation (NFC + control/zero-width safeguards)",
+"priority": "P0",
+"why_now": [
+"QA flagged Unicode handling gaps that can cause spoofing, duplicate accounts, and broken searches.",
+"Low-effort, high-impact hardening using built-in Node/TS features (no new vendors).",
+"Prevents data integrity issues before production data accumulates.",
+"Complements recent security fixes and CORS enforcement to protect user identity and content."
+],
+"scope": "IN: All Express/Next.js API inputs (req.body, req.query, req.params); server-side normalization and validation; pre-persistence normalization for key identifiers. OUT: Frontend-only normalization, database migrations (we normalize before persistence), third-party provider payload transformations beyond normalization.",
+"implementation_plan": [
+{
+"step": "Create Unicode normalization middleware",
+"details": "Normalize all string inputs to NFC, standardize line endings to \n, and track modifications per field. Apply before validation/auth logic.",
+"owner": "Platform",
+"estimate_hours": 3,
+"dependencies": ["Body parsing order in server/index.ts"]
+},
+{
+"step": "Identifier vs text policy",
+"details": "For identifier-like fields (email, username, slug, id, path, city/state/major codes), strip/block control and zero-width characters; for free-text (essays, descriptions), keep Unicode but remove control chars and normalize.",
+"owner": "Security",
+"estimate_hours": 2,
+"dependencies": ["ENV config for identifier fields"]
+},
+{
+"step": "Integrate pre-save normalization",
+"details": "Before DB writes for users/scholarships/applications, normalize key fields (email, name_display, slug). Ensure lookups/search use normalized form.",
+"owner": "Platform",
+"estimate_hours": 3,
+"dependencies": ["Data access layer hooks"]
+},
+{
+"step": "Tests and edge-case matrix",
+"details": "Add unit/integration tests for canonical equivalence, zero-width, mixed-script, and control characters. Validate no regressions on essays and multi-language inputs.",
+"owner": "QA",
+"estimate_hours": 4,
+"dependencies": ["Test fixtures with international samples"]
+},
+{
+"step": "Monitoring and logging",
+"details": "Log normalization actions and rejections at debug level; create metric counters for modified/rejected fields to detect abuse or misconfig.",
+"owner": "Platform",
+"estimate_hours": 2,
+"dependencies": ["Existing logging system"]
+}
+],
+"code_changes": [
+{
+"file": "server/middleware/unicode-normalize.ts",
+"purpose": "Normalize inputs to NFC, standardize newlines, strip/block unsafe chars in identifiers",
+"snippet": "import { Request, Response, NextFunction } from 'express';\n\nconst CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g; // keep \t, \n, \r\nconst ZERO_WIDTH_ALL = /[\u200B-\u200D\u2060\uFEFF]/g; // ZWSP, ZWNJ, ZWJ, WJ, BOM\nconst ZERO_WIDTH_SAFE_TO_STRIP = /[\u200B\u2060\uFEFF]/g; // keep ZWJ/ZWNJ in free text\n\nconst parseList = (s?: string) => new Set((s || '').split(',').map(x => x.trim().toLowerCase()).filter(Boolean));\nconst IDENT_FIELDS = () => parseList(process.env.UNICODE_IDENTIFIER_FIELDS || 'email,username,slug,id,path,file,origin,city,state,major');\n\nfunction sanitizeString(value: string, mode: 'identifier' | 'text') {\n  let v = value.normalize('NFC').replace(/\r\n?/g, '\n');\n  const removed: string[] = [];\n  if (CONTROL.test(v)) { v = v.replace(CONTROL, ''); removed.push('control'); }\n  if (mode === 'identifier') {\n    if (ZERO_WIDTH_ALL.test(v)) { v = v.replace(ZERO_WIDTH_ALL, ''); removed.push('zero_width'); }\n    // Optional: collapse whitespace\n    v = v.trim();\n  } else {\n    if (ZERO_WIDTH_SAFE_TO_STRIP.test(v)) { v = v.replace(ZERO_WIDTH_SAFE_TO_STRIP, ''); removed.push('zero_width_safe'); }\n  }\n  return { value: v, removed };\n}\n\nfunction walk(obj: any, modeForKey: (k: string) => 'identifier' | 'text', path: string[] = [], report: any[] = []) {\n  if (obj == null) return obj;\n  if (typeof obj === 'string') {\n    const mode = modeForKey(path[path.length - 1] || '');\n    const before = obj; const { value, removed } = sanitizeString(obj, mode);\n    if (before !== value) report.push({ path: path.join('.'), mode, removed });\n    return value;\n  }\n  if (Array.isArray(obj)) return obj.map((v, i) => walk(v, modeForKey, path.concat(String(i)), report));\n  if (typeof obj === 'object') {\n    for (const [k, v] of Object.entries(obj)) {\n      (obj as any)[k] = walk(v, modeForKey, path.concat(k), report);\n    }\n    return obj;\n  }\n  return obj;\n}\n\nexport function unicodeNormalize(req: Request, res: Response, next: NextFunction) {\n  const idSet = IDENT_FIELDS();\n  const modeForKey = (k: string) => (idSet.has(k.toLowerCase()) ? 'identifier' : 'text');\n  const report: any[] = [];\n  // Normalize query, params, body\n  req.query = walk(req.query, modeForKey, ['query'], report);\n  req.params = walk(req.params, modeForKey, ['params'], report);\n  if (req.body && typeof req.body === 'object') {\n    req.body = walk(req.body, modeForKey, ['body'], report);\n  }\n  (req as any).normalizationReport = report;\n  return next();\n}\n"
+},
+{
+"file": "server/index.ts",
+"purpose": "Register Unicode middleware early in pipeline",
+"snippet": "import express from 'express';\nimport helmet from 'helmet';\nimport { corsEnforce } from './middleware/cors';\nimport { pathSecurity } from './middleware/path-security';\nimport { unicodeNormalize } from './middleware/unicode-normalize';\n\nconst app = express();\napp.use(helmet());\napp.use(pathSecurity);\napp.use(corsEnforce);\napp.use(express.json({ limit: '1mb' }));\napp.use(unicodeNormalize); // before auth/validators/routes\n"
+},
+{
+"file": "server/db/hooks/normalize.ts",
+"purpose": "Pre-save normalization for key entities",
+"snippet": "export function normalizeUser(u: any) {\n  if (u.email) u.email = String(u.email).normalize('NFC').trim().toLowerCase();\n  if (u.username) u.username = String(u.username).normalize('NFC').trim();\n  return u;\n}\n\nexport function normalizeScholarship(s: any) {\n  if (s.slug) s.slug = String(s.slug).normalize('NFC').trim();\n  return s;\n}\n"
+}
+],
+"config_changes": [
+{
+"file": ".env",
+"entries": [
+"UNICODE_IDENTIFIER_FIELDS=email,username,slug,id,path,file,origin,city,state,major"
+]
+},
+{
+"file": "README.md",
+"entries": [
+"Unicode normalization: All inputs normalized to NFC and sanitized. Identifier fields strip zero-width and control characters; free-text preserves language content.",
+"To adjust policy, edit UNICODE_IDENTIFIER_FIELDS (comma-separated, case-insensitive)."
+]
+}
+],
+"acceptance_criteria": [
+"All API inputs are normalized to NFC; CR/LF standardized to LF.",
+"Control characters outside of \t, \n, \r are removed; requests containing only control characters in identifier fields are rejected with 400.",
+"Zero-width characters are removed from identifier fields; preserved only where necessary in free text.",
+"Canonically equivalent inputs (e.g., e + combining acute vs é) are treated as equal for identifiers.",
+"International free-text (e.g., Arabic, Hindi, Chinese) is accepted intact after NFC normalization.",
+"No more than 5% latency increase p95; no functional regressions in essay analysis or content generation."
+],
+"tests": {
+"unit": [
+"normalize.nfc: 'e\u0301' becomes 'é' in identifier and text modes",
+"normalize.controls: removes C0/C1 controls; preserves \n, \t, \r",
+"normalize.zeroWidth.identifier: strips ZWSP, BOM, ZWJ/ZWNJ from identifiers",
+"normalize.zeroWidth.text: strips ZWSP/BOM but preserves ZWJ/ZWNJ",
+"normalize.query.params: normalization applies to req.query and req.params"
+],
+"integration": [
+"POST /users with email 'Usér\u0301@example.com' creates a single account; duplicate prevented with canonically equivalent input",
+"POST /scholarships with slug containing ZWSP is cleaned or rejected per policy",
+"Search/match endpoints behave identically with canonically equivalent queries",
+"Essay submission retains non-Latin scripts and punctuation after normalization"
+],
+"security": [
+"Reject identifier fields composed only of zero-width/control characters",
+"Detect and log when identifier normalization changes value (potential spoof attempt)",
+"Ensure no double-normalization side effects on repeated middleware invocation"
+]
+},
+"risk_mitigation": {
+"risks": [
+"Over-stripping could affect languages that rely on ZWJ/ZWNJ in free text",
+"Identifier normalization may cause unexpected duplicates if database still stores old unnormalized records",
+"Performance overhead on large payloads"
+],
+"rollback_plan": "Feature-flag the middleware by env; disable by removing the middleware registration and redeploy. Retain pre-save normalization only for critical fields until full rollout."
+},
+"metrics": {
+"security": [
+"Count of requests with removed zero-width/control characters in identifiers",
+"Number of blocked requests due to unsafe characters"
+],
+"performance": [
+"Middleware processing time p95 < 2ms",
+"Overall request latency change < 5%"
+],
+"stability": [
+"No increase in 4xx/5xx rates beyond expected 400s for invalid inputs",
+"Duplicate-creation attempts reduced to near zero for canonically equivalent identifiers"
+]
+},
+"timeline_days": 3,
+"communications": [
+"Notify frontend and data teams that inputs will be normalized to NFC; identifier fields will reject invisible characters.",
+"Document examples and guidance for international users; essays unaffected except control removal.",
+"Add runbook entry for adjusting UNICODE_IDENTIFIER_FIELDS."
+],
+"alternatives_if_blocked": [
+"Phase 1: Apply normalization only to identifier fields (email, slug, username) and pre-save hooks.",
+"Observe-only mode: Log normalization differences without mutating values for 24–48 hours, then enforce."
+],
+"follow_up_recommendations": [
+"Enforce strict allowlist CORS with credentials control and preflight handling (if not already shipped).",
+"Harden auth: verify JWT iss/aud/exp/nbf and add CSRF protection for any cookie-based endpoints."
+]
+}
+

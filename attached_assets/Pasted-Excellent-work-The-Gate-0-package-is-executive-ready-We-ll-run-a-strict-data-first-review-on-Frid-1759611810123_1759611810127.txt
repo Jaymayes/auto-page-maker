@@ -1,0 +1,49 @@
+Excellent work. The Gate 0 package is executive-ready. We’ll run a strict, data-first review on Friday. Default posture: No-Go unless all seven criteria are green, zero Sev-1s, and weekly burn ≤ plan. The $60k capital allocation remains approved; any contingency unlock requires a one-page ROI memo with expected KPI lift and payback ≤ 3 months. Reallocations >$5k still require my sign-off.
+
+Final directives and last-mile asks (due EOD Thursday)
+
+DRI roster and on-call: Send names, backups, and on-call coverage through Week 4. Include the on-call drill schedule and evidence that alert acknowledgment is <5 minutes in a dry-run.
+DR restore: Calendar invite on my calendar with success checklist; include target RTO/RPO and the dataset/scope to be restored. If Week 3 slips, we will preemptively call No-Go.
+B2B pipeline: Identify the two providers most likely to sign this week, name the decision-makers, list blockers, and the exact actions (and date) to clear them. Include the time-to-first-listing SLA (≤14 days) path per provider.
+Legal workback: Confirm dated milestones for Privacy, TOS, FERPA, DPAs. Include the engagement letter and a risk callout for any dependency that could slip the DR test or B2B go-live.
+Growth/SEO: Confirm top 50 pages are instrumented and live. Provide the 7-day indexation tracking sheet. If indexation <60%, include preliminary RCA hypotheses ready for discussion.
+Engineering reliability: Error budgets by service, current burn, and freeze policy if burn >25%. Include latency distributions (not just P95), error rates by major endpoint, and auto-blockers coverage.
+Revenue instrumentation: Show that the 3% provider fee and ARPU from credits are observable end-to-end in dashboards, with anomaly alerts (>3σ) configured.
+AI quality and ethics: Name the AI Quality Steward. Deliver the bias test plan and the model card template. Affirm our no-academic-dishonesty guardrail and the transparency policy in copy surfaced to end users.
+Planned executive spot checks in the Friday session
+
+Reliability: Randomly sample 3 endpoints to validate P95 ≤120ms and error ≤1% with traces. Verify two production alerts from the last 72 hours fired and paged correctly (ack <5 min).
+Delivery: Walk the canary + rollback runbook and demonstrate a non-prod rollback executed this week.
+DR/Backup: Validate the restore test scope, the environment to be restored, and the checklist of pass/fail criteria.
+B2B: Open the pipeline spreadsheet; drill into the two most-likely-to-sign providers, confirm decision-maker mapping, blockers, and the day-by-day close plan.
+Revenue: Trigger a $0.01 sandbox transaction to verify the 3% fee measurement path and that revenue tiles update within the expected latency.
+Growth/SEO: Pick 5 of the top 50 pages at random; confirm analytics events, schema markup, canonical tags, and noindex/nofollow correctness; check indexation status and impressions trend.
+AI Quality: Review one bias test spec and the model card template; confirm sign-off workflow and issue-handling SLA.
+KPIs to have live on dashboards for the run-of-show
+
+Reliability and delivery
+Uptime (target ≥99.9%), P50/P95/P99 latency, error rate by endpoint, error budget burn, incident count and MTTA/MTTR.
+B2C growth and monetization
+WAU/MAU, activation rate, free→paid conversion, ARPU from credits, cohort retention (W1/W4), SEO indexation %, top pages impressions/clicks, CAC split (organic vs paid) with organic prioritized.
+B2B pipeline and revenue
+Active providers, new listings/week, time-to-first-listing, gross listings quality score, 3% platform fee realized/run-rate, days-to-close per stage.
+Finance
+Weekly burn vs plan by category, runway, variance analysis, anomaly alerts (>3σ) log.
+AI quality and responsibility
+Bias test coverage and pass rate, red-team findings, model card status, “no academic dishonesty” guardrail checks, user transparency surfacing.
+Risk posture and red lines
+
+Any Sev-1, missed DR restore test, on-call ack >5 minutes, or reliability SLO breach moves us to Safe Mode (max 1 week) with a written remediation plan and owner.
+If SEO indexation <60% at Day 7, we open a formal RCA and freeze any non-critical content generation until guardrails are validated.
+If B2B time-to-first-listing exceeds 14 days for new providers, GM B2B proposes corrective actions within 48 hours (process, incentives, or product enablement changes).
+B2B close plan for this week
+
+GM B2B: Send me by Thursday 4pm a one-pager per the two target providers with:
+Decision-making unit, last email/meeting date, explicit close plan, and the “give/get” to land by Friday.
+Proposed accelerators (lightweight) that do not compromise unit economics.
+Operational cadence and expectations
+
+Pre-reads: I will review Thursday 8–10pm. Any must-fix comments will be sent by 10:30pm.
+Friday meeting: 30 minutes, timeboxed. Each DRI gets the allotted time; no slides beyond the dashboards and checklists. We will apply the binary Go/No-Go rule and assign remediations on the spot.
+Daily signal: Send a 2-minute end-of-day executive summary (Slack) with: top risks, blockers, and whether burn and SLOs remain within thresholds.
+If you deliver the above by EOD Thursday, we are ready to make a high-confidence Gate 0 decision on Friday. Keep execution tight, data-first, and bias toward organic growth.

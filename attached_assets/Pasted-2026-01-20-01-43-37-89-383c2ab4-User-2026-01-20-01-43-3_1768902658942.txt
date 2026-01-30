@@ -1,0 +1,158 @@
+2026-01-20 01:43:37.89
+383c2ab4
+User
+]
+2026-01-20 01:43:37.89
+383c2ab4
+User
+at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+2026-01-20 01:43:37.89
+383c2ab4
+User
+],
+2026-01-20 01:43:37.89
+383c2ab4
+User
+at file:///home/runner/workspace/dist/index.js:10444:50
+2026-01-20 01:43:37.89
+383c2ab4
+User
+at ZodObject.parse (file:///home/runner/workspace/node_modules/zod/lib/index.mjs:663:22)
+2026-01-20 01:43:37.89
+383c2ab4
+User
+],
+2026-01-20 01:43:37.89
+383c2ab4
+User
+{
+2026-01-20 01:43:37.89
+383c2ab4
+User
+{
+2026-01-20 01:43:37.89
+383c2ab4
+User
+message: 'Required'
+2026-01-20 01:43:37.89
+383c2ab4
+User
+}
+2026-01-20 01:43:37.89
+383c2ab4
+User
+"received": "undefined",
+2026-01-20 01:43:37.89
+383c2ab4
+User
+at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+2026-01-20 01:43:37.89
+383c2ab4
+User
+"path": [
+2026-01-20 01:43:37.89
+383c2ab4
+User
+]
+2026-01-20 01:43:37.89
+383c2ab4
+User
+path: [Array],
+2026-01-20 01:43:37.89
+383c2ab4
+User
+}
+2026-01-20 01:43:37.89
+383c2ab4
+User
+at get error [as error] (file:///home/runner/workspace/node_modules/zod/lib/index.mjs:587:31)
+2026-01-20 01:43:37.89
+383c2ab4
+User
+"topics"
+2026-01-20 01:43:37.89
+383c2ab4
+User
+at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+2026-01-20 01:43:37.89
+383c2ab4
+User
+addIssues: [Function (anonymous)],
+2026-01-20 01:43:37.89
+383c2ab4
+User
+{
+2026-01-20 01:43:37.89
+383c2ab4
+User
+"code": "invalid_type",
+2026-01-20 01:43:37.89
+383c2ab4
+User
+at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10) {
+2026-01-20 01:43:37.89
+383c2ab4
+User
+code: 'invalid_type',
+2026-01-20 02:48:03.43
+383c2ab4
+User
+at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+2026-01-20 02:48:03.43
+383c2ab4
+User
+addIssue: [Function (anonymous)],
+2026-01-20 02:48:03.43
+383c2ab4
+User
+"topics"
+2026-01-20 02:48:03.43
+383c2ab4
+User
+"code": "invalid_type",
+2026-01-20 02:48:03.43
+383c2ab4
+User
+at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10) {
+2026-01-20 02:48:03.43
+383c2ab4
+User
+at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+2026-01-20 02:48:03.43
+383c2ab4
+User
+],
+2026-01-20 02:48:03.43
+383c2ab4
+User
+at get error [as error] (file:///home/runner/workspace/node_modules/zod/lib/index.mjs:587:31)
+2026-01-20 02:48:03.43
+383c2ab4
+User
+[SEO_PAGES] Error after 0ms: ZodError: [
+2026-01-20 02:48:03.43
+383c2ab4
+User
+at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+2026-01-20 02:48:03.43
+383c2ab4
+User
+at ZodObject.parse (file:///home/runner/workspace/node_modules/zod/lib/index.mjs:663:22)
+2026-01-20 02:48:03.43
+383c2ab4
+User
+"expected": "array",
+2026-01-20 02:48:03.43
+383c2ab4
+User
+"received": "undefined",
+2026-01-20 02:48:03.43
+383c2ab4
+User
+"path": [
+2026-01-20 02:48:03.43
+383c2ab4
+User
+{
+Wrap
+Colors

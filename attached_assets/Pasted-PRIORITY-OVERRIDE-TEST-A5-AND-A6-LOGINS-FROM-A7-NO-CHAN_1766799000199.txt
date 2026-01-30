@@ -1,0 +1,174 @@
+PRIORITY OVERRIDE: TEST A5 AND A6 LOGINS FROM A7 (NO CHANGES / NO DEPLOYS)
+
+Start Origin (required): https://auto-page-maker-jamarrlmayes.replit.app
+Targets:
+Student app (A5): https://student-pilot-jamarrlmayes.replit.app
+Provider app (A6): https://provider-register-jamarrlmayes.replit.app
+IdP (read‑only context): https://scholar-auth-jamarrlmayes.replit.app (A1)
+Objective: Validate both funnels: A7→A5 and A7→A6. If login fails, capture hard evidence and classify the failure. Do NOT change code or deploy.
+Deliverables (attach all)
+
+HARs: a7_to_a5.har and a7_to_a6.har
+Screenshots:
+consent_before.png (at consent screen)
+consent_after.png OR session_expired.png (5s after clicking Authorize)
+JSON:
+setcookies.json (all Set‑Cookie headers from A1 you received in each flow)
+post.json (headers you sent on POST /oidc/interaction/:uid/confirm; must include Cookie)
+Final verdict lines for each flow using the Decision Rules below
+Headed Playwright script (copy/paste and run). It starts on A7, follows the appropriate CTA into A5/A6, pauses for CAPTCHA/login up to 90s, and classifies outcomes.
+
+from playwright.sync_api import Playwright, sync_playwright, expect
+import re, time, os, json, urllib.parse
+from datetime import datetime
+
+A7 = "https://auto-page-maker-jamarrlmayes.replit.app"
+A5 = "https://student-pilot-jamarrlmayes.replit.app"
+A6 = "https://provider-register-jamarrlmayes.replit.app"
+A1_HOST = "scholar-auth-jamarrlmayes.replit.app"
+
+def ensure_dir(): os.makedirs("artifacts_a7", exist_ok=True)
+def log(s): print(f"[{datetime.utcnow().isoformat()}] {s}")
+
+def record_set_cookie(resp, store):
+try:
+host = urllib.parse.urlparse(resp.url).hostname or ""
+if A1_HOST in host:
+sc = resp.headers.get("set-cookie")
+if sc: store.append({"url": resp.url, "status": resp.status, "set-cookie": sc})
+except: pass
+
+def click_cta_to_target(page, target):
+# Robust CTA heuristics on A7
+if target == A5:
+pats = [r"get my matches", r"get started", r"start your journey", r"student", r"find scholarships"]
+explicit = 'a[href*="student-pilot-jamarrlmayes.replit.app"]'
+else:
+pats = [r"list a scholarship", r"for schools", r"provider", r"onboard", r"register"]
+explicit = 'a[href*="provider-register-jamarrlmayes.replit.app"]'
+for pat in pats:
+for role in ("link","button"):
+loc = page.get_by_role(role, name=re.compile(pat, re.I))
+if loc.count(): loc.first.click(); return True
+if page.locator(explicit).count():
+page.locator(explicit).first.click(); return True
+return False
+
+def run_flow(playwright: Playwright, target: str, tag: str):
+ensure_dir()
+browser = playwright.chromium.launch(headless=False, args=["--start-maximized"])
+context = browser.new_context(record_har_path=f"artifacts_a7/{tag}.har", viewport={"width":1280,"height":800})
+page = context.new_page()
+
+# 0) Start at A7
+page.goto(A7, wait_until="domcontentloaded")
+if page.url != A7:
+    raise AssertionError("ABORT: Scope violation. Must start on A7 and follow CTA to A5/A6.")
+
+# 1) Click CTA into target app
+if not click_cta_to_target(page, target):
+    raise AssertionError(f"CTA not found on A7 for {target}")
+page.wait_for_url(re.compile(rf"^{re.escape(target)}"), timeout=20000)
+
+# 2) Instrument Set‑Cookie & consent POST headers
+set_cookies, post_log = [], {}
+page.on("response", lambda r: record_set_cookie(r, set_cookies))
+def on_request(req):
+    if re.search(r"/oidc/interaction/[^/]+/confirm/?$", req.url) and req.method.lower()=="post":
+        post_log["url"] = req.url
+        post_log["headers"] = {k:v for k,v in req.headers.items()
+                               if k.lower() in ("cookie","origin","referer","content-type")}
+        post_log["body_len"] = len(req.post_data or "")
+page.on("request", on_request)
+
+# 3) Trigger login on target
+try:
+    page.get_by_role("button", name=re.compile("sign in|log in|get started|sign up|register", re.I)).first.click()
+except:
+    # Protected path fallback to trigger auth
+    fallback = "/dashboard" if target==A5 else "/onboarding"
+    page.goto(target + fallback)
+
+# 4) Wait to reach consent, allow manual CAPTCHA/login up to 90s
+try:
+    page.wait_for_url(lambda u: ("/oidc/interaction/" in u) or u.startswith(target), timeout=30000)
+except: pass
+if not page.url.startswith(target) and "/oidc/interaction/" not in page.url:
+    print("\n⚠️ Manual step: complete Clerk/Google login or CAPTCHA. Waiting up to 90s…")
+    try: page.wait_for_url(lambda u: ("/oidc/interaction/" in u) or u.startswith(target), timeout=90000)
+    except: pass
+
+# 5) If already at target (no consent needed), success
+if page.url.startswith(target):
+    json.dump(set_cookies, open(f"artifacts_a7/{tag}_setcookies.json","w"), indent=2)
+    context.storage_state(path=f"artifacts_a7/{tag}_storage.json")
+    context.close(); browser.close()
+    return {"result":"SUCCESS", "final_url":page.url}
+
+# 6) At consent: snapshot, then click
+page.screenshot(path=f"artifacts_a7/{tag}_consent_before.png")
+if "Session Expired" in page.content():
+    json.dump(set_cookies, open(f"artifacts_a7/{tag}_setcookies.json","w"), indent=2)
+    context.storage_state(path=f"artifacts_a7/{tag}_storage.json")
+    page.screenshot(path=f"artifacts_a7/{tag}_session_expired.png")
+    context.close(); browser.close()
+    return {"result":"SESSION_EXPIRED_BEFORE", "final_url":page.url}
+
+btn = page.get_by_role("button", name=re.compile("^Authorize$", re.I)).first
+expect(btn).to_be_visible()
+btn.click()
+time.sleep(5)
+page.screenshot(path=f"artifacts_a7/{tag}_consent_after.png")
+
+outcome = {"result":"UNKNOWN", "final_url":page.url,
+           "post":post_log, "set_cookie":set_cookies}
+if "Session Expired" in page.content():
+    outcome["result"] = "SESSION_EXPIRED_AFTER"
+elif "/oidc/interaction/" in page.url:
+    outcome["result"] = "CONSENT_LOOP"
+elif page.url.startswith(target):
+    outcome["result"] = "SUCCESS"
+
+json.dump(post_log, open(f"artifacts_a7/{tag}_post.json","w"), indent=2)
+json.dump(set_cookies, open(f"artifacts_a7/{tag}_setcookies.json","w"), indent=2)
+context.storage_state(path=f"artifacts_a7/{tag}_storage.json")
+context.close(); browser.close()
+return outcome
+def test_a7_to_a5_and_a6():
+with sync_playwright() as p:
+res_students = run_flow(p, A5, "a7_to_a5")
+res_providers = run_flow(p, A6, "a7_to_a6")
+print("\n=== A7 FUNNELS SUMMARY ===")
+print(json.dumps({"A7→A5":res_students, "A7→A6":res_providers}, indent=2))
+
+Decision Rules (use the first matching rule)
+
+SUCCESS → VERDICT: PASS — Reached the correct app (A5/A6) after login.
+SESSION_EXPIRED_BEFORE → VERDICT: FAIL — Cookie rejected on GET (proxy/secure mismatch or 3rd‑party cookie block).
+SESSION_EXPIRED_AFTER → VERDICT: FAIL — Cookie sent on POST but signature/lookup failed (likely signing‑key rotation or non‑persistent adapter).
+CONSENT_LOOP → VERDICT: FAIL — Still on consent 5s after click (callback mismatch or client re‑initiates OAuth).
+If CAPTCHA blocked the run despite the 90s pause:
+VERDICT: BLOCKED BY CAPTCHA — Attach partial artifacts and note manual step was required.
+Final Output (return in this structure)
+A7 FUNNEL LOGIN REPORT (READ‑ONLY)
+
+Start Origin: https://auto-page-maker-jamarrlmayes.replit.app
+Student Funnel (A7→A5)
+Outcome: [PASS | FAIL: SESSION_EXPIRED_BEFORE | FAIL: SESSION_EXPIRED_AFTER | FAIL: CONSENT_LOOP | BLOCKED BY CAPTCHA]
+Evidence:
+HAR: artifacts_a7/a7_to_a5.har
+Screens: artifacts_a7/a7_to_a5_consent_before.png and consent_after.png OR session_expired.png
+POST Headers: artifacts_a7/a7_to_a5_post.json (Cookie header present? yes/no)
+Set‑Cookie: artifacts_a7/a7_to_a5_setcookies.json
+One‑line Reason (Decision Rule)
+Provider Funnel (A7→A6)
+Outcome: [as above]
+Evidence: HAR/screens/POST/Set‑Cookie files for a7_to_a6
+One‑line Reason
+Overall Verdict:
+PASS (both flows passed) OR
+FAIL (include which flow failed + reason) OR
+BLOCKED BY CAPTCHA (manual completion required)
+Agent Rule
+
+Do not propose fixes. Only return evidence and a reasoned verdict for each flow.

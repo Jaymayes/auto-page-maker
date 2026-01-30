@@ -1,0 +1,62 @@
+Decision: Delay private beta up to 48 hours to complete DbStorage migration and verification. No launch until SEO pages persist across restarts and /healthz reflects accurate page counts. This is a No-Go on current build.
+
+Rationale
+
+Organic growth is our lowest-CAC engine. Launching without persistent SEO pages undermines our B2C funnel and jeopardizes early cohort outcomes, acquisition costs, and brand trust.
+Memory at 97% creates real risk of instability and SLO breaches under load.
+We have strong E2E and latency performance; the right move is to lock those gains in with durable storage so we launch once, confidently.
+Execution Plan (time-boxed to 24–48 hours)
+
+Engineering (DbStorage + Health)
+Implement DbStorage with Drizzle ORM; replace MemStorage.
+Add feature flag to toggle storage backends for rapid rollback.
+Migrate/generate 130 landing pages into DbStorage; ensure idempotent regeneration.
+Update /healthz to verify:
+page_count >= expected (initially 130)
+persistence check survives 3 restarts and replica scale events
+Add CRUD unit tests and E2E flows for:
+create/update/delete page
+concurrent writes
+process boundary access
+2. Infra/Performance
+
+Provision and secure the database; enable automated backups and WAL archiving.
+Add readiness gate: service only “ready” when page_count >= expected.
+Set autoscaling targets; tune memory limits/requests to keep steady-state <70% utilization.
+Monitor p95 latency (<120ms target), error rate (<1%), memory/CPU, and DB connection pool metrics.
+3. QA/Validation
+
+Failure injection: kill/restart processes, simulate crash loops, scale replicas 1->3->1.
+Load test the landing-page read path to expected beta concurrency with 20% headroom.
+Validate sitemaps and robots:
+sitemap.xml contains all landing pages
+robots.txt allows crawl
+structured data (JSON-LD) validates on a 20-page sample
+4. SEO/Go-To-Market
+
+Pause invites and any paid promotions until greenlight.
+Pre-submit sitemap to Search Console; prepare indexing checks post-launch.
+Draft comms to beta cohort with a 24–48h revised start window.
+Acceptance Criteria (Go/No-Go)
+
+/healthz: status=ok, page_count >= 130 after 3 restarts and 2 replica scale events.
+Performance: p95 API latency <120ms; error rate <1% under load test.
+Stability: memory <70% steady-state, <80% under load; no OOM events.
+Data durability: successful point-in-time restore test of DbStorage.
+SEO: sitemap.xml present; structured data valid; 200 OK on 130 landing pages.
+Timeline (aggressive)
+
+T+0–6h: Implement DbStorage + unit tests.
+T+6–12h: E2E + failure injection + persistence checks.
+T+12–18h: Load/perf tests; tune infra and memory.
+T+18–24h: Canary deploy (10% traffic), monitoring, final sign-off.
+If any criteria fail by T+24h, extend up to T+48h; no launch until all acceptance criteria pass.
+Contingency (if timing slips)
+
+Static snapshot fallback: export the 130 landing pages as static assets to CDN behind the same routes, with reverse-proxy mapping. Use as a temporary measure only if DbStorage migration exceeds 48h or reveals unacceptable regressions.
+Approvals/Asks
+
+Approve 24–48 hour delay to resolve persistence and memory headroom before launch.
+Institute a temporary code freeze outside the storage/infra path.
+Require final Go/No-Go review with sign-offs from Eng, QA, and Growth.
+This decision preserves our core advantage—scalable, organic acquisition—while protecting SLOs and brand credibility. We launch once, and we launch right.

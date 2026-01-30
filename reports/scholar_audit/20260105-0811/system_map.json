@@ -1,0 +1,92 @@
+{
+  "audit_timestamp": "2026-01-05T08:11:00Z",
+  "mode": "read_only_diagnostic",
+  "ecosystem": {
+    "A1": {
+      "name": "scholar_auth",
+      "url": "https://scholar-auth-jamarrlmayes.replit.app",
+      "purpose": "Identity & Authentication",
+      "health_status": "healthy",
+      "dependencies": ["auth_db", "email_service", "jwks_signer", "oauth_provider", "clerk"],
+      "inbound_apis": ["/api/auth/*", "/api/users/*", "/.well-known/jwks.json"],
+      "outbound_apis": ["A8 telemetry (configured)"],
+      "auth_method": "JWT RS256"
+    },
+    "A2": {
+      "name": "scholarship_api",
+      "url": "https://scholarship-api-jamarrlmayes.replit.app",
+      "purpose": "Data Backbone / Scholarship Database",
+      "health_status": "healthy",
+      "dependencies": ["postgresql", "cache"],
+      "inbound_apis": ["/api/scholarships/*", "/api/analytics/*"],
+      "outbound_apis": ["A8 telemetry"],
+      "auth_method": "API Key / JWT",
+      "issues": ["/ready endpoint missing (404)"]
+    },
+    "A3": {
+      "name": "scholarship_agent",
+      "url": "https://scholarship-agent-jamarrlmayes.replit.app",
+      "purpose": "AI Matching Logic",
+      "health_status": "healthy",
+      "dependencies": ["application"],
+      "inbound_apis": ["/api/match/*"],
+      "outbound_apis": ["A2 scholarship_api", "OpenAI"],
+      "auth_method": "JWT"
+    },
+    "A4": {
+      "name": "scholarship_sage",
+      "url": "https://scholarship-sage-jamarrlmayes.replit.app",
+      "purpose": "AI Learning Assistant",
+      "health_status": "healthy",
+      "dependencies": ["database", "openai", "scholarship_api"],
+      "inbound_apis": ["/api/sage/*", "/api/essay/*"],
+      "outbound_apis": ["A2 scholarship_api", "OpenAI"],
+      "auth_method": "JWT"
+    },
+    "A5": {
+      "name": "student_pilot",
+      "url": "https://student-pilot-jamarrlmayes.replit.app",
+      "purpose": "B2C User Application",
+      "health_status": "healthy",
+      "dependencies": ["database", "agent"],
+      "inbound_apis": ["/api/students/*", "/api/applications/*"],
+      "outbound_apis": ["A1 auth", "A2 api", "A3 agent", "A8 telemetry"],
+      "auth_method": "Session + JWT",
+      "a8_events": 87
+    },
+    "A6": {
+      "name": "provider_register",
+      "url": "https://provider-register-jamarrlmayes.replit.app",
+      "purpose": "B2B Revenue / Provider Onboarding",
+      "health_status": "healthy",
+      "dependencies": ["db", "cache", "stripe_connect"],
+      "inbound_apis": ["/api/providers/*", "/api/webhooks/stripe"],
+      "outbound_apis": ["Stripe API", "A8 telemetry"],
+      "auth_method": "Stripe Webhook Signature + JWT"
+    },
+    "A7": {
+      "name": "auto_page_maker",
+      "url": "https://auto-page-maker-jamarrlmayes.replit.app",
+      "purpose": "SEO / Marketing Landing Pages",
+      "health_status": "healthy",
+      "dependencies": ["database", "email_provider", "jwks"],
+      "inbound_apis": ["/api/pages/*", "/api/analytics/*", "/scholarships/*"],
+      "outbound_apis": ["A1 auth", "A8 telemetry", "IndexNow"],
+      "auth_method": "S2S JWT + API Key"
+    },
+    "A8": {
+      "name": "auto_com_center",
+      "url": "https://auto-com-center-jamarrlmayes.replit.app",
+      "purpose": "Command Center / Telemetry Hub",
+      "health_status": "healthy",
+      "dependencies": ["database"],
+      "inbound_apis": ["/api/events", "/api/events/recent", "/api/health"],
+      "outbound_apis": [],
+      "auth_method": "Bearer Token",
+      "role": "Telemetry Sink (Single Source of Truth)"
+    }
+  },
+  "telemetry_protocol": "v3.5.1",
+  "a8_endpoint": "POST /api/events",
+  "required_headers": ["x-scholar-protocol: v3.5.1", "x-app-label", "x-event-id", "Authorization: Bearer <token>"]
+}

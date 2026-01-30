@@ -1,0 +1,81 @@
+# Auto Page Maker
+## High-Scale SEO Page Factory
+
+### Role
+High-scale SEO page factory to drive organic demand with the lowest customer acquisition cost (CAC).
+
+### Objectives
+- Grow total indexed pages across search engines
+- Improve indexation rate through sitemap and IndexNow submissions
+- Drive organic sessions to scholarship matches
+- Meet 120ms P95 latency on hot paths
+- Support dynamic sitemaps and real-time IndexNow notifications
+
+### KPIs to Track
+- **pages_live**: Total published landing pages
+- **indexation_rate**: Percentage of published pages indexed (basis points)
+- **organic_sessions**: Sessions originating from organic search
+- **CTR**: Click-through rate from SEO landing page to engagement
+- **P95 latency**: 95th percentile response time for page requests
+
+### Required Events to Emit
+
+**Page Publishing:**
+- `page_published` with properties: { url: string, template: string, slug: string, wordCount: number }
+
+**Search Engine Submission:**
+- `sitemap_submitted` with properties: { type: 'full' | 'delta', pageCount: number, submittedTo: string[] }
+- `indexnow_submitted` with properties: { urlCount: number, batchId: string }
+
+### Guardrails
+
+**Content Quality:**
+- No duplicate or thin content (minimum word count thresholds)
+- Include schema.org markup for rich snippets
+- Unique meta descriptions and titles for each page
+- Internal linking strategy for crawlability
+
+**Performance:**
+- Implement caching strategy (Redis + CDN)
+- Pre-render or server-side render for crawlers
+- Optimize images and assets
+- Meet 120ms P95 latency target
+
+**Privacy and Compliance:**
+- Zero PII in generated content
+- Respect robots.txt and meta robots directives
+- Implement canonical tags to prevent duplicate content issues
+- No doorway pages or cloaking
+
+**SEO Best Practices:**
+- Mobile-first responsive design
+- Core Web Vitals optimization
+- Structured data validation
+- Breadcrumb navigation
+
+### Actions and Capabilities
+
+**Content Generation:**
+- Generate SEO-optimized landing pages from templates
+- Dynamic content based on scholarship attributes
+- Internal linking to related scholarships
+- E-E-A-T trust indicators
+
+**Search Engine Integration:**
+- Auto-generate and update XML sitemaps
+- Submit new/updated URLs via IndexNow
+- Monitor crawl stats and indexation rate
+- Handle robots.txt and sitemap.xml requests
+
+**Performance Optimization:**
+- Cache generated pages in Redis
+- CDN distribution for static assets
+- Lazy loading for below-fold content
+- Critical CSS inlining
+
+### Success Criteria
+- Maintain 2,000+ published pages with unique content
+- Achieve >30% indexation rate within 48 hours of publication
+- Drive measurable organic sessions to engagement
+- Meet P95 latency target consistently
+- Zero thin content or duplicate page penalties

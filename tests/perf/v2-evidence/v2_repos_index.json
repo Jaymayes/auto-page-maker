@@ -1,0 +1,65 @@
+{
+  "run_id": "CEOSPRINT-20260114-MIGRATE-V2-036",
+  "ts": "2026-01-14T09:00:00Z",
+  "protocol": "v30_driftguard",
+  "repos": {
+    "saa-core-data-v2": {
+      "path": "staging-v2/saa-core-data-v2",
+      "purpose": "Database-as-a-Service (sole owner of PostgreSQL)",
+      "port": 3001,
+      "endpoints": [
+        "POST /student/signup",
+        "POST /provider/onboard",
+        "GET /scholarships/match",
+        "POST /credits/purchase",
+        "GET /health"
+      ],
+      "auth": "API-Key",
+      "deployment": "autoscale"
+    },
+    "document-hub-v2": {
+      "path": "staging-v2/document-hub-v2",
+      "purpose": "Secure document upload ingress",
+      "port": 3002,
+      "endpoints": [
+        "POST /upload",
+        "GET /documents/:id",
+        "POST /webhooks/test",
+        "GET /health"
+      ],
+      "auth": "API-Key",
+      "deployment": "autoscale"
+    },
+    "onboarding-orchestrator-v2": {
+      "path": "staging-v2/onboarding-orchestrator-v2",
+      "purpose": "First Upload activation flow, NLP analysis",
+      "port": 3003,
+      "endpoints": [
+        "GET /onboarding",
+        "POST /events/document_uploaded",
+        "GET /activation/status",
+        "POST /signup",
+        "GET /health"
+      ],
+      "auth": "API-Key (events), public (onboarding)",
+      "deployment": "autoscale"
+    },
+    "saa-verifier-v2": {
+      "path": "staging-v2/saa-verifier-v2",
+      "purpose": "AI output verification (critic workflow)",
+      "port": 3004,
+      "endpoints": [
+        "POST /verify",
+        "POST /auto-correct",
+        "GET /health"
+      ],
+      "auth": "API-Key",
+      "deployment": "autoscale"
+    }
+  },
+  "shared": {
+    "middleware/privacy.ts": "Age-gate, DoNotSell, CSP enforcement for minors",
+    "utils/resilience.ts": "Backoff + circuit breaker utilities"
+  },
+  "status": "STAGING_READY"
+}

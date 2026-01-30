@@ -1,0 +1,23 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T18:00:00Z",
+  "status": "PAUSED",
+  "fleet_seo": {
+    "background_jobs": "paused",
+    "page_builds": "paused",
+    "sitemap_fetches": "paused",
+    "etl_jobs": "paused"
+  },
+  "schedulers": {
+    "cap": 0,
+    "permitted": ["auth", "payments", "watchtower"],
+    "blocked": ["page_builds", "sitemap", "etl", "analytics_transform", "seo_fetch"]
+  },
+  "pilot_maintained": {
+    "traffic_cap": 0.02,
+    "safety_lock": "active",
+    "auto_refunds": "enabled",
+    "stripe_cap_6h": 4
+  }
+}

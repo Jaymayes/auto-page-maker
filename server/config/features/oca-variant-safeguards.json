@@ -1,0 +1,54 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-20T01:00:00Z",
+  "ceo_approval": "CEO-20260119-OCA-PROMOTE-10PCT-PREAUTH",
+  "canary_id": "oca_canary_5pct_20260120",
+  "variant_quality_safeguards": {
+    "enabled": true,
+    "monitoring_frequency_sec": 300,
+    "triggers": [
+      {
+        "id": "provider_acceptance_dip",
+        "condition": "provider_acceptance_rate < baseline for any variant",
+        "evaluation": "per_variant",
+        "action": {
+          "immediate": "pause_variant",
+          "notify": "ceo",
+          "include": {
+            "variant_id": true,
+            "acceptance_rate_current": true,
+            "acceptance_rate_baseline": true,
+            "delta_pp": true,
+            "sample_rejection_reasons": true
+          },
+          "require": "rapid_qa_plan"
+        },
+        "emit_event": "oca_variant_paused"
+      }
+    ],
+    "rapid_qa_plan_template": {
+      "time_to_produce": "30min",
+      "contents": [
+        "root_cause_hypothesis",
+        "sample_rejected_packets",
+        "provider_feedback_summary",
+        "remediation_options",
+        "estimated_fix_timeline"
+      ],
+      "approval_required": "ceo"
+    },
+    "variant_resume_criteria": {
+      "ceo_approval": true,
+      "qa_plan_executed": true,
+      "fix_verified": true
+    }
+  },
+  "baseline_capture": {
+    "timing": "pre_canary_24h",
+    "metrics": [
+      "provider_acceptance_rate",
+      "average_review_time_hours",
+      "rejection_rate_by_reason"
+    ]
+  }
+}

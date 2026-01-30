@@ -1,0 +1,9 @@
+service,label,endpoint,samples,p50_ms,p95_ms,p99_ms,ci95_ms,target_ms,status
+scholar-auth,A1,/health,48,140,223,252,±11,150,BREACH
+scholarship-api,A2,/health,41,124,184,232,±10,150,BREACH
+scholarship-agent,A3,/health,32,126,206,459,±67,150,BREACH
+scholarship-sage,A4,/health,32,136,196,210,±10,150,BREACH
+student-pilot,A5,/health,48,143,185,225,±8,150,BREACH
+provider-register,A6,/health,38,124,186,193,±9,150,BREACH
+auto-page-maker,A7,/health,48,226,365,424,±18,150,BREACH
+auto-com-center,A8,/health,35,128,173,179,±8,150,BREACH

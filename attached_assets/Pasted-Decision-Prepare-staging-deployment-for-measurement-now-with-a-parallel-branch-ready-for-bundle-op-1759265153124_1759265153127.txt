@@ -1,0 +1,40 @@
+Decision: Prepare staging deployment for measurement now, with a parallel branch ready for bundle optimization if metrics don’t clear the gate.
+
+Rationale
+
+We’ve made low-risk, additive improvements that can materially improve real-world FCP/LCP. Validate with RUM before spending 2–3 hours on bundle surgery.
+The 75KB JS gate is important, but its impact on FCP/LCP is likely smaller than the already-shipped CSS/compression wins. Measure first; optimize second if needed.
+Timeline: We need signal by Wednesday AM to make a Thursday noon status. Measurement tonight de-risks the schedule.
+Execution Plan
+
+Tonight (immediately)
+
+Deploy to staging/preview with the current state.
+Kick off Lighthouse CI mobile runs (Android, Slow 4G, 5–9 runs; use median). Capture filmstrips and trace.
+Verify GA4 + enhanced Web Vitals are flowing in staging. Record p50/p75 FCP/LCP.
+Open a “ready” branch for bundle work (don’t merge yet):
+Lucide: switch to per-icon imports (lucide-react/icons/{name}), confirm sideEffects: false paths, and prevent dynamic icon names; add a transform-imports or babel plugin if needed.
+Radix: import only used primitives, drop unused packages, and lazy-load heavier components (Dialog/Popover) behind interaction.
+Add/verify bundle analyzer and produce before/after artifact.
+Wednesday morning
+
+Review metrics from staging:
+Go to canary if ALL hold: FCP p75 ≤ 2.4s, LCP p75 ≤ 2.8s, CLS ≤ 0.1, TBT ≤ 300ms (lab), main JS gz ≤ 90KB, no error-rate regression.
+If any fail OR FCP p75 > 3.0s: immediately execute the bundle PR (Lucide + Radix) to hit ≤ 75KB gz. Re-deploy to staging and re-run Lighthouse.
+Wednesday afternoon
+
+If post-optimization metrics clear gates, proceed to 50% canary. Monitor GA4/Web Vitals and error rates for 2–4 hours, then roll to 100% if stable.
+Gates and Non-negotiables
+
+Main JS gz: target ≤ 75KB. If not achieved, we require FCP p75 ≤ 2.4s to proceed; otherwise optimize bundle first.
+Core Web Vitals: FCP p75 ≤ 2.4s, LCP p75 ≤ 2.8s, CLS ≤ 0.1. INP trending ≤ 200ms on interaction-heavy views.
+Stability: No increase in client error rate; SLOs unaffected.
+Assignment
+
+You: Deploy to staging now and trigger Lighthouse CI. Open the “ready” optimization branch with scaffolding (don’t merge).
+Tomorrow 9:30am ET: Post metric snapshot (p50/p75 FCP/LCP, Lighthouse median, bundle size).
+If thresholds missed: Merge optimization by 12pm ET Wednesday, remeasure by EOD.
+Answer to your question
+
+Prepare staging deployment for measurement now.
+In parallel, prep (but don’t merge) the Lucide/Radix bundle-optimization branch so we can execute immediately if the numbers don’t clear the gate.

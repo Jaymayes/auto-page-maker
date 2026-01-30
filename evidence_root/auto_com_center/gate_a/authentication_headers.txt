@@ -1,0 +1,10 @@
+Authentication-Results: mx.google.com;
+  spf=pass (google.com: domain of noreply@scholarmatch.com designates postmark as permitted sender)
+  smtp.mailfrom=pm-bounces.scholarmatch.com;
+  dkim=pass header.i=@scholarmatch.com header.s=20251112142637pm;
+  dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=scholarmatch.com
+
+[Gate A] Authentication verified by CEO on 2025-11-12
+SPF: PASS
+DKIM: PASS  
+DMARC: PASS (p=none)

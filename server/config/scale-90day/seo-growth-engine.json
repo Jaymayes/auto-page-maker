@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-16T22:30:00Z",
+  "auto_page_maker": {
+    "weekly_net_indexed_target": 7500,
+    "track_ctr": true,
+    "track_indexed_to_click_ratio": true
+  },
+  "quality_guardrails": {
+    "dedupe_filter": true,
+    "thin_content_filter": true,
+    "log_removals": true,
+    "monitor_bounce_rate_new_clusters": true
+  },
+  "funnel_targets": {
+    "first_upload_rate_weekly_improvement_pct": 10,
+    "primary_lever": "signup_to_first_upload"
+  }
+}

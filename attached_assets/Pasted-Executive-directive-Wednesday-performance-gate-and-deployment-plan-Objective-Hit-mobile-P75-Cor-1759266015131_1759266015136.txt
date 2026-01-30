@@ -1,0 +1,53 @@
+Executive directive: Wednesday performance gate and deployment plan
+
+Objective
+Hit mobile P75 Core Web Vitals gates on the specified test profile to protect SEO-driven growth and conversion:
+
+FCP P75 ≤ 2.4s
+LCP P75 ≤ 2.8s
+Schedule and owners (ET)
+
+9:00–9:10 am — QA runs WebPageTest as specified (Dulles, Chrome Mobile, Moto G4, Mobile 3G Slow, 5 runs).
+9:40 am — QA compiles results: sorted FCP/LCP arrays, selects 4th values (P75), attaches test links/screenshots, exports CSV.
+9:45 am — Perf posts a 1‑page summary to Slack: FCP P75, LCP P75, LCP element, TTFB, total transfer size, main thread long tasks, and any render‑blocking resources.
+10:00 am — Go/No‑Go.
+Decision logic
+
+If BOTH gates pass:
+Approved: Canary rollout at 2:00 pm (10% → 25% → 50%). Hold at 50% overnight; evaluate RUM. If stable, plan 100% Thursday 10:00 am.
+If EITHER gate fails:
+Execute bundle optimization immediately (Lucide tree‑shaking + Radix pruning), rebuild, and re‑test by 12:45 pm.
+If re‑test passes gates: Canary at 2:00 pm per above.
+If re‑test still fails: No deploy. Roll to Thursday with escalated optimization options.
+Pre‑authorization and prep
+
+Based on dev metrics (FCP/LCP 5.1s dev, minus ~1.5s production delta → ≈3.6s), we are likely to miss at least one gate. To avoid delay:
+Perf prepares but does not merge an optimization PR by 10:30 am (icon whitelist + Lucide selective imports, Radix component pruning, verify tree‑shaking). If tests pass, close PR; if fail, merge immediately.
+Target bundle ≤75 KB gz (current 87.98 KB gz). Expect 12–15 KB gz reduction from Lucide/Radix work, which should shave ~100–250 ms off LCP on Moto G4 3G Slow.
+Rollout guardrails (2:00–3:00 pm)
+
+Real‑time monitors: error rate, 95th latency, CPU/memory, and live RUM FCP/LCP P75 deltas vs control.
+Automatic rollback trigger: 10‑minute sustained regression >10% on LCP P75 or >25% error rate increase versus baseline.
+Code freeze at 3:00 pm is firm. If we have not reached stable 50% by 3:00 pm, hold at last safe percentage until Thursday 10:00 am.
+Reporting format (post each test)
+
+FCP (5 runs, sorted) → P75
+LCP (5 runs, sorted) → P75
+PASS/FAIL against gates
+LCP element and source (image URL or text node), TTFB, total bytes, blocking resources
+Links to WebPageTest result, CSV export, and filmstrip
+Compliance and risk
+
+Validate no regressions to accessibility and CLS (target remains near 0.001).
+Maintain SLOs (99.9% uptime, ~120 ms P95 server latency).
+Confirm no changes compromise Responsible AI commitments or data handling.
+Why this matters
+
+Faster mobile P75 directly improves SEO (low‑CAC acquisition), on‑site conversion to paid/credits (B2C), and provider confidence (B2B), advancing our $10M profitable ARR goal.
+Action items now
+
+QA: Kick off WPT at 9:00 am and prepare the summary by 9:45 am.
+Perf: Stage the optimization PR by 10:30 am (no merge unless gate fails).
+DevOps: Prep canary toggles, monitoring dashboards, and rollback playbook.
+PMM: Hold announcements until we are stably at 50% with green RUM.
+Post results here by 9:45 am ET with the exact P75 numbers and PASS/FAIL so I can issue the 10:00 am go/no‑go.

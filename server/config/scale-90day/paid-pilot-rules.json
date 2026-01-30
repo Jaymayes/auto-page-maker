@@ -1,0 +1,82 @@
+{
+  "version": "3.0.0",
+  "updated_at": "2026-01-19T10:30:00Z",
+  "token_consumed": "CEO-20260114-PAID-PILOT-STEPUP",
+  "phase": "day3_final",
+  "campaign_type": "retargeting_only",
+  "prospecting_allowed": false,
+  "budget": {
+    "daily_cap_usd": 300,
+    "rolling_window_hours": 24,
+    "pacing": {
+      "am_pct": 30,
+      "pm_pct": 30,
+      "evening_pct": 40
+    }
+  },
+  "segment_mix_day3": {
+    "checkout_abandoners": {"allocation_pct": 60, "priority": 1},
+    "upload_abandoners": {"allocation_pct": 30, "priority": 2},
+    "essay_transcript_viewers": {
+      "allocation_pct": 10,
+      "priority": 3,
+      "auto_pause": {"cac_ceiling_usd": 8, "window_hours": 6}
+    }
+  },
+  "creative_plan_day3": {
+    "complete_your_app": {"allocation_pct": 70, "role": "winner"},
+    "last_chance_match": {
+      "allocation_pct": 20,
+      "role": "challenger",
+      "kill_criteria": {
+        "min_impressions": 500,
+        "ctr_drop_vs_control_pct": 30,
+        "cac_increase_vs_cohort_pct": 25,
+        "evaluation_window_hours": 6
+      }
+    },
+    "resume_upload_2clicks": {
+      "allocation_pct": 10,
+      "role": "exploratory",
+      "kill_criteria": {
+        "min_impressions": 500,
+        "ctr_drop_vs_control_pct": 30,
+        "cac_increase_vs_cohort_pct": 25,
+        "evaluation_window_hours": 6
+      }
+    }
+  },
+  "frequency_caps": {
+    "impressions_per_user_day": 3,
+    "impressions_per_user_week": 7,
+    "converter_suppression_days": 14
+  },
+  "auto_downshift": {
+    "trigger_window_hours": 6,
+    "downshift_budget_usd": 150,
+    "conditions": {
+      "cac_ceiling_usd": 10,
+      "stripe_success_floor_pct": 98.5,
+      "stripe_breach_window_min": 30,
+      "fraud_ceiling_pct": 0.5,
+      "refund_ceiling_pct": 4
+    }
+  },
+  "scale_criteria_72h": {
+    "next_budget_usd": 400,
+    "requires_explicit_ceo_authorization": true,
+    "conditions": {
+      "cac_max_usd": 7,
+      "arpu7_vs_cac_ratio_min": 2.0,
+      "refund_max_pct": 3,
+      "stripe_success_min_pct": 98.5,
+      "incidents": 0
+    }
+  },
+  "guardrails": {
+    "minors_do_not_sell": true,
+    "pii_in_logs": false,
+    "api_key_enforcement_daily_check": true,
+    "organic_share_min_pct": 85
+  }
+}

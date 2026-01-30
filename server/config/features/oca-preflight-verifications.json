@@ -1,0 +1,83 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-01-20T01:30:00Z",
+  "ceo_approval": "CEO-20260119-OCA-PROMOTE-10PCT-PREAUTH",
+  "canary_id": "oca_canary_5pct_20260120",
+  "gate_event": "a8_preflight_verifications_ok",
+  "deadline": "immediate",
+  "owner": "Ops/SRE",
+  "required_verifications": [
+    {
+      "id": "kill_drill_proof",
+      "description": "1-minute kill runbook drill completed",
+      "evidence_type": "attachment",
+      "required_fields": ["drill_timestamp", "response_time_sec", "rollback_verified", "incident_template_tested"]
+    },
+    {
+      "id": "ab_compliance_screenshots",
+      "description": "Screenshots showing exact 'No AI essays. Students write; we only assist.' text",
+      "evidence_type": "screenshots",
+      "surfaces": ["student_email_variant_a", "student_email_variant_b", "modal", "integrity_panel"],
+      "exact_text": "No AI essays. Students write; we only assist."
+    },
+    {
+      "id": "holdout_integrity",
+      "description": "10% control cohort verification",
+      "required_fields": {
+        "control_cohort_pct": {"expected": 10, "tolerance_pp": 0.5},
+        "notification_events_in_control": {"expected": 0},
+        "allocation_drift_pp": {"max": 0.5},
+        "randomization_seed": {"locked": true}
+      }
+    },
+    {
+      "id": "cost_telemetry_dry_run",
+      "description": "All cost fields non-null in dry run",
+      "required_fields": {
+        "cost_per_notified": {"non_null": true},
+        "cost_per_started": {"non_null": true},
+        "cost_per_completed": {"non_null": true},
+        "compute_per_completion": {"non_null": true}
+      }
+    },
+    {
+      "id": "variant_safeguard_test",
+      "description": "Simulated acceptance dip triggers pause + CEO page",
+      "evidence_type": "test_log",
+      "required_fields": {
+        "simulated_dip_triggered": true,
+        "variant_paused": true,
+        "ceo_page_captured": true
+      }
+    },
+    {
+      "id": "log_hygiene_sample",
+      "description": "OCA header present, no PII in audit logs",
+      "evidence_type": "log_sample",
+      "required_fields": {
+        "oca_header_present": true,
+        "pii_in_logs": false,
+        "sample_log_ids": {"min_count": 3}
+      }
+    }
+  ],
+  "payload_template": {
+    "event": "a8_preflight_verifications_ok",
+    "verifications": {
+      "kill_drill_proof": {"passed": true, "attachment_id": "<string>"},
+      "ab_compliance_screenshots": {"passed": true, "screenshot_ids": ["<string>"]},
+      "holdout_integrity": {"passed": true, "control_pct_actual": "<number>", "drift_pp": "<number>"},
+      "cost_telemetry_dry_run": {"passed": true, "sample_values": {}},
+      "variant_safeguard_test": {"passed": true, "test_log_id": "<string>"},
+      "log_hygiene_sample": {"passed": true, "sample_log_ids": ["<string>"]}
+    },
+    "all_passed": true,
+    "verified_by": "<operator_id>",
+    "verified_at": "<iso8601>"
+  },
+  "on_failure": {
+    "action": "block_launch",
+    "notify": ["engineering", "ops", "ceo"],
+    "include": "failed_verifications"
+  }
+}

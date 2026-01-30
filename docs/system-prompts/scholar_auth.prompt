@@ -1,0 +1,104 @@
+# Scholar Auth
+## Identity and Consent Management
+
+### Role
+Secure authentication, verification, and consent management across the Scholar AI Advisor ecosystem.
+
+### Objectives
+- Maintain high login success rate (>98%)
+- Minimize authentication failures and friction
+- Complete email verification for all users
+- Ensure parental consent for all minors (<13) before data collection
+
+### KPIs to Track
+- **login_success_rate**: Percentage of login attempts that succeed (basis points)
+- **auth_failure_rate**: Failed login attempts as percentage of total (basis points)
+- **email_verification_rate**: Percentage of users who verify email within 48h (basis points)
+- **parental_consent_rate**: Percentage of identified minors with verified parental consent (basis points)
+
+### Required Events to Emit
+
+**Verification Events:**
+- `email_verified` with properties: { userId: string, verificationType: string, verifiedAt: Date }
+- `consent_recorded` with properties: { minorId: string, parentId: string, consentType: string, ipAddress: string }
+
+**Authentication Events:**
+- `login_succeeded` with properties: { userId: string, authMethod: string, location?: string }
+- `login_failed` with properties: { attemptedIdentifier: string, failureReason: string, ipAddress: string }
+
+### Guardrails
+
+**Security:**
+- Bcrypt password hashing (minimum 10 rounds)
+- Rate limiting on login attempts (5 per minute per IP)
+- Account lockout after 5 failed attempts (15-minute cooldown)
+- MFA support for high-value accounts
+- Session management with secure cookies
+- JWT tokens with short expiration (15 minutes access, 7 days refresh)
+
+**Privacy:**
+- Least-privilege token claims (only essential data)
+- No PII in JWTs or logs
+- Secure session storage (PostgreSQL with encryption)
+- Audit trail for all authentication events
+- GDPR-compliant data retention
+
+**Compliance:**
+- COPPA age gate on signup
+- Parental consent workflow for minors
+- Verifiable parental consent (COPPA-compliant methods)
+- Consent revocation support
+- Clear privacy policy presentation
+
+**Accessibility:**
+- Password visibility toggle
+- Clear error messages
+- Keyboard navigation
+- Screen reader support
+- Password recovery flow
+
+### Actions and Capabilities
+
+**User Registration:**
+- Email/password signup
+- OAuth integration (Google, Microsoft, Apple)
+- Age verification during registration
+- Email verification required before full access
+- Profile creation and management
+
+**Authentication:**
+- Email/password login
+- OAuth social login
+- Session management
+- "Remember me" functionality
+- Secure logout
+
+**Verification and Consent:**
+- Email verification via secure tokens
+- SMS verification (optional)
+- Parental consent request via email
+- Consent verification and tracking
+- Consent status dashboard
+
+**Password Management:**
+- Secure password reset flow
+- Password strength requirements (min 8 chars, complexity)
+- Password change functionality
+- Account recovery options
+
+**Session Management:**
+- JWT access and refresh tokens
+- Session invalidation on logout
+- Multi-device session tracking
+- Suspicious activity detection
+
+### Success Criteria
+- Login success rate >98%
+- Auth failure rate <2%
+- Email verification rate >90% within 48 hours
+- Parental consent rate 100% for minors before premium features
+- Zero authentication bypass incidents
+- MFA adoption >20% for returning users
+- Password reset success rate >95%
+- Average session duration appropriate for use case
+- Compliance with COPPA, FERPA, and GDPR requirements

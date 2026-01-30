@@ -1,0 +1,74 @@
+Excellent progress and clear report—thank you. Here’s the executive decision and the path forward.
+
+Decision
+
+Private Beta: GO (B2C only). Launch to a controlled cohort with traffic ramp over 10–14 days.
+Public Launch: NO-GO until remaining Gate 0 blockers are closed.
+Why: All critical user-facing issues are resolved and core flows work. We will de-risk via a measured beta while we close foundational gaps (auth enforcement, CI/CD, legal docs, health).
+
+Beta Scope and Guardrails
+
+Cohort: 500–1,000 students sourced organically via Auto Page Maker pages and our waitlist. No paid acquisition.
+Feature flags: Enforce flags for Apply actions, error states, and any experimental flows.
+Traffic ramp: 20% → 50% → 100% of cohort over 3 phases (2–3 days each). Rollback on breach of SLOs or error-rate thresholds.
+Exit Criteria for Public Launch
+Must-haves (Gate 0 close-outs):
+
+Auth middleware enforced across all protected routes and API endpoints.
+Final Privacy Policy and Terms of Service published and linked sitewide.
+CI/CD pipeline with automated unit/integration/E2E smoke on every merge; gated deploys; rollback automation.
+/healthz endpoint with liveness/readiness checks.
+Observability: dashboards and alerts for uptime, p95 latency, error rates, auth failures, and SEO crawl health.
+A11y: address toast ARIA improvements; target WCAG AA for critical flows.
+Security: confirm security headers and rate limiting; add basic WAF rules and bot mitigation for known patterns.
+Performance/SLO Validation (during beta)
+
+Availability ≥ 99.9%
+Latency p95 ≤ 120 ms for primary student flows (browse, filter, detail)
+Error budget: 0.5% 5xx over 7-day window
+Frontend performance: Largest Contentful Paint ≤ 2.5s on 75th percentile for top pages
+KPIs to Track in Beta (data-first gating)
+
+Activation: % of new signups completing first scholarship search ≥ 70%
+Search-to-detail click-through ≥ 35%
+Detail-to-apply click-through ≥ 15% (noting reCAPTCHA on external links)
+Free-to-paid conversion (if credits enabled in beta): initial target 2–3%
+ARPU (credits) baseline
+SEO: number of indexed Auto Page Maker pages, organic clicks, CTR
+Support/incident rate: < 3 tickets per 100 users; no P0 incidents
+Immediate Workplan and Owners
+
+Auth middleware enforcement (Backend Lead) — 3 days
+/healthz and readiness probes (Platform/DevOps) — 1 day
+CI/CD pipeline with smoke E2E and rollback (DevOps + QA) — 4–5 days
+Finalize Privacy/Terms (Legal/Policy + PM) — 3 days (parallel review)
+A11y improvements for toasts and focus states (Frontend) — 2 days
+Observability: dashboards + alerting in place (DevOps) — 2 days
+SEO hardening: validate robots/sitemap, AMP not required, ensure structured data for scholarships, ramp Auto Page Maker (Growth Eng) — 2 days
+Incident playbook and on-call schedule (PM + DevOps) — 1 day
+B2B roadmap v0.1: provider waitlist, data model, fee flow; not in beta scope, but spec due (PM + Partnerships) — 1 week
+Capital Allocation (approved)
+
+DevOps tooling and monitoring budget
+Legal review for Privacy/Terms
+QA test suite parallelization to cut cycle time
+Content/SEO budget for programmatic pages (Auto Page Maker scale-up)
+Risk Notes and Mitigations
+
+External Apply reCAPTCHA: expected; add helper text to reduce drop-off; measure click-to-complete where possible.
+429s under heavy test load: monitor in beta; calibrate rate limits; whitelist our test runners.
+Duplicate testids in separate contexts: acceptable as documented.
+Ethical AI: ensure clarity that we assist discovery and application planning, not essay ghostwriting; add user-facing transparency statements in detail and apply flows.
+Timeline
+
+T+0 (today): Approve private beta. Begin Gate 0 close-outs.
+T+3–5 days: Auth, healthz, CI/CD, a11y fixes complete; observability live.
+T+5: Start beta cohort at 20%; daily review.
+T+10–14: Ramp to 100% of cohort if SLOs and KPIs hold.
+Public Launch Decision: end of week 2, contingent on exit criteria.
+Requests from the Team
+
+Share the latest E2E test pass rate, flake rate, and coverage summary.
+Provide baseline performance traces for the top 5 endpoints and pages.
+Confirm Auto Page Maker is generating and internally linking the top 100 programmatic pages for beta, and submit sitemap for indexing once legal docs go live.
+Thank you for getting us from a 52/100 NO-GO to a testable beta. Execute the above plan with urgency and report daily on SLOs and KPI deltas during the ramp. If any blocker threatens the timeline, escalate immediately for rapid decisioning.

@@ -1,0 +1,11 @@
+service,endpoint,p50_ms,p95_ms,target_ms,status
+scholar-auth,/health,263,356,150,BREACH
+scholarship-api,/health,160,202,150,BREACH
+scholarship-api,/ready,N/A,N/A,100,MISSING
+scholarship-agent,/health,183,319,150,BREACH
+scholarship-sage,/health,158,321,150,BREACH
+student-pilot,/health,210,240,150,BREACH
+provider-register,/health,217,280,150,BREACH
+auto-page-maker,/health,295,462,150,BREACH
+auto-com-center,/health,171,197,150,BREACH
+auto-com-center,POST /api/events,216,260,150,BREACH

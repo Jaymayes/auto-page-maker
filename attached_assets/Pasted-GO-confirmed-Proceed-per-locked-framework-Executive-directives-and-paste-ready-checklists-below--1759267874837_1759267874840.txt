@@ -1,0 +1,52 @@
+GO confirmed. Proceed per locked framework. Executive directives and paste-ready checklists below.
+
+Executive decisions and alignment
+
+Authorization: Proceed with 9:30am ET WebPageTest and 9:45am ET verdict per binding guardrails.
+Strategic alignment: This process protects Core Web Vitals, SEO-driven, low-CAC growth and conversion—key to our $10M ARR plan and dual-engine model (B2C credits + B2B marketplace) . Maintain infra reliability and privacy compliance to protect brand trust and institutional adoption .
+Safety: Rollback owner has unilateral authority to pause/rollback if triggers are hit. No exceptions.
+Actions required now (before 9:30am ET)
+
+Name and post the Rollback Owner in #perf-warroom (pin it)
+Paste in #perf-warroom: Rollback Owner: [Engineering On-Call Name] Authority: Immediate pause/rollback without sign-off per locked triggers Contact: [Phone/Slack handle]
+Deadline: 9:15am ET
+2. CDN/Cache readiness in #perf-warroom (pin it)
+
+Paste: CDN/Cache: ✅ Pre-warm complete (homepage + top 10 categories) | ✅ Config parity (control vs canary) | ✅ Config frozen through canary window
+3. Dashboard link in #perf-warroom (pin it)
+
+Paste: Live Dashboard: [RUM dashboard URL] Guardrails: Alerts to #perf-warroom enabled Compare Panel: Canary vs control (device/geo normalized)
+9:30am ET: Execute WebPageTest
+
+Device/network: Moto G4, Slow 4G, 10 runs; lock config to baseline
+Immediately paste in #perf-warroom (pin it): WPT Test: [link] | Config: Moto G4 + Slow 4G + 10 runs (baseline locked)
+9:45am ET: One-line verdict in #release-channel
+
+Paste (LOCKED TEMPLATE): Verdict: [PASS/PAUSE/ROLLBACK] | Build v1.0.0 db61ca1 | Bundle [X] KB gz (target ≤75) | LCP P75 Δ: [X]% | INP P75: [Y]ms (Δ [Z]%) | TTFB P75 Δ: [A]% | CLS Δ: [B] | JS errors/1K: [C] | Conversion Δ: [D]% | WPT: [link] | Dashboard: [link]
+Operating rules (binding)
+
+Pass: LCP/INP/TTFB ≤+5% delta; INP P75 ≤200ms; CLS P75 Δ ≤+0.02; JS errors ≤1/1K and non-increasing; Conversion no worse than -1pp or -3% relative; Bundle ≤75 KB gz; Infra cost flat/down; CWV pass-rate holds/improves.
+Pause: >+10% degradation (LCP/INP/TTFB) or CLS Δ >+0.02 sustained 5 min + ≥1.5K views.
+Rollback: >+15% degradation or JS error >0.3% sustained 5 min + ≥1.5K views.
+Compliance: COPPA/FERPA, RUM PII exclusion, no session replay for under-13. This supports our Responsible AI and privacy commitments in the playbook .
+If PASS: canary ramp
+
+2:00pm ET → 10% (30 min hold) → checkpoint
+2:30pm ET → 25% (60 min hold) → checkpoint
+3:30pm ET → 50% → hold overnight
+Thursday AM: CTO/VP RUM review → approve 100% if green
+If PAUSE/ROLLBACK: incident comms in #perf-warroom
+
+Paste: ⚠️ CANARY [PAUSED/ROLLED BACK] - [Timestamp] • Suspected cause: [Brief description] • Mitigation: [Action taken - pause at X% or full rollback] • ETA for new cut: [Estimate or “investigating”]
+Schedule rapid review: 15 minutes from post.
+Reporting cadence (no deviations)
+
+9:45am ET: One-line verdict in #release-channel
+12:00pm ET: Dashboard link + rollback owner + canary confirmation (if PASS)
+4:00pm ET: EOD canary vs control deltas + infra cost snapshot (if PASS)
+Strategic reminders
+
+Guard CWV and bundle size to protect organic acquisition and conversion; this is central to our low-CAC SEO engine and five-year ARR trajectory .
+Maintain uptime and latency reliability; it underpins trust with students and institutions alike .
+Enforce Responsible AI and privacy standards; these are core to our brand and B2B scale-up .
+I will be watching the 9:45am ET verdict and the 12:00pm/4:00pm checkpoints. Execute with precision and escalate immediately if any guardrail is hit.

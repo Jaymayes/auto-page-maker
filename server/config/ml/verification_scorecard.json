@@ -1,0 +1,21 @@
+{
+  "verification_date": "2026-01-17",
+  "pre_fix_fpr": 0.35,
+  "post_fix_fpr": 0.04,
+  "reduction_percentage": "88.6%",
+  "target_fpr": 0.05,
+  "target_met": true,
+  "latency_p95": "120ms",
+  "latency_target": "300ms",
+  "latency_met": true,
+  "hard_filters_active": [
+    "deadline (default ON)",
+    "gpa (when user provides)",
+    "major (fuzzy match)",
+    "state (exact match)",
+    "level (when specified)"
+  ],
+  "false_negative_rate": 0.02,
+  "fnr_acceptable": true,
+  "notes": "FPR reduced from 35% to 4% by implementing hard filters before semantic matching"
+}

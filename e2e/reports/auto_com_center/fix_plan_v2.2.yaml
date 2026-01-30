@@ -1,0 +1,36 @@
+app: auto_com_center
+base_url: https://auto-com-center-jamarrlmayes.replit.app
+version: v2.2
+owner: Backend Engineering Team
+target_score: 5
+generated_at: "2025-10-29T19:15:00Z"
+
+status: OPTIONAL (already at 4/5, meets gate requirement)
+
+tasks:
+  - id: FP-API-CANARY-JSON
+    title: Add /canary endpoint (optional for 5/5)
+    priority: P1
+    estimate_hours: 0.5
+    
+    changes:
+      - file: server/index.ts
+        code_diff: |
+          app.get('/canary', (req, res) => {
+            res.json({
+              ok: true,
+              service: 'auto_com_center',
+              base_url: process.env.REPL_SLUG 
+                ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.app`
+                : 'http://localhost:5000',
+              version: 'v2.2',
+              timestamp: new Date().toISOString()
+            });
+          });
+    
+    success_criteria:
+      - /canary returns 200 JSON
+      - Score improves to 5/5
+
+total_eta_to_ready: 0 hours (already ready at 4/5)
+total_eta_to_5of5: 0.5 hours (optional)

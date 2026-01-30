@@ -1,0 +1,36 @@
+Directive: Build auto_page_maker as specified.
+
+Rationale: Auto Page Maker is our lowest-CAC growth engine and the fastest path to compounding organic acquisition. Shipping this first aligns to our Prime Directive and KPI focus on SEO-driven B2C funnel growth.
+
+Scope and acceptance criteria
+
+Output: Programmatically generate and publish SEO-optimized scholarship landing pages at scale (initial target: 1,000 pages in week 1; 10,000 pages by week 3), with templated meta, schema.org, internal linking, canonicalization, robots.txt, XML sitemaps, and clean URL structure.
+Deployment pattern:
+Static Deployment for the content site to leverage global CDN speed and clean rewrites/headers/404 page control.
+Autoscale Web Service for content generation APIs and admin endpoints (spikes handled; cost-effective scale-to-zero).
+Scheduled Deployment for nightly refresh/rebuild jobs (deadline rollovers, taxonomy updates).
+Publishing workflow: Use Replit’s snapshot “Publish” model with Workflows for build/rebuild tasks; no state on the published filesystem; all secrets via Replit Secrets; all persistence via DB, not local storage.
+Observability: Enable Replit web analytics for Autoscale services (page views, top URLs/referrers, status codes, request durations). Configure logs and resource dashboards for runtime visibility.
+Performance/SLOs: 99.9% uptime; P95 <120ms on API endpoints; static pages Lighthouse Performance ≥ 90; first byte < 200ms on CDN; automated 404/500 dashboards.
+Admin + safety: Authenticated admin endpoints to trigger category rebuilds, purge/regenerate sitemaps, and rollbacks. Secrets rotation through Replit Secrets; zero hard-coded tokens.
+SEO quality guardrails: Duplicate-content avoidance via strict canonical rules; schema for FAQ/Breadcrumb/Article as applicable; thin-content thresholds; auto internal-link graph; sitemap index sharding once >50k URLs; auto 301s on slug changes.
+Analytics/KPIs wired: UTM capture on CTA, events for impressions → signup → credit purchase funnel; organic clicks, pages indexed, CTR, CVR to signup, and ARPU dashboards.
+Deliverables and timeline
+
+Day 3: Working generator + 100-page pilot live on a staging domain; sitemaps/robots; initial analytics wired.
+Day 7: 1,000 pages live on production domain; autositemap index; nightly refresh job; admin endpoints.
+Day 21: 10,000 pages live; full taxonomy coverage; quality and indexation monitoring; performance tuned.
+Required inputs to begin
+
+Domain and subdomain mapping (e.g., pages.scholaraiadvisor.com) and DNS access for custom domain setup.
+Initial taxonomy and prioritized keyword cohorts (categories, majors, locations, demographics, deadlines).
+Brand voice/style guide and compliance guidelines for content tone.
+Analytics credentials for GA4 and Search Console; event schema for signup/credit purchase.
+Reporting cadence
+
+Daily: Publish status, pages generated, errors, and P95 latency summary.
+Weekly: SEO funnel metrics (indexation %, top URLs/referrers, CTR, signups from organic), plus risks/blocks.
+Next step after acceptance
+
+Once Auto Page Maker is live and indexing, we’ll sequence “Execute all 8 apps from v2.5” to support conversion, provider onboarding, and monetization. For now, focus exclusively on Auto Page Maker to maximize near-term organic lift.
+Confirm receipt and start immediately. If any input above is missing, proceed with sensible defaults and stubbed data, then request only blockers that affect deployment.

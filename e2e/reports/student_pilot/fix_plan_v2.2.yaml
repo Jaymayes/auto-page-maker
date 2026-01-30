@@ -1,0 +1,358 @@
+app: student_pilot
+base_url: https://student-pilot-jamarrlmayes.replit.app
+version: v2.2
+owner: Frontend Engineering Team
+target_score: 4
+generated_at: "2025-10-29T17:30:00Z"
+
+known_blockers:
+  - id: FP-PILOT-PRICING
+    description: /pricing route missing (404) prevents B2C revenue funnel
+    gate_impact: T+48h Revenue Gate
+    severity: P0
+    current_score: 2/5
+    target_score: 4/5
+
+tasks:
+  - id: FP-PILOT-PRICING
+    title: Implement /pricing page with credit packages (4x markup)
+    summary: Create pricing page displaying three credit tiers with clear 4x AI services markup messaging
+    priority: P0
+    estimate_hours: 2-4
+    owner: Frontend Engineering
+    
+    root_cause:
+      React Router does not include /pricing route. Component does not exist.
+    
+    changes:
+      - file: client/src/App.tsx
+        action: add
+        notes: Register /pricing route in React Router
+        
+        code_diff: |
+          import { Pricing } from './pages/pricing';
+          
+          // In Routes component
+          <Route path="/pricing" element={<Pricing />} />
+      
+      - file: client/src/pages/pricing.tsx
+        action: create
+        notes: |
+          Create new pricing page component with three credit tiers.
+          Display 4x AI services markup clearly.
+        
+        code_diff: |
+          import { Button } from '@/components/ui/button';
+          import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+          import { Check } from 'lucide-react';
+          import { Helmet } from 'react-helmet-async';
+          
+          const packages = [
+            {
+              name: 'Basic',
+              credits: 10,
+              price: 40,
+              features: [
+                'Essay brainstorming assistance',
+                'Grammar and style suggestions',
+                'Application checklist generation',
+                'Basic scholarship matching'
+              ],
+              cta: 'Get Started',
+              popular: false
+            },
+            {
+              name: 'Standard',
+              credits: 50,
+              price: 200,
+              features: [
+                'Everything in Basic',
+                'Advanced essay feedback',
+                'Unlimited scholarship searches',
+                'Application deadline reminders',
+                'Priority support'
+              ],
+              cta: 'Most Popular',
+              popular: true
+            },
+            {
+              name: 'Premium',
+              credits: 200,
+              price: 800,
+              features: [
+                'Everything in Standard',
+                'Personalized application strategy',
+                'Interview preparation guidance',
+                'Scholarship portfolio optimization',
+                'Dedicated success advisor'
+              ],
+              cta: 'Go Premium',
+              popular: false
+            }
+          ];
+          
+          export function Pricing() {
+            return (
+              <>
+                <Helmet>
+                  <title>Pricing - ScholarMatch AI Credits</title>
+                  <meta name="description" content="Purchase AI credits for personalized scholarship matching and application assistance. Plans start at $40 for 10 credits." />
+                </Helmet>
+                
+                <div className="container mx-auto px-4 py-16" data-testid="page-pricing">
+                  <div className="text-center mb-12">
+                    <h1 className="text-4xl font-bold mb-4" data-testid="heading-pricing">
+                      Choose Your Plan
+                    </h1>
+                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                      Unlock AI-powered scholarship matching and application support.
+                      Credits never expire.
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Transparent pricing: 4x markup on AI services to support platform development
+                    </p>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    {packages.map((pkg) => (
+                      <Card 
+                        key={pkg.name}
+                        className={pkg.popular ? 'border-primary shadow-lg' : ''}
+                        data-testid={`card-package-${pkg.name.toLowerCase()}`}
+                      >
+                        {pkg.popular && (
+                          <div className="bg-primary text-primary-foreground text-center py-1 text-sm font-medium">
+                            Most Popular
+                          </div>
+                        )}
+                        <CardHeader>
+                          <CardTitle data-testid={`title-${pkg.name.toLowerCase()}`}>
+                            {pkg.name}
+                          </CardTitle>
+                          <CardDescription>
+                            <span className="text-3xl font-bold" data-testid={`price-${pkg.name.toLowerCase()}`}>
+                              ${pkg.price}
+                            </span>
+                            <span className="text-muted-foreground"> / {pkg.credits} credits</span>
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-3">
+                            {pkg.features.map((feature, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                                <span className="text-sm">{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                        <CardFooter>
+                          <Button 
+                            className="w-full"
+                            variant={pkg.popular ? 'default' : 'outline'}
+                            data-testid={`button-purchase-${pkg.name.toLowerCase()}`}
+                          >
+                            {pkg.cta}
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-16 text-center">
+                    <h2 className="text-2xl font-bold mb-4">How Credits Work</h2>
+                    <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-8">
+                      <div>
+                        <h3 className="font-semibold mb-2">Purchase</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Buy credit packages that fit your needs. Credits never expire.
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-2">Use AI Features</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Each AI-powered action (essay feedback, matching, etc.) uses credits.
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-2">Track Usage</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Monitor your credit balance and usage history in your dashboard.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            );
+          }
+    
+    verification:
+      - step: "curl -I https://student-pilot-jamarrlmayes.replit.app/pricing"
+        expect: "HTTP/1.1 200 OK"
+      
+      - step: "curl -sS https://student-pilot-jamarrlmayes.replit.app/pricing | grep -i 'Choose Your Plan'"
+        expect: "Match found (heading present)"
+      
+      - step: "curl -sS https://student-pilot-jamarrlmayes.replit.app/pricing | grep -i '\\$40'"
+        expect: "Match found (pricing displayed)"
+      
+      - step: "curl -sS https://student-pilot-jamarrlmayes.replit.app/pricing | grep -i '4x markup'"
+        expect: "Match found (markup transparency)"
+      
+      - step: "3-sample P95 test (30s spacing)"
+        expect: "P95 TTFB ≤ 190ms (target ≤160ms for 5/5)"
+      
+      - step: "Visual inspection"
+        expect: |
+          - Three pricing cards visible
+          - Prices: $40, $200, $800
+          - Credits: 10, 50, 200
+          - CTA buttons functional
+          - Mobile responsive layout
+    
+    success_criteria:
+      - /pricing returns 200 OK
+      - Page displays three credit packages (10, 50, 200 credits)
+      - Pricing shows 4x markup ($40, $200, $800)
+      - "4x markup" or "transparent pricing" messaging visible
+      - CTA buttons present and clickable
+      - SEO meta tags complete (<title>, description)
+      - P95 TTFB ≤ 190ms (acceptable for 4/5; target ≤160ms for 5/5)
+      - Score increases from 2/5 to ≥4/5
+    
+    rollback_plan: |
+      1. Remove /pricing route from client/src/App.tsx
+      2. Delete client/src/pages/pricing.tsx file
+      3. Restart workflow
+      4. Verify /pricing returns to 404 state
+    
+    risk: low
+    notes: |
+      - Static page with no backend dependencies initially
+      - Can implement without Stripe integration (add checkout flow separately)
+      - Responsive design critical for mobile users
+
+  - id: FP-PILOT-CHECKOUT
+    title: Implement /checkout flow with Stripe test mode
+    summary: Create checkout page for credit purchase processing
+    priority: P1
+    estimate_hours: 4-6
+    owner: Full-Stack Engineering
+    dependencies: [FP-PILOT-PRICING, FP-AUTH-JWKS-RS256]
+    
+    changes:
+      - file: client/src/App.tsx
+        action: add
+        notes: Add /checkout route
+      
+      - file: client/src/pages/checkout.tsx
+        action: create
+        notes: Payment form component
+      
+      - file: server/routes.ts
+        action: add
+        notes: |
+          POST /api/purchase endpoint
+          Stripe webhook handler for payment confirmation
+    
+    verification:
+      - step: "Manual test: Click purchase button → redirects to /checkout"
+        expect: "Checkout page loads"
+      
+      - step: "Stripe test mode transaction (4242 4242 4242 4242)"
+        expect: "Payment succeeds, credits added to account"
+      
+      - step: "Business events telemetry"
+        expect: "credit_purchase_succeeded event emitted"
+    
+    success_criteria:
+      - Authenticated users can access checkout
+      - Stripe Elements integrated (test mode)
+      - Successful purchase adds credits to user account
+      - Transaction recorded in database
+      - Telemetry events emitted
+    
+    risk: medium
+    notes: |
+      - Requires Stripe API key (test mode)
+      - Depends on scholar_auth for user authentication
+      - PCI compliance considerations (use Stripe Elements, never store card data)
+
+  - id: FP-SEC-HEADERS-6OF6
+    title: Audit and complete security headers (6/6)
+    summary: Ensure all six required security headers present
+    priority: P1
+    estimate_hours: 1
+    owner: Backend Engineering
+    
+    verification:
+      - step: "curl -I https://student-pilot-jamarrlmayes.replit.app/pricing | grep -i security-headers"
+        expect: |
+          ✅ Strict-Transport-Security
+          ✅ Content-Security-Policy
+          ✅ X-Content-Type-Options
+          ✅ X-Frame-Options
+          ✅ Referrer-Policy
+          ✅ Permissions-Policy
+    
+    success_criteria:
+      - All 6 headers present on /pricing and other HTML routes
+      - Headers comply with security best practices
+    
+    risk: low
+
+quick_wins:
+  - description: Create /pricing page with credit packages
+    eta_minutes: 120-180
+    impact: Unblocks T+48h Revenue Gate (2/5 → 4/5)
+  
+  - description: Add SEO meta tags to /pricing
+    eta_minutes: 15
+    impact: Improves discoverability and conversion
+
+dependencies:
+  - app: scholar_auth
+    reason: JWT authentication required for checkout flow
+    blocking: true
+    notes: |
+      - /pricing page can be public (no auth required)
+      - /checkout requires authenticated user
+      - Critical path: Fix scholar_auth JWKS in parallel
+
+  - app: scholarship_api
+    reason: May query scholarships for upsell recommendations
+    blocking: false
+    notes: Graceful degradation if API unavailable
+
+phased_rollout:
+  phase_1:
+    name: Pricing Discovery (P0)
+    tasks: [FP-PILOT-PRICING]
+    eta_hours: 2-4
+    gate_unblocked: T+48h Revenue Gate (reaches 4/5)
+  
+  phase_2:
+    name: Purchase Flow (P1)
+    tasks: [FP-PILOT-CHECKOUT]
+    eta_hours: 4-6
+    dependencies: [scholar_auth JWKS fixed]
+    revenue_enabled: true
+  
+  phase_3:
+    name: Security & Polish (P1)
+    tasks: [FP-SEC-HEADERS-6OF6]
+    eta_hours: 1
+
+total_eta_to_ready: 3-5 hours (Phase 1)
+total_eta_to_4of5: 3-5 hours
+total_eta_to_start_generating_revenue: 6-10 hours (includes scholar_auth dependency)
+
+revenue_projection:
+  eta_to_first_purchase: 6-10 hours from implementation start
+  assuming: |
+    - scholar_auth JWKS fixed in 4-6 hours (parallel)
+    - student_pilot /pricing + /checkout ready in 6 hours
+    - Integration testing: 1 hour
+    - Sandbox test purchase: immediate
+    - Production first sale: T+24-48h (user discovery time)

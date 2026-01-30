@@ -1,0 +1,148 @@
+{
+  "seed_list_name": "Gate A Deliverability Test - 20 Address Mix",
+  "test_date": "2025-11-12",
+  "gate": "Gate A",
+  "target_inbox_placement": "≥95%",
+  "providers": {
+    "gmail": 8,
+    "outlook": 7,
+    "icloud": 5
+  },
+  "addresses": [
+    {
+      "id": 1,
+      "provider": "gmail",
+      "email": "test1.scholarmatch@gmail.com",
+      "purpose": "Primary inbox test"
+    },
+    {
+      "id": 2,
+      "provider": "gmail",
+      "email": "test2.scholarmatch@gmail.com",
+      "purpose": "Spam folder detection"
+    },
+    {
+      "id": 3,
+      "provider": "gmail",
+      "email": "test3.scholarmatch@gmail.com",
+      "purpose": "Promotions tab test"
+    },
+    {
+      "id": 4,
+      "provider": "gmail",
+      "email": "test4.scholarmatch@gmail.com",
+      "purpose": "Authentication validation"
+    },
+    {
+      "id": 5,
+      "provider": "gmail",
+      "email": "test5.scholarmatch@gmail.com",
+      "purpose": "DKIM validation"
+    },
+    {
+      "id": 6,
+      "provider": "gmail",
+      "email": "test6.scholarmatch@gmail.com",
+      "purpose": "SPF validation"
+    },
+    {
+      "id": 7,
+      "provider": "gmail",
+      "email": "test7.scholarmatch@gmail.com",
+      "purpose": "DMARC validation"
+    },
+    {
+      "id": 8,
+      "provider": "gmail",
+      "email": "test8.scholarmatch@gmail.com",
+      "purpose": "Bulk send simulation"
+    },
+    {
+      "id": 9,
+      "provider": "outlook",
+      "email": "test1.scholarmatch@outlook.com",
+      "purpose": "Primary inbox test"
+    },
+    {
+      "id": 10,
+      "provider": "outlook",
+      "email": "test2.scholarmatch@outlook.com",
+      "purpose": "Junk folder detection"
+    },
+    {
+      "id": 11,
+      "provider": "outlook",
+      "email": "test3.scholarmatch@outlook.com",
+      "purpose": "Focused inbox test"
+    },
+    {
+      "id": 12,
+      "provider": "outlook",
+      "email": "test4.scholarmatch@outlook.com",
+      "purpose": "Authentication validation"
+    },
+    {
+      "id": 13,
+      "provider": "outlook",
+      "email": "test5.scholarmatch@outlook.com",
+      "purpose": "DKIM validation"
+    },
+    {
+      "id": 14,
+      "provider": "outlook",
+      "email": "test6.scholarmatch@outlook.com",
+      "purpose": "SPF validation"
+    },
+    {
+      "id": 15,
+      "provider": "outlook",
+      "email": "test7.scholarmatch@outlook.com",
+      "purpose": "Bulk send simulation"
+    },
+    {
+      "id": 16,
+      "provider": "icloud",
+      "email": "test1.scholarmatch@icloud.com",
+      "purpose": "Primary inbox test"
+    },
+    {
+      "id": 17,
+      "provider": "icloud",
+      "email": "test2.scholarmatch@icloud.com",
+      "purpose": "Junk folder detection"
+    },
+    {
+      "id": 18,
+      "provider": "icloud",
+      "email": "test3.scholarmatch@icloud.com",
+      "purpose": "Authentication validation"
+    },
+    {
+      "id": 19,
+      "provider": "icloud",
+      "email": "test4.scholarmatch@icloud.com",
+      "purpose": "DKIM validation"
+    },
+    {
+      "id": 20,
+      "provider": "icloud",
+      "email": "test5.scholarmatch@icloud.com",
+      "purpose": "Bulk send simulation"
+    }
+  ],
+  "test_procedure": {
+    "step_1": "Send test email to all 20 addresses via /api/send endpoint",
+    "step_2": "Wait 5 minutes for delivery",
+    "step_3": "Check inbox placement (primary inbox vs spam/junk/promotions)",
+    "step_4": "Calculate inbox placement percentage",
+    "step_5": "Capture authentication headers from each provider",
+    "pass_criteria": "≥19 emails in primary inbox (95%)",
+    "fail_criteria": "<19 emails in primary inbox (<95%)"
+  },
+  "notes": [
+    "These are placeholder test addresses - replace with real accessible email accounts",
+    "Recommended: Use Gmail/Outlook/iCloud accounts you control",
+    "Document inbox placement for each address in test results",
+    "Capture raw email headers showing DKIM/SPF/DMARC pass status"
+  ]
+}

@@ -1,0 +1,103 @@
+# Student Pilot
+## B2C Student Experience App
+
+### Role
+Help each student find and apply to high-likelihood scholarships; maximize ethical conversions and ARPU from credits.
+
+### Objectives
+- Improve match quality and relevance scores
+- Increase CTR by segment (High Likelihood, Competitive, Long Shot)
+- Drive free-to-paid conversion through valuable premium features
+- Increase scholarship application completion rates
+- Ensure COPPA compliance with parental consent for users under 13
+
+### KPIs to Track
+- **CTR_by_segment**: Click-through rates for High Likelihood, Competitive, and Long Shot scholarships (basis points)
+- **free_to_paid_conversion**: Percentage of free users who purchase credits (basis points)
+- **ARPU_from_credits**: Average revenue per user from credit purchases (cents)
+- **application_completion_rate**: Percentage of started applications that are submitted (basis points)
+- **consent_rate_under_13**: Percentage of minors with verified parental consent (basis points)
+
+### Required Events to Emit
+
+**User Lifecycle:**
+- `student_signup` with properties: { studentId: string, signupSource: string, isMinor: boolean }
+- `profile_completed` with properties: { studentId: string, completionPercent: number, fieldsCompleted: string[] }
+
+**Engagement:**
+- `match_viewed` with properties: { studentId: string, scholarshipId: string, segment: string, matchScore: number }
+
+**Monetization:**
+- `credit_purchased` with properties: { studentId: string, amountCents: number, creditsQuantity: number, paymentMethod: string }
+- `credit_spent` with properties: { studentId: string, creditsSpent: number, feature: string, scholarshipId?: string }
+
+**Application Flow:**
+- `application_submitted` with properties: { studentId: string, scholarshipId: string, completionTimeMinutes: number }
+
+### Guardrails
+
+**Academic Integrity:**
+- No essay writing or ghostwriting features
+- No application automation that violates scholarship terms
+- Provide guidance and checklists, not completed work
+- Clear disclaimers about responsible use
+
+**Explainability:**
+- Clear explanations for match recommendations
+- Transparency in how match scores are calculated
+- "Why this scholarship?" reasoning for each match
+- Ability to provide feedback on matches
+
+**COPPA Compliance:**
+- Age verification during signup
+- Parental consent flow for users under 13
+- Restricted features for minors without consent
+- Secure storage of consent records
+- No behavioral tracking of minors without consent
+
+**Accessibility and Usability:**
+- WCAG 2.1 AA compliance
+- Mobile-responsive design
+- Plain language (8th-grade reading level)
+- Multi-language support where feasible
+- Screen reader compatibility
+
+### Actions and Capabilities
+
+**Profile and Matching:**
+- Student profile creation and management
+- AI-powered scholarship matching
+- Segmented recommendations (High/Competitive/Long Shot)
+- Save scholarships for later
+- Track application deadlines
+
+**Premium Features (Credits Required):**
+- AI essay assistance (brainstorming, outlining, feedback - not writing)
+- Application checklist generation
+- Deadline reminder system
+- Priority match updates
+- Extended match history
+
+**Application Support:**
+- Scholarship requirement checklists
+- Document upload and management
+- Application progress tracking
+- Submission confirmations
+- Post-submission follow-up guidance
+
+**Parent/Guardian Portal (for minors):**
+- Consent management
+- Activity visibility
+- Safety controls
+- Communication preferences
+
+### Success Criteria
+- CTR for High Likelihood matches >30%
+- CTR for Competitive matches >15%
+- CTR for Long Shot matches >5%
+- Free-to-paid conversion >8%
+- ARPU >$500/year for paid users
+- Application completion rate >60%
+- 100% consent rate for minors before premium features
+- Student satisfaction score >4.5/5
+- Zero academic integrity violations

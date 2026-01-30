@@ -1,0 +1,58 @@
+Acknowledged. Based on your T+24h pulse and the latest execution logs:
+
+A1-CHG-2025-001: Implemented; local headers correct. Publish to production and verify via A8 probes.
+A5 latency: Code Red resolved. Warm P95 ~185ms meets target.
+A3 provider CTA: Implemented with UTM and telemetry; no local auth surfaces added.
+Executive next steps (24–48 hours)
+
+A1 scholar_auth (finalize change ticket)
+Action: Publish the cache-header changes to production.
+Validate (A8 probes):
+/.well-known/openid-configuration p95 ≤150ms for 3 consecutive windows.
+/.well-known/jwks.json p95 ≤150ms for 3 consecutive windows.
+Evidence required: A8 screenshots for both probes, showing green status and Cache-Control: public, max-age=300, s-maxage=300 on response headers.
+2. A5 student_pilot (stabilize and prove impact)
+
+Action: Keep pre-warm enabled; emit dns/tls/ttfb/total timing to A8 for /api/login.
+Targets:
+/api/login p95 ≤200ms sustained for 24 hours.
+/api/login median ≤120ms.
+Evidence required: A8 timing tile (p50/p95) + 0 critical alerts over rolling 24h.
+Business KPI: trial_credits_granted → payment_succeeded conversion ≥3% in the next 48h (baseline check).
+3. A3 scholarship_agent (activate B2B funnel)
+
+Action: Ship the Provider CTA change to production (if not already), and confirm telemetry ingestion of provider CTA clicks in A8.
+Targets:
+≥25 provider CTA clicks in 48h (utm_source=scholarship_agent, audience=provider).
+1+ provider completes Stripe Connect (A6 provider_connected) in 48–72h.
+Evidence required: A8 marketing_intent events (count and UTM fields), plus at least one provider_connected event.
+4. A6 provider_register (close the loop)
+
+Action: Concierge outreach to the 3 stuck providers with direct Stripe Connect links; use the new dashboard banner as the in-app prompt.
+Targets:
+2/3 providers complete Stripe Connect within 48h; first listing created within 72h.
+Evidence required: provider_connected event(s), plus first scholarship listing created.
+5. A7 auto_page_maker (SEO visibility)
+
+Action: Provide Google Search Console verification token; add meta-tag or file and verify property.
+Targets:
+GSC verified within 24h; sitemap submitted; ≥100 URLs indexed within 48–72h.
+Evidence required: GSC verification screenshot + A8 capture of page_view events with utm_source=auto_page_maker.
+6. A8 auto_com_center (guardrails and proof)
+
+Action: Keep current alert thresholds (A1 warn 150ms, crit 200ms; A5 warn 200ms, crit 350ms). Add tiles for A5 dns/tls/ttfb/total (p50/p95).
+Targets:
+Record “first green window” for A5 p95 ≤200ms and archive in the release notes.
+No spikes in A1 4xx >2% on /oidc/auth for 24h post A1 publish.
+Evidence required: A8 screenshots of alerts/tiles and first-green timestamps.
+Contingencies
+
+If A1 discovery/JWKS p95 >150ms after publish: roll back cache headers and re-check edge layer overrides; redeploy with stricter header set (immutable ETag + s-maxage only).
+If A5 p95 regresses >350ms: enable a secondary pre-warm on a 5-minute interval and confirm no dynamic discovery on /api/login path.
+If A3 CTA click volume <10 in 24h: add a top-of-fold provider CTA and test alternative copy; report uplift.
+What I need from you now
+
+Confirm A1 publish window (now vs. off-peak). I recommend immediate publish with A8 watching probes.
+Confirm GSC token for A7.
+Confirm concierge outreach is queued for the 3 providers (use personalized Stripe Connect links).
+If any blocker appears during A1 publish or A5 monitoring, ping me with the A8 alert snapshot; I’ll issue an immediate adjustment directive.

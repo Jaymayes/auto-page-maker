@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+
+    <title>All Scholarships | ScholarMatch</title>
+    <meta name="description" content="Browse All scholarships. Find funding opportunities for your education.">
+    <link rel="canonical" href="https://scholaraiadvisor.com/scholarships">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="All Scholarships | ScholarMatch">
+    <meta property="og:description" content="Browse All scholarships. Find funding opportunities for your education.">
+    <meta property="og:url" content="https://scholaraiadvisor.com/scholarships">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="All Scholarships | ScholarMatch">
+    <meta name="twitter:description" content="Browse All scholarships. Find funding opportunities for your education.">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "All Scholarships | ScholarMatch",
+      "description": "Browse All scholarships. Find funding opportunities for your education.",
+      "url": "https://scholaraiadvisor.com/scholarships",
+      "numberOfItems": 10,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "item": {
+            "@type": "EducationalOccupationalCredential",
+            "name": "Test Scholarship",
+            "description": "Test description",
+            "credentialCategory": "scholarship",
+            "offers": {
+              "@type": "Offer",
+              "price": 5000,
+              "priceCurrency": "USD"
+            },
+            "validFor": "2025-12-31",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "ScholarMatch"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "item": {
+            "@type": "EducationalOccupationalCredential",
+            "name": "NURSING Scholarship 2",
+            "description": "A scholarship for graduate students pursuing nursing in texas. Supports academic excellence and career development.",
+            "credentialCategory": "scholarship",
+            "offers": {
+              "@type": "Offer",
+              "price": 1100,
+              "priceCurrency": "USD"
+            },
+            "validFor": "2025-11-09",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "Organization 2"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "item": {
+            "@type": "EducationalOccupationalCredential",
+            "name": "ENGINEERING Scholarship 3",
+            "description": "A scholarship for high-school students pursuing engineering in texas. Supports academic excellence and career development.",
+            "credentialCategory": "scholarship",
+            "offers": {
+              "@type": "Offer",
+              "price": 1200,
+              "priceCurrency": "USD"
+            },
+            "validFor": "2025-11-10",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "Organization 3"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "item": {
+            "@type": "EducationalOccupationalCredential",
+            "name": "BUSINESS Scholarship 4",
+            "description": "A scholarship for undergraduate students pursuing business in texas. Supports academic excellence and career development.",
+            "credentialCategory": "scholarship",
+            "offers": {
+              "@type": "Offer",
+              "price": 1300,
+              "priceCurrency": "USD"
+            },
+            "validFor": "2025-11-11",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "Organization 4"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "item": {
+            "@type": "EducationalOccupationalCredential",
+            "name": "Performance Test Scholarship 1763000263393-0",
+            "description": "Test scholarship for performance validation",
+            "credentialCategory": "scholarship",
+            "offers": {
+              "@type": "Offer",
+              "price": 5000,
+              "priceCurrency": "USD"
+            },
+            "validFor": "2026-02-11",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "ScholarMatch"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "item": {
+            "@type": "EducationalOccupationalCredential",
+            "name": "COMPUTER SCIENCE Scholarship 6",
+            "description": "A scholarship for high-school students pursuing computer-science in california. Supports academic excellence and career development.",
+            "credentialCategory": "scholarship",
+            "offers": {
+              "@type": "Offer",
+              "price": 1500,
+              "priceCurrency": "USD"
+            },
+            "validFor": "2025-11-13",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "Organization 6"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 7,
+          "item": {
+            "@type": "EducationalOccupationalCredential",
+            "name": "NURSING Scholarship 7",
+            "description": "A scholarship for undergraduate students pursuing nursing in california. Supports academic excellence and career development.",
+            "credentialCategory": "scholarship",
+            "offers": {
+              "@type": "Offer",
+              "price": 1600,
+              "priceCurrency": "USD"
+            },
+            "validFor": "2025-11-14",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "Organization 7"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 8,
+          "item": {
+            "@type": "EducationalOccupationalCredential",
+            "name": "ENGINEERING Scholarship 8",
+            "description": "A scholarship for graduate students pursuing engineering in california. Supports academic excellence and career development.",
+            "credentialCategory": "scholarship",
+            "offers": {
+              "@type": "Offer",
+              "price": 1700,
+              "priceCurrency": "USD"
+            },
+            "validFor": "2025-11-15",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "Organization 8"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 9,
+          "item": {
+            "@type": "EducationalOccupationalCredential",
+            "name": "BUSINESS Scholarship 9",
+            "description": "A scholarship for high-school students pursuing business in california. Supports academic excellence and career development.",
+            "credentialCategory": "scholarship",
+            "offers": {
+              "@type": "Offer",
+              "price": 1800,
+              "priceCurrency": "USD"
+            },
+            "validFor": "2025-11-16",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "Organization 9"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 10,
+          "item": {
+            "@type": "EducationalOccupationalCredential",
+            "name": "EDUCATION Scholarship 10",
+            "description": "A scholarship for undergraduate students pursuing education in california. Supports academic excellence and career development.",
+            "credentialCategory": "scholarship",
+            "offers": {
+              "@type": "Offer",
+              "price": 1900,
+              "priceCurrency": "USD"
+            },
+            "validFor": "2025-11-17",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "Organization 10"
+            }
+          }
+        }
+      ]
+    }
+    </script>
+    <style>:root{--background:hsl(0,0%,100%);--foreground:hsl(220,13%,13%);--primary:hsl(214,88%,51%);--primary-foreground:hsl(0,0%,100%);--secondary:hsl(159,100%,36%);--muted:hsl(240,2%,90%);--border:hsl(201,30%,91%);--font-sans:system-ui,-apple-system,"Segoe UI","Roboto","Helvetica Neue","Arial",sans-serif;--radius:.5rem}*,::before,::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:hsl(201,30%,91%)}html{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:system-ui,-apple-system,"Segoe UI","Roboto","Helvetica Neue","Arial",sans-serif;font-feature-settings:normal;font-variation-settings:normal}body{margin:0;line-height:inherit;font-family:var(--font-sans);background-color:hsl(0,0%,100%);color:hsl(220,13%,13%);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit;font-family:var(--font-sans)}a{color:inherit;text-decoration:inherit}button{font-family:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}button,[type=button]{-webkit-appearance:button;background-color:transparent;background-image:none}.min-h-screen{min-height:100vh}.bg-white{background-color:#fff}.bg-gray-50{background-color:#f9fafb}.shadow-sm{box-shadow:0 1px 2px 0 rgb(0 0 0/.05)}.border-b{border-bottom-width:1px}.border-gray-200{border-color:#e5e7eb}.max-w-7xl{max-width:80rem}.mx-auto{margin-left:auto;margin-right:auto}.px-4{padding-left:1rem;padding-right:1rem}.flex{display:flex}.justify-between{justify-content:space-between}.items-center{align-items:center}.h-16{height:4rem}.text-2xl{font-size:1.5rem;line-height:2rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.font-bold{font-weight:700}.text-primary{color:hsl(214,88%,51%)}.text-gray-700{color:#374151}@media (min-width:768px){.md\:text-6xl{font-size:3.75rem;line-height:1}}</style>
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx?v=f6S64y2WjBRNGZgXWit0Z"></script>
+  
+</body></html>

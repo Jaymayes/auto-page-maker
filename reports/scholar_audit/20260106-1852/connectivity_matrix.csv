@@ -1,0 +1,24 @@
+Source,Target,Protocol,Auth,Status,Latency_ms,Notes
+A1,Clerk,HTTPS,API-Key,HEALTHY,<100,External auth provider
+A1,Postmark,HTTPS,API-Key,HEALTHY,<200,Email service
+A1,auth_db,PostgreSQL,Connection,SLOW,247,Database connection slow
+A2,Database,PostgreSQL,Connection,HEALTHY,<50,Neon serverless
+A2,A8,HTTPS,JWT,HEALTHY,<100,Telemetry
+A3,A2,HTTPS,JWT,HEALTHY,<100,Scholarship data
+A3,A4,HTTPS,JWT,HEALTHY,<100,LLM services
+A3,A8,HTTPS,JWT,HEALTHY,<100,Telemetry
+A4,OpenAI,HTTPS,API-Key,HEALTHY,<500,LLM API
+A4,A2,HTTPS,JWT,HEALTHY,<100,Scholarship data
+A5,A1,HTTPS,OIDC,HEALTHY,<200,Authentication
+A5,A2,HTTPS,JWT,HEALTHY,<100,Scholarship data
+A5,A3,HTTPS,JWT,HEALTHY,<100,Agent services
+A6,A1,HTTPS,OIDC,DOWN,N/A,500 error on A6
+A6,A2,HTTPS,JWT,DOWN,N/A,500 error on A6
+A6,A8,HTTPS,JWT,DOWN,N/A,500 error on A6
+A6,Stripe,HTTPS,API-Key,UNKNOWN,N/A,Cannot verify - A6 down
+A6,Database,PostgreSQL,Connection,UNKNOWN,N/A,Cannot verify - A6 down
+A7,Database,PostgreSQL,Connection,HEALTHY,60,Neon serverless
+A7,SendGrid,HTTPS,API-Key,HEALTHY,173,Async cached
+A7,A8,HTTPS,JWT,HEALTHY,<100,Telemetry
+A8,Database,PostgreSQL,Connection,HEALTHY,<50,Event store
+A8,Slack,HTTPS,Webhook,HEALTHY,<200,Notifications

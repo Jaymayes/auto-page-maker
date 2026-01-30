@@ -1,0 +1,72 @@
+{
+  "version": "1.0.0",
+  "modal_id": "oca_submit_modal",
+  "title": "Review Your Application",
+  "sections": {
+    "prefilled_fields": {
+      "heading": "Pre-filled from your profile",
+      "description": "These fields were automatically filled. You can edit any of them.",
+      "editable": true
+    },
+    "untouched_fields": {
+      "heading": "You need to complete",
+      "description": "These fields require your input.",
+      "required": true
+    },
+    "attachments": {
+      "heading": "Your documents",
+      "description": "Attach your essay (written by you).",
+      "upload_cta": "Upload essay",
+      "accepted_types": [".pdf", ".doc", ".docx"]
+    },
+    "provider_terms": {
+      "heading": "Provider terms",
+      "description": "By submitting, you agree to {{provider_name}}'s application terms.",
+      "link_text": "View full terms",
+      "link_url": "{{provider_terms_url}}"
+    }
+  },
+  "checkboxes": {
+    "integrity": {
+      "id": "integrity_checkbox",
+      "text": "I wrote the attached essay myself and meet the eligibility criteria.",
+      "required": true,
+      "telemetry_event": "oca_integrity_checked"
+    },
+    "consent": {
+      "id": "consent_checkbox",
+      "text": "I authorize submission of my profile data and attached documents to {{provider_name}}.",
+      "required": true,
+      "telemetry_event": "oca_consent_checked"
+    }
+  },
+  "links": {
+    "what_we_wont_do": {
+      "text": "What we won't do",
+      "action": "open_integrity_policy_panel",
+      "telemetry_event": "oca_integrity_policy_viewed"
+    }
+  },
+  "buttons": {
+    "cancel": {
+      "text": "Cancel",
+      "style": "secondary",
+      "action": "close_modal"
+    },
+    "submit": {
+      "text": "Submit Application",
+      "style": "primary",
+      "action": "submit_application",
+      "disabled_until": ["integrity_checkbox", "consent_checkbox"],
+      "telemetry_event": "oca_submit_clicked"
+    }
+  },
+  "telemetry_flow": [
+    "oca_modal_viewed",
+    "oca_doc_selected",
+    "oca_consent_checked",
+    "oca_integrity_checked",
+    "oca_submit_clicked",
+    "oca_submit_result"
+  ]
+}

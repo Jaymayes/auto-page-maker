@@ -1,0 +1,17 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "dedupe_strategy": {
+    "accept_duplicates_now": true,
+    "preserve_raw_payloads": true,
+    "post_hoc_dedupe_job": {
+      "key": "coalesce(request_id, sha256(body))",
+      "table": "business_events",
+      "collapse_duplicates": true
+    },
+    "unique_index": {
+      "create_after_stabilization": true,
+      "key": "coalesce(request_id, sha256(body))"
+    }
+  }
+}

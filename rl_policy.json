@@ -1,0 +1,91 @@
+{
+  "version": "1.0.0",
+  "protocol": "AGENT3_HANDSHAKE_v27",
+  "updated": "2026-01-09T07:50:00Z",
+  
+  "policy_type": "contextual_bandit",
+  "model": "linear_ucb",
+  
+  "reward_function": {
+    "formula": "0.05 * page_view + 0.30 * lead + 0.65 * checkout - 0.40 * complaint",
+    "components": {
+      "page_view": {"weight": 0.05, "source": "analytics.page_view"},
+      "lead": {"weight": 0.30, "source": "analytics.lead_capture"},
+      "checkout": {"weight": 0.65, "source": "stripe.checkout_completed"},
+      "complaint": {"weight": -0.40, "source": "support.complaint_filed"}
+    },
+    "normalization": "min_max",
+    "window_hours": 24
+  },
+  
+  "state_features": [
+    "user_segment",
+    "traffic_source",
+    "device_type",
+    "time_of_day",
+    "page_category",
+    "previous_visits"
+  ],
+  
+  "actions": [
+    "show_cta_apply",
+    "show_cta_learn_more",
+    "show_pricing_modal",
+    "show_testimonial",
+    "highlight_deadline"
+  ],
+  
+  "learning_rate": 0.01,
+  "discount_factor": 0.95,
+  "exploration_rate": 0.1,
+  "exploration_decay": 0.995,
+  "min_exploration": 0.01,
+  
+  "error_correction": {
+    "retry_strategy": "exponential_backoff_with_jitter",
+    "max_retries": 5,
+    "base_delay_ms": 100,
+    "max_delay_ms": 60000,
+    "jitter_factor": 0.3,
+    "circuit_breaker": {
+      "failure_threshold": 5,
+      "success_threshold": 3,
+      "timeout_ms": 30000,
+      "half_open_requests": 3
+    },
+    "auto_heal": {
+      "enabled": true,
+      "negative_reward_threshold": -0.15,
+      "rollback_window_hours": 1
+    }
+  },
+  
+  "hitl_gates": {
+    "policy_change": {
+      "risk_level": "medium",
+      "requires_approval": true,
+      "approval_log": "tests/perf/reports/hitl_approvals.log"
+    },
+    "reward_weight_change": {
+      "risk_level": "high",
+      "requires_approval": true
+    },
+    "circuit_breaker_override": {
+      "risk_level": "high",
+      "requires_approval": true
+    }
+  },
+  
+  "telemetry": {
+    "primary_endpoint": "a8",
+    "fallback_endpoint": "a2",
+    "emit_interval_sec": 60,
+    "batch_size": 100
+  },
+  
+  "audit": {
+    "log_all_decisions": true,
+    "retention_days": 90,
+    "pii_masking": true
+  }
+}

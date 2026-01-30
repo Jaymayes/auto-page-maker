@@ -1,0 +1,206 @@
+BROWSER-ONLY VERIFICATION (NO CURL-ONLY PASSES)
+
+You must run a headed browser E2E test that reproduces actual user behavior from A7 → A5/A6 → A1 → back to A5/A6.
+Any verdict not derived from this visible flow MUST be rejected.
+If the “Authorize Application” page reappears after clicking Authorize (or the URL still contains /oidc/interaction/ after 5 seconds), return VERDICT=BLOCKED with evidence.
+Strict Logic Gate (Identify → Lock → Handshake)
+
+Detect app (exactly one)
+Landing (required start): A7 (Marketing) → https://scholaraiadvisor.com OR https://auto-page-maker-jamarrlmayes.replit.app
+Targets after CTA:
+A5 student_pilot → https://student-pilot-jamarrlmayes.replit.app (PUBLIC Students)
+A6 provider_register → https://provider-register-jamarrlmayes.replit.app (PUBLIC Providers)
+Lock scope
+Execute the A7→A5 (Student) and A7→A6 (Provider) flows.
+You may open A1 only when the flow redirects there.
+Handshake (print exactly before testing)
+🔍 AGENT IDENTITY CONFIRMED START ORIGIN: [A7 URL actually used] TARGETS: [A5 and A6] ACTION: Running headed browser sign‑up + login with loop sentinel from A7 → A5/A6.
+Global Guardrails
+
+Fresh Incognito/private profile per run (no prior cookies).
+Redact secrets/tokens/emails in logs → ****
+Rate limit ≤ 1 RPS; no parallel tab spam.
+Save artifacts:
+A HAR of the auth interaction (upload/attach)
+A screenshot at the moment you click “Authorize”
+Console + network errors (redacted)
+What Must Be Tested (Browser only, starting on A7)
+
+A7 → A5 (Student CTA): Click a CTA such as “Get My Matches”, “Get Started”, “Start Your Journey” or any link to student-pilot; then sign up/login via A1; return to A5 within ≤ 8s; no consent loop.
+A7 → A6 (Provider CTA): Click a CTA such as “List a Scholarship”, “For Schools”, “Provider” or any link to provider-register; then sign up/login via A1; return to A6 within ≤ 8s; no consent loop.
+Loop Sentinel: If after clicking “Authorize” the page remains the consent page or the URL still contains /oidc/interaction/ after 5s → FAIL = BLOCKED.
+Expected Output
+
+Attach the exact Playwright script executed (not pseudocode), screenshots, console/network snippets, and a filled summary:
+A7→A5 Sign-up → A5 Landing: PASS/FAIL
+A7→A6 Sign-up → A6 Landing: PASS/FAIL
+Loop Sentinel: PASS/FAIL
+If any FAIL: return VERDICT=BLOCKED plus remediation ticket text.
+Playwright (Python) – Copy/paste and run (headed mode)
+Note: You may need to complete Google/Clerk in the visible browser.
+
+from playwright.sync_api import Playwright, sync_playwright, expect
+import re, time, os
+
+A7_STARTS = [
+"https://scholaraiadvisor.com",
+"https://auto-page-maker-jamarrlmayes.replit.app"
+]
+A5_ORIGIN = "https://student-pilot-jamarrlmayes.replit.app"
+A6_ORIGIN = "https://provider-register-jamarrlmayes.replit.app"
+
+def loop_sentinel(page, target_origin):
+# Wait for OIDC consent/interaction (A1).
+page.wait_for_url(re.compile(r"./oidc/interaction/."), timeout=45000)
+
+os.makedirs("artifacts", exist_ok=True)
+page.screenshot(path="artifacts/consent_before.png")
+
+# Click Authorize
+btn = page.get_by_role("button", name=re.compile("^Authorize$", re.I)).first
+expect(btn).to_be_visible()
+btn.click()
+
+# Wait 5s; if still on interaction page, it's the loop
+time.sleep(5)
+stuck = ("/oidc/interaction/" in page.url) or btn.is_visible()
+page.screenshot(path="artifacts/consent_after.png")
+
+if stuck:
+    raise AssertionError(f"CRITICAL: Authorize loop detected. URL={page.url}")
+
+# Must be redirected back to target app
+expect(page).to_have_url(re.compile(rf"^{re.escape(target_origin)}"), timeout=10000)
+def click_student_cta(page):
+# CTA text patterns that lead to A5 (student)
+candidates = [
+r"get my matches", r"get started", r"start your journey", r"student", r"find scholarships"
+]
+for pattern in candidates:
+els = page.get_by_role("link", name=re.compile(pattern, re.I))
+if els.count() > 0:
+els.first.click()
+return True
+btns = page.get_by_role("button", name=re.compile(pattern, re.I))
+if btns.count() > 0:
+btns.first.click()
+return True
+# Fallback: any anchor targeting A5
+anchors = page.locator('a[href*="student-pilot-jamarrlmayes.replit.app"]')
+if anchors.count() > 0:
+anchors.first.click()
+return True
+return False
+
+def click_provider_cta(page):
+# CTA text patterns that lead to A6 (provider)
+candidates = [
+r"list a scholarship", r"for schools", r"provider", r"onboard", r"register"
+]
+for pattern in candidates:
+els = page.get_by_role("link", name=re.compile(pattern, re.I))
+if els.count() > 0:
+els.first.click()
+return True
+btns = page.get_by_role("button", name=re.compile(pattern, re.I))
+if btns.count() > 0:
+btns.first.click()
+return True
+# Fallback: any anchor targeting A6
+anchors = page.locator('a[href*="provider-register-jamarrlmayes.replit.app"]')
+if anchors.count() > 0:
+anchors.first.click()
+return True
+return False
+
+def run_from_landing(playwright: Playwright, landing_url: str, target_origin: str, cta: str, test_id: str):
+browser = playwright.chromium.launch(headless=False, args=["--start-maximized"])
+context = browser.new_context(record_har_path=f"artifacts/{test_id}.har", viewport={"width":1280,"height":800})
+page = context.new_page()
+
+# 0) Enforce correct starting origin (A7)
+page.goto(landing_url, wait_until="domcontentloaded")
+if "scholar-auth-jamarrlmayes.replit.app" in page.url:
+    raise AssertionError("ABORT: Scope violation. Started on A1 instead of A7.")
+
+# 1) Click the correct CTA on A7
+ok = click_student_cta(page) if cta == "student" else click_provider_cta(page)
+if not ok:
+    raise AssertionError(f"CTA not found on landing for {cta} flow at {landing_url}")
+
+# 2) Expect navigation to target app (A5/A6)
+try:
+    page.wait_for_url(re.compile(rf"^{re.escape(target_origin)}"), timeout=15000)
+except:
+    # Follow link resolving if opened in same origin first
+    if page.url.startswith("https://scholaraiadvisor.com") or page.url.startswith("https://auto-page-maker-"):
+        # Click any explicit anchor pointing to target
+        href = 'a[href*="student-pilot"]' if target_origin == A5_ORIGIN else 'a[href*="provider-register"]'
+        page.locator(href).first.click()
+        page.wait_for_url(re.compile(rf"^{re.escape(target_origin)}"), timeout=15000)
+
+# 3) On A5/A6, trigger sign-in/signup
+try:
+    page.get_by_role("button", name=re.compile("sign in|log in|get started|sign up", re.I)).first.click()
+except:
+    page.goto(target_origin + "/dashboard")
+
+# 4) Wait until we hit A1 consent OR already land back on target app
+try:
+    page.wait_for_url(lambda u: ("/oidc/interaction/" in u) or u.startswith(target_origin), timeout=60000)
+except:
+    pass
+
+# 5) If at consent, run loop sentinel
+if "/oidc/interaction/" in page.url:
+    loop_sentinel(page, target_origin)
+else:
+    expect(page).to_have_url(re.compile(rf"^{re.escape(target_origin)}"))
+
+context.close()
+browser.close()
+def test_student_from_landing():
+with sync_playwright() as p:
+# Prefer the custom domain if available
+landing = A7_STARTS[0]
+run_from_landing(p, landing, A5_ORIGIN, "student", "a7_to_a5")
+
+def test_provider_from_landing():
+with sync_playwright() as p:
+landing = A7_STARTS[0]
+run_from_landing(p, landing, A6_ORIGIN, "provider", "a7_to_a6")
+
+If the test fails (loop_sentinel raises), you must return:
+VERDICT: BLOCKED
+Root Cause (likely): A1 consent POST cannot persist the session/grant due to proxy/cookie misalignment or incomplete grant confirmation.
+Attach artifacts/consent_before.png, artifacts/consent_after.png, artifacts/*.har.
+
+Mandatory Remediation Ticket (paste back if blocked)
+Title: A1 Consent Loop — Proxy/Cookie/Grant Confirmation Fix
+Summary: Users who start at A7 and follow the CTA to A5/A6 reach A1 consent; clicking Authorize reloads consent and never returns to the app.
+Evidence: Playwright screenshots (before/after), HAR showing POST /oidc/interaction/:uid/confirm followed by another GET /oidc/interaction/:uid, and persisted URL containing /oidc/interaction/.
+Probable Causes (A1 only):
+
+Trust Proxy not enabled:
+app.set('trust proxy', 1 or true) and/or provider.proxy = true (if using oidc-provider)
+Cookie policy misaligned:
+OIDC/session cookies must be Secure=true, SameSite='none', HttpOnly=true; if __Host- prefix is used, omit Domain and set Path="/"
+Incomplete consent handler:
+Confirm/grant must always include consent.grantId and requested scopes before calling interactionFinished
+Callback exactness:
+redirect_uri must exactly match A5/A6 callback (no trailing slash drift)
+CORS misconfig:
+Allow only A5/A6 origins with credentials (no wildcard+credentials)
+Parsers:
+Ensure body/cookie parsers run before oidc-provider confirm so cookies are readable
+Acceptance Criteria for Green
+
+A7→A5: Sign‑up/login returns to A5 within ≤ 8s (no interaction URL after Authorize).
+A7→A6: Sign‑up/login returns to A6 within ≤ 8s.
+Loop Sentinel passes for both flows (no stuck consent).
+HAR shows single Authorize POST → redirect to app callback → final app URL.
+A1 never acts as a user‑facing destination; non‑admin internal UI is not rendered.
+Note to Agent
+
+Do not claim SAFE unless BOTH A7→A5 and A7→A6 flows pass the Loop Sentinel test from the landing site.
+Any test that starts directly on A1 is invalid and must be ABORTED.

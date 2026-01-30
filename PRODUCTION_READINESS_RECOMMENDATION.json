@@ -1,0 +1,144 @@
+{
+  "recommendation_title": "Fix Critical Path Traversal Vulnerability",
+  "priority": "P0",
+  "why_now": [
+    "Critical security vulnerability allowing server file system access via ../ patterns",
+    "QA testing confirmed HTTP 200 responses to traversal attempts instead of proper 403/404",
+    "Blocks production deployment due to potential data exposure and compliance violations",
+    "Zero-day risk if deployed without fix - immediate exploitation possible"
+  ],
+  "scope": "In scope: Express.js route handling, static file serving, path sanitization middleware. Out of scope: Frontend routing, API endpoint logic changes, database schema modifications",
+  "implementation_plan": [
+    {
+      "step": "Create path sanitization middleware",
+      "details": "Implement Express middleware to detect and block directory traversal patterns (../, .\\, %2e%2e%2f, etc.) before route processing",
+      "owner": "Platform",
+      "estimate_hours": 2,
+      "dependencies": []
+    },
+    {
+      "step": "Add path normalization utilities",
+      "details": "Create utility functions to normalize and validate file paths, resolve symbolic links, and ensure paths stay within allowed directories",
+      "owner": "Platform", 
+      "estimate_hours": 1,
+      "dependencies": ["path sanitization middleware"]
+    },
+    {
+      "step": "Configure Express static serving restrictions",
+      "details": "Update Express static file configuration to serve only from designated public directories with strict path validation",
+      "owner": "Platform",
+      "estimate_hours": 1,
+      "dependencies": ["path normalization utilities"]
+    },
+    {
+      "step": "Add security headers for directory listing",
+      "details": "Ensure directory listing is disabled and add X-Content-Type-Options nosniff headers for file responses",
+      "owner": "Security",
+      "estimate_hours": 0.5,
+      "dependencies": ["Express static serving restrictions"]
+    },
+    {
+      "step": "Implement comprehensive testing",
+      "details": "Create test suite covering all known traversal attack vectors and edge cases",
+      "owner": "Platform",
+      "estimate_hours": 2,
+      "dependencies": ["all previous steps"]
+    }
+  ],
+  "code_changes": [
+    {
+      "file": "server/middleware/path-security.ts",
+      "purpose": "Create middleware to sanitize paths and block traversal attempts",
+      "snippet": "import { Request, Response, NextFunction } from 'express';\nimport path from 'path';\n\nconst TRAVERSAL_PATTERNS = [\n  /\\.\\.\\//, /\\.\\.\\\\/,\n  /%2e%2e%2f/i, /%2e%2e%5c/i,\n  /\\.\\.%2f/i, /\\.\\.%5c/i\n];\n\nexport const preventPathTraversal = (req: Request, res: Response, next: NextFunction) => {\n  const requestPath = decodeURIComponent(req.path);\n  \n  if (TRAVERSAL_PATTERNS.some(pattern => pattern.test(requestPath))) {\n    return res.status(403).json({ error: 'Forbidden: Path traversal detected' });\n  }\n  \n  const normalizedPath = path.normalize(requestPath);\n  if (normalizedPath.includes('..')) {\n    return res.status(403).json({ error: 'Forbidden: Invalid path' });\n  }\n  \n  next();\n};"
+    },
+    {
+      "file": "server/routes.ts",
+      "purpose": "Apply path security middleware to all routes",
+      "snippet": "import { preventPathTraversal } from './middleware/path-security.js';\n\nexport async function registerRoutes(app: Express): Promise<Server> {\n  // Apply path traversal protection to all routes\n  app.use(preventPathTraversal);\n  \n  // Existing routes continue..."
+    },
+    {
+      "file": "server/index.ts",
+      "purpose": "Configure secure static file serving",
+      "snippet": "import express from 'express';\nimport path from 'path';\n\n// Secure static file serving with restricted root\napp.use('/public', express.static(path.join(__dirname, '../public'), {\n  dotfiles: 'deny',\n  index: false,\n  redirect: false\n}));"
+    }
+  ],
+  "config_changes": [
+    {
+      "file": "server/index.ts",
+      "entries": [
+        "Add path security middleware before all routes",
+        "Configure express.static with security options: dotfiles: 'deny', index: false",
+        "Set maxAge for static assets with proper cache headers"
+      ]
+    }
+  ],
+  "acceptance_criteria": [
+    "All path traversal patterns (../, .\\, %2e%2e%2f, etc.) return HTTP 403 Forbidden",
+    "Legitimate file requests to public directories continue working normally",
+    "Directory listing attempts return 403/404 instead of file listings",
+    "Symbolic link traversal attempts are blocked",
+    "URL encoding variations of traversal patterns are detected and blocked",
+    "Performance impact <5ms per request for path validation",
+    "All existing API endpoints continue functioning without changes"
+  ],
+  "tests": {
+    "unit": [
+      "Path sanitization utility functions validate inputs correctly",
+      "Traversal pattern detection catches all known variants",
+      "Path normalization handles edge cases (empty paths, root paths, etc.)"
+    ],
+    "integration": [
+      "Express middleware integration blocks malicious requests",
+      "Static file serving works for legitimate requests",
+      "API endpoints unaffected by security middleware"
+    ],
+    "security": [
+      "Directory traversal attacks: ../../etc/passwd, ..\\..\\windows\\system32",
+      "URL encoded traversal: %2e%2e%2f, %2e%2e%5c variants",
+      "Double encoding attacks: %252e%252e%252f",
+      "Unicode normalization attacks with equivalent characters",
+      "Null byte injection attempts: ..%00.txt",
+      "Symbolic link traversal if symlinks exist in public directories"
+    ]
+  },
+  "risk_mitigation": {
+    "risks": [
+      "Overly aggressive filtering breaks legitimate file access",
+      "Performance degradation from path validation on every request",
+      "False positives blocking valid API routes with .. patterns in query params"
+    ],
+    "rollback_plan": "Remove path security middleware import from routes.ts and server.ts, revert to previous static file configuration. No database changes required. Rollback time: <5 minutes."
+  },
+  "metrics": {
+    "security": [
+      "0 successful directory traversal attempts across complete test matrix",
+      "All traversal patterns return 403 Forbidden status codes",
+      "No false positives on legitimate API requests"
+    ],
+    "performance": [
+      "Path validation adds <5ms latency per request",
+      "No degradation in API endpoint response times",
+      "Static file serving performance unchanged"
+    ],
+    "stability": [
+      "Error rates for legitimate requests remain unchanged", 
+      "No increase in 5xx errors from middleware",
+      "All existing functionality preserved"
+    ]
+  },
+  "timeline_days": 1,
+  "communications": [
+    "Security team: Critical vulnerability patched, ready for pen testing",
+    "Product team: No user-facing changes, all features remain functional", 
+    "DevOps team: Deploy includes security middleware, monitor 403 error rates",
+    "QA team: Re-run security test suite to verify fix effectiveness"
+  ],
+  "alternatives_if_blocked": [
+    "Implement reverse proxy with path filtering (nginx/CloudFlare) as temporary mitigation",
+    "Deploy with restricted file system permissions and chroot jail environment"
+  ],
+  "follow_up_recommendations": [
+    "Configure CORS headers with strict origin allowlist for cross-domain security",
+    "Implement Unicode input normalization and validation for international character handling"
+  ]
+}

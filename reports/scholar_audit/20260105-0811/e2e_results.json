@@ -1,0 +1,60 @@
+{
+  "audit_timestamp": "2026-01-05T08:11:00Z",
+  "namespace": "simulated_audit",
+  "workflows": [
+    {
+      "workflow": "marketing_seo",
+      "event_type": "PageView",
+      "source": "auto_page_maker",
+      "event_id": "evt_1767600787171_i3npncl8c",
+      "persisted": true,
+      "latency_ms": 229,
+      "status": "pass"
+    },
+    {
+      "workflow": "lead_gen",
+      "event_type": "NewLead",
+      "source": "auto_page_maker",
+      "event_id": "evt_1767600787470_9t4szw7qg",
+      "persisted": true,
+      "latency_ms": 227,
+      "status": "pass"
+    },
+    {
+      "workflow": "auth",
+      "event_type": "NewUser",
+      "source": "scholar_auth",
+      "event_id": "evt_1767600787742_6lw74csa8",
+      "persisted": true,
+      "latency_ms": 224,
+      "status": "pass"
+    },
+    {
+      "workflow": "b2b_revenue",
+      "event_type": "PaymentSuccess",
+      "source": "provider_register",
+      "event_id": "evt_1767600788093_nt5bcbxcq",
+      "persisted": true,
+      "latency_ms": 300,
+      "status": "pass"
+    },
+    {
+      "workflow": "learning",
+      "event_type": "ScholarshipMatchResult",
+      "source": "scholarship_agent",
+      "event_id": "evt_1767600788417_z7t84fgu3",
+      "persisted": true,
+      "latency_ms": 226,
+      "status": "pass"
+    },
+    {
+      "workflow": "learning",
+      "event_type": "SageAssist",
+      "source": "scholarship_sage",
+      "event_id": "evt_1767600788748_3m4x2z495",
+      "persisted": true,
+      "latency_ms": 232,
+      "status": "pass"
+    }
+  ]
+}

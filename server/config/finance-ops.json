@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-01-16T04:30:00Z",
+  "reserve_ledger": {
+    "holdback_pct": 10,
+    "payout_schedule": "net-14",
+    "mode": "simulation",
+    "go_live_condition": "T+24h fully green"
+  },
+  "reconciliation": {
+    "check_at": "T+24h",
+    "tolerance_usd": 0,
+    "items": [
+      "stripe_charges",
+      "stripe_refunds",
+      "payout_accruals",
+      "platform_ledger"
+    ],
+    "expected_match": true
+  },
+  "provider_communications": {
+    "internal_only": true,
+    "support_notified": true,
+    "message": "Cutover complete, performance stable, payouts guarded. Provider payout caps temporarily raised to $250 with 10% reserves."
+  },
+  "paid_pilot_conditions": {
+    "token": "CEO-20260114-PAID-PILOT-72H",
+    "available_after": "T+24h fully green",
+    "constraints": {
+      "daily_budget_usd": 150,
+      "rolling_24h_spend": true,
+      "cac_ceiling_usd": 12,
+      "cac_breach_auto_pause_hours": 24,
+      "arpu_target_usd": 18,
+      "arpu_deadline_days": 7,
+      "arpu_vs_cac_ratio": 1.5,
+      "campaign_type": "retargeting_only",
+      "prospecting_allowed": false,
+      "privacy_compliance_required": true
+    }
+  }
+}

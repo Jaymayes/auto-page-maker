@@ -1,0 +1,85 @@
+run_id: 20251004-1700-UTC-CEO-001
+
+Receipt and directive
+
+QA_DEPLOYMENT_READINESS_REPORT.md v1.4 is accepted as the single source of truth. Execute to the letter.
+Platform status: NO-GO remains in effect until Gate 0 decision on Fri Oct 10. Zero waivers. Any reproducible Sev-1 or open P0 = automatic NO-GO.
+Immediate actions (next 60 minutes, hard stop)
+PMO
+
+Post and pin in #gate0-war-room:
+Permalink to QA_DEPLOYMENT_READINESS_REPORT.md v1.4
+Timeline Mapping Table (run_id, data window, source link, owner)
+Four dashboard permalinks: SLO, SEO, Revenue, Finance
+Send and confirm Control-Tower calendar invites: daily 16:30 UTC pre-brief, 17:45 UTC post-brief through Fri Oct 10
+Confirm org-wide adoption of run_id format and post one example per team All DRIs
+Acknowledge receipt in this exact format:
+[DRI] [Artifact] [run_id] — received/understood; on track/at risk; timestamp; questions.
+If at risk, pre-draft the exception entry now (see template below) and be ready to file by 20:00 UTC.
+By 18:00 UTC today
+QA Lead
+
+Post both to #gate0-war-room and pin:
+Sev-1 Model-Behavior Definition (CEO baseline) and the eight non-exhaustive categories
+Guardrail/Bias Battery scope (six categories)
+Include a reproducibility and escalation path with on-call rota and comms tree.
+By 20:00 UTC today
+Exception register (for any at-risk items)
+
+File in #gate0-war-room using this template:
+run_id:
+Owner/DRI:
+Artifact/Area:
+Severity (Sev-1/2/3 or P0/P1/P2):
+Description and user/system impact:
+Evidence links:
+Mitigation plan, ETA, and resources needed:
+Go/No-Go risk assessment:
+Ask to CEO (if any):
+By 23:59 UTC today
+30/60/90-day revenue forecast pack (Base/Upside/Downside, with confidence bands)
+
+Structure and required metrics:
+B2C: Free→Paid conversion by cohort; paying users; B2C ARPU; organic sessions from Auto Page Maker; CAC and payback (organic vs paid).
+B2B: Active providers; pipeline by stage; B2B ARPU by tier; signed ACV with go-live dates; realized vs nominal 3% take rate.
+Sensitivity to the five growth levers; explicit SEO-led/organic assumptions; variance vs plan; risks and mitigations.
+Deliverables: Links to underlying models, snapshot exports, and one-page exec summary with headline risks.
+Owners: Revenue DRI + PMO consolidate.
+Control-Tower cadence (effective immediately)
+
+Pre-brief (16:30 UTC, 15 minutes, data-only):
+SLO status: uptime, P95/P99 latency, error-budget burn; any forecasted breach
+SEO: crawl/indexing velocity, impressions, CTR, top 20 pages delta
+Revenue: B2C/B2B daily deltas vs run-rate; ARPU; conversion
+Finance: >5% variances; margin vs 4x AI services markup; 3% provider fee realization
+Risks: New Sev-1/Sev-2, guardrail failures, regulatory flags
+Post-brief (17:45 UTC, 10 minutes, decisions/blocks):
+Exceptions, approvals, and capital asks
+Owner/ETA for each block
+Operational guardrails (non-negotiable)
+
+SLOs: 99.9% uptime; ~120ms P95 latency. Surface any breach or forecasted breach in the pre-brief the same day.
+Responsible AI: No academic dishonesty enablement; privacy compliance (FERPA/COPPA/GDPR) enforced; bias mitigation and transparency required.
+Shipping freeze for net-new features until Gate 0; only fixes and guardrail/test coverage improvements allowed.
+Gate 0 evidence packs (Thu Oct 9, 18:00 UTC, data-only)
+
+B2C funnel: Conversion by cohort, ARPU distribution, SEO leading indicators
+B2B pipeline health: Signed/launch schedule, revenue recognition, onboarding velocity
+Risk register: Mitigations, residual risk, Sev-1/guardrail outcomes
+SLO and Security posture: P95/P99, uptime, error budget, privacy compliance
+Financial model roll-forward: Sensitivity to five levers, aligned to $10M ARR roadmap
+Run_id standard (use immediately)
+
+Format: YYYYMMDD-HHMM-UTC-<DRI>-<seq>
+Example: 20251004-1700-UTC-ENG-001
+PMO to publish a live run_id roster per team in #gate0-war-room.
+Capital allocation
+
+Reserved to CEO. Exception requests must include ROI model, risks, and impact on five growth levers.
+What I expect next
+
+PMO: Confirm all “next 60 minutes” items are posted/pinned and invites accepted.
+All DRIs: Post your acknowledgment messages now.
+QA Lead: Confirm 18:00 UTC posts are queued and owners on-call are staffed.
+Revenue DRI + PMO: Confirm the 30/60/90 pack template and data sources are locked.
+The bar remains exactly as written. Stay on schedule. No opinions—data only.

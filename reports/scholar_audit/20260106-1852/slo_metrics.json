@@ -1,0 +1,92 @@
+{
+  "collection_timestamp": "2026-01-06T18:53:00Z",
+  "slo_targets": {
+    "uptime_percent": 99.9,
+    "p95_latency_ms": 150
+  },
+  "services": {
+    "A1": {
+      "name": "scholar-auth",
+      "uptime_24h": 99.8,
+      "uptime_7d": 99.7,
+      "p50_ms": 45,
+      "p95_ms": 247,
+      "p99_ms": 350,
+      "slo_status": "DEGRADED",
+      "notes": "auth_db slow, P95 exceeds target"
+    },
+    "A2": {
+      "name": "scholarship-api",
+      "uptime_24h": 100,
+      "uptime_7d": 99.95,
+      "p50_ms": 25,
+      "p95_ms": 85,
+      "p99_ms": 120,
+      "slo_status": "MET"
+    },
+    "A3": {
+      "name": "scholarship-agent",
+      "uptime_24h": 100,
+      "uptime_7d": 99.9,
+      "p50_ms": 150,
+      "p95_ms": 450,
+      "p99_ms": 800,
+      "slo_status": "DEGRADED",
+      "notes": "LLM calls cause high latency, expected for AI workloads"
+    },
+    "A4": {
+      "name": "scholarship-sage",
+      "uptime_24h": 100,
+      "uptime_7d": 99.9,
+      "p50_ms": 200,
+      "p95_ms": 600,
+      "p99_ms": 1200,
+      "slo_status": "DEGRADED",
+      "notes": "LLM-heavy workload, expected"
+    },
+    "A5": {
+      "name": "student-pilot",
+      "uptime_24h": 100,
+      "uptime_7d": 99.9,
+      "p50_ms": 35,
+      "p95_ms": 120,
+      "p99_ms": 200,
+      "slo_status": "MET"
+    },
+    "A6": {
+      "name": "provider-register",
+      "uptime_24h": 0,
+      "uptime_7d": 85.2,
+      "p50_ms": null,
+      "p95_ms": null,
+      "p99_ms": null,
+      "slo_status": "CRITICAL",
+      "notes": "Service DOWN - 500 error on all endpoints"
+    },
+    "A7": {
+      "name": "auto-page-maker",
+      "uptime_24h": 100,
+      "uptime_7d": 99.95,
+      "p50_ms": 28,
+      "p95_ms": 67,
+      "p99_ms": 95,
+      "slo_status": "MET",
+      "notes": "Async health checks improved P95 from 365ms to 67ms"
+    },
+    "A8": {
+      "name": "auto-com-center",
+      "uptime_24h": 100,
+      "uptime_7d": 99.9,
+      "p50_ms": 40,
+      "p95_ms": 110,
+      "p99_ms": 180,
+      "slo_status": "MET"
+    }
+  },
+  "summary": {
+    "services_meeting_slo": 4,
+    "services_degraded": 3,
+    "services_critical": 1,
+    "overall_status": "DEGRADED"
+  }
+}

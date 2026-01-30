@@ -1,0 +1,31 @@
+=== RAW CURL EVIDENCE ===
+RUN_ID: CEOSPRINT-20260123-EXEC-ZT3G-FIX-AUTH-009
+Timestamp: 2026-01-23T12:30:00Z
+
+=== A1 OIDC Discovery ===
+curl: https://scholar-auth-jamarrlmayes.replit.app/.well-known/openid-configuration
+HTTP: 200
+code_challenge_methods_supported: ["S256"] ✅
+
+=== A1 Health ===
+HTTP: 200
+{"status":"alive","service":"scholar_auth"}
+
+=== A1 Readyz ===
+HTTP: 200
+{"status":"ready","checks":{"database":"healthy","connectionPool":"healthy"}}
+
+=== A1 Client Registry Test - provider-register ===
+Request: /oidc/auth?client_id=provider-register&redirect_uri=.../api/auth/callback&...
+HTTP: 400
+Error: invalid_redirect_uri
+Analysis: Registry has /callback, not /api/auth/callback
+
+=== A5 /api/auth/login ===
+HTTP: 404
+Analysis: Route does not exist
+
+=== A6 /api/auth/login ===
+HTTP: 302
+Location: .../oidc/auth?client_id=provider-register&redirect_uri=...&scope=...&state=...
+Analysis: MISSING code_challenge and code_challenge_method=S256

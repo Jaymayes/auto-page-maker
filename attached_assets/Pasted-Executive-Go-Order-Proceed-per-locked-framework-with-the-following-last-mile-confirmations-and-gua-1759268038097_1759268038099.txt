@@ -1,0 +1,46 @@
+Executive Go Order: Proceed per locked framework, with the following last-mile confirmations and guardrails.
+
+Non-negotiable pre-flight (by 9:20am ET)
+
+Rollback owner: Post name + phone/Slack in #perf-warroom pin. Authority reaffirmed: unilateral pause/rollback on triggers.
+Live RUM dashboard link: Post in #perf-warroom (pin). Alerts confirmed to #perf-warroom.
+Bundle size check: Confirm the canary artifact ≤75 KB gz. If >75 KB gz, do NOT start the canary—post PAUSE with cause “bundle target miss,” and ship a rapid cut with code-splitting/defers.
+RUM PII exclusion: Reconfirm filters are active; verify a redacted sample event in the dashboard before 9:30.
+CDN/cache parity: Reconfirm canary vs control config parity and freeze through canary window (already marked done; recheck).
+9:30–9:45 execution (canary start + WPT)
+
+Kick off WebPageTest at 9:30am ET with locked config (Moto G4, Slow 4G, 10 runs); post link as a pinned item.
+Monitor live RUM compare panel (device/geo normalized): LCP, INP, TTFB, CLS, JS errors, CWV pass rate, conversion.
+Infra: Watch cost deltas in near-real-time (edge egress, function minutes, DB RU/IO). Cost must be flat or down.
+9:45am ET one-line verdict to #release-channel (locked template)
+
+Use the provided template exactly. If any metric breaches Pass criteria, post PAUSE or ROLLBACK immediately with the incident format and schedule the 15-min rapid review.
+Pass/Fail guardrails (reaffirmed)
+
+Pass: LCP/INP/TTFB ≤+5% delta; INP P75 ≤200ms absolute; CLS Δ ≤+0.02; JS errors ≤1/1K, non-increasing; Conversion not worse than -1pp or -3% relative; Bundle ≤75 KB gz; Infra cost flat/down; CWV pass-rate hold/improve.
+Pause: >+10% degradation (LCP/INP/TTFB) OR CLS Δ >+0.02, sustained 5 min and ≥1.5K views.
+Rollback: >+15% degradation OR JS error >0.3%, sustained 5 min and ≥1.5K views.
+Safety authority: Rollback owner may act unilaterally—no exceptions.
+If PASS: ramp plan (times locked)
+
+2:00pm → 10% (30 min) → checkpoint
+2:30pm → 25% (60 min) → checkpoint
+3:30pm → 50% → hold overnight
+Thu AM → CTO/VP RUM review → approve 100% if green
+If PAUSE/ROLLBACK: incident format (locked)
+
+Post “⚠️ CANARY [PAUSED/ROLLED BACK] - [Timestamp]” with suspected cause, mitigation, ETA/new cut; schedule rapid review 15 minutes from post.
+Reporting cadence (no deviations)
+
+9:45am: One-line verdict in #release-channel
+12:00pm: Dashboard link, rollback owner confirmation, canary confirmation (if PASS)
+4:00pm: EOD canary vs control deltas + infra cost snapshot (if PASS)
+Strategic notes (CEO)
+
+This release must protect Core Web Vitals to preserve our SEO-driven, low-CAC growth engine and safeguard the $10M ARR trajectory. We will not trade CWV or brand trust for short-term feature velocity.
+No exceptions to Responsible AI and privacy posture (COPPA/FERPA). If any telemetry anomaly suggests PII leakage, initiate immediate PAUSE and privacy audit before resuming.
+Action items right now
+
+Post the filled pins: Rollback owner + contact, RUM dashboard URL, WPT test link placeholder.
+Confirm bundle gz ≤75 KB. If not, post PAUSE and cut a lean bundle immediately.
+Proceed with 9:30am ET WebPageTest per the locked framework. I’ll be online for the 9:45am verdict and 12:00pm/4:00pm checkpoints.

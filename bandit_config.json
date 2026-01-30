@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "protocol": "AGENT3_HANDSHAKE_v27",
+  "updated": "2026-01-09T07:50:00Z",
+  
+  "bandits": {
+    "cta_variant": {
+      "type": "thompson_sampling",
+      "arms": ["apply_now", "get_started", "claim_scholarship", "view_details"],
+      "prior_alpha": 1,
+      "prior_beta": 1,
+      "reward_window_hours": 24,
+      "min_samples_per_arm": 100
+    },
+    "headline_variant": {
+      "type": "epsilon_greedy",
+      "epsilon": 0.1,
+      "decay_rate": 0.99,
+      "arms": ["value_prop", "urgency", "social_proof", "question"],
+      "min_samples_per_arm": 50
+    },
+    "pricing_display": {
+      "type": "ucb1",
+      "arms": ["monthly", "annual_discount", "per_essay"],
+      "exploration_constant": 2.0,
+      "min_samples_per_arm": 200
+    }
+  },
+  
+  "reward_signals": {
+    "page_view": 0.05,
+    "lead_capture": 0.30,
+    "checkout_initiated": 0.50,
+    "checkout_completed": 0.65,
+    "complaint": -0.40,
+    "bounce": -0.10
+  },
+  
+  "exploration_budget": {
+    "daily_max_experiments": 1000,
+    "traffic_allocation_pct": 10,
+    "holdout_pct": 5
+  },
+  
+  "guardrails": {
+    "min_conversion_rate": 0.02,
+    "max_bounce_rate": 0.70,
+    "circuit_breaker_threshold": -0.20,
+    "hitl_required_for_policy_change": true
+  },
+  
+  "telemetry": {
+    "emit_to": "a8",
+    "tile_id": "seo.experiments",
+    "sampling_rate": 1.0
+  }
+}

@@ -1,0 +1,50 @@
+Acknowledged. This is the right Gate 0 package and it’s executive-ready. Thank you.
+
+Executive directives for Friday’s Gate 0 review
+
+Decision rule (Go/No-Go)
+
+Go only if all seven Gate 0 exit criteria are green with quantitative evidence, no Sev-1 incidents in the last 7 days, and weekly burn ≤ plan from the $60k allocation.
+If any criterion is amber/red, status remains NO-GO and we enter Safe Mode for a maximum of 1 week with a remediation plan and DRI ownership.
+Pre-reads due EOD Thursday (links in the report)
+
+Engineering: Live links to reliability and delivery dashboards; alert policies; on-call drill evidence (ack <5 min + postmortem); release discipline runbook (immutable deploy + rollback).
+DevOps: DR policy; scheduled restore test date/time; restore playbook; verification plan for RTO ≤4h and RPO ≤24h (must land by Week 3).
+GM B2B: Provider pipeline sheet with current counts by stage; LOI copies; listing velocity plan to reach 15+ listings by Week 6.
+Legal: Engagement confirmation; deliverable schedule (privacy policy, TOS, FERPA/COPPA posture, DPAs); risk register entries and mitigations.
+QA: Testing strategy and coverage metrics; AI Quality Steward named; bias/transparency test plan + model card template.
+Growth/SEO: Auto Page Maker output plan for 200 net-new pages; instrumentation status for top 50 pages; 7-day indexation tracking.
+Gate 0 scoring rubric (binary pass/fail with spot checks)
+
+Reliability: ≥99.9% uptime last 7 days, P95 ≤120ms, error rate ≤1%; change failure ≤15%, MTTR ≤30 min. Auto-blockers confirmed if P95 >200ms for >10 min or error rate >2% for >5 min.
+Delivery: Release runbook validated via a canary + rollback simulation in non-prod this week.
+DR/Backup: Restore test scheduled, success criteria set; backup integrity checks automated; weekly screenshot/report evidence path defined.
+Legal: Engagement letter signed; dated workback plan and deliverables; red/amber risks logged.
+B2B pilot readiness: 2 LOIs signed; 5 late-stage providers in pipeline with dates; listing velocity plan.
+Revenue instrumentation: 3% provider fee flow observable; ARPU from credits tracked and visible in dashboards.
+AI Quality: Steward appointed; bias tests defined; model card template adopted; logging hooks in place for explainability.
+Capital allocation confirmation ($60k)
+
+Approved as proposed. Contingency $10k remains locked; unlock requires a 1-page ROI memo with target KPI lift, payback period ≤3 months, and owner. Any reallocation >$5k needs CEO sign-off.
+Operating directives (next 14 days)
+
+Reliability/error budget: Publish service-level error budgets by Friday; freeze non-critical changes if burn >25% in any 7-day window.
+DR: Treat “DR not tested” as CRITICAL until the restore test passes. If Week 3 deadline risks slipping, declare NO-GO in advance and re-sequence work to prioritize DR.
+SEO engine: Enforce content quality guardrails and templating; daily indexation telemetry; if 7-day indexation <60%, run a root-cause analysis (sitemaps, internal linking, CWV).
+B2C funnel: Stand up baseline tracking for landing→signup conversion; implement one low-risk A/B test on the top landing page within 14 days.
+B2B pipeline: Weekly pipeline health review; time-to-first-listing SLA per provider; highlight any provider at risk of churn and mitigation.
+Revenue telemetry: Daily revenue and ARPU tiles on the Growth/Revenue dashboards; set alerts for anomalies >3σ.
+AI stewardship: Steward to circulate the bias test plan and model card template by Thursday; begin collecting evidence toward Gate 3.
+Friday run-of-show (30 minutes, timeboxed)
+
+Dashboards review (10): Reliability, Delivery, Growth, Revenue; confirm alerting and error budgets.
+DR/Legal (10): DR restore plan/date + success criteria; legal schedule and risk posture.
+B2B/AI (5): Pipeline status vs targets; AI Quality Steward intro and Gate 3 plan.
+Decision (5): Apply Go/No-Go rule; assign Safe Mode remediations if needed.
+Outstanding confirmations I want before we meet
+
+DRI roster: Names + backups for each area; on-call rotation posted through Week 4.
+DR restore test slot: Calendar invite on the books with observers and success checklist attached.
+Provider pipeline detail: Of the 5 late-stage providers, which two are most likely to sign this week, and what are the blockers?
+Legal workback: Dates for privacy policy, TOS, and FERPA/COPPA readout; confirm DPAs where needed for pilots.
+If helpful, I can provide a one-page Gate 0 scorecard template and a pre-read checklist to paste into the report or share as a PDF. Say the word and I’ll draft them now.

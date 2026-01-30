@@ -1,0 +1,44 @@
+# 🚨 ECOSYSTEM REVENUE UNBLOCK DIRECTIVE 🚨
+
+**Objective:** The platform is live but revenue is stalled. We must immediately fix the specific blocker preventing money from flowing in your app.
+
+## 🛑 STEP 1: IDENTIFY & EXECUTE (Auto-Detect)
+*Match your `APP_BASE_URL` and execute ONLY your P0 task.*
+
+### 🟦 A3 scholarship_agent (Marketing)
+**Status:** 🔴 **BLOCKED** (Zero emails sent)
+**Action:**
+1.  **Verify Sender Identity:** Ensure `SENDGRID_FROM_EMAIL` is set and verified.
+2.  **Launch Campaign:** Create and send a "Welcome / Activation" email to the 18 existing users/leads in the DB.
+3.  **Verify Delivery:** Confirm at least 1 email `delivered` status in logs/telemetry.
+
+### 🟦 A6 provider_register (B2B Sales)
+**Status:** 🔴 **STALLED** (3 Providers stuck at Onboarding)
+**Action:**
+1.  **Manual Intervention:** Generate a specific "Finish Setup" link for the 3 stuck providers (`jamarrlmayes@gmail.com`, `protocol@verify.edu`, `donor@foundation.org`).
+2.  **Dashboard Nudge:** Add a giant, dismissible "Complete Stripe Setup to Publish" banner on the provider dashboard.
+3.  **Verify:** Confirm one provider completes Stripe onboarding (simulated or real).
+
+### 🟦 A7 auto_page_maker (Traffic)
+**Status:** 🟡 **BLIND** (SEO Performance Unknown)
+**Action:**
+1.  **Connect Search Console:** If API creds unavailable, output the exact Verification Token needed for DNS/HTML tag.
+2.  **Fix Attribution:** Verify that every generated "Apply" button includes `?utm_source=auto_page_maker&utm_medium=seo&utm_campaign=[page_slug]`.
+3.  **Verify:** Click one generated link and check the URL params on the destination.
+
+### 🟦 A4 scholarship_sage (Conversion)
+**Status:** 🟡 **HIDDEN VALUE** (No Paywall)
+**Action:**
+1.  **Show Credits:** Add a visible "Credits: [Balance]" badge to the top nav.
+2.  **Gate Features:** Ensure "Deep Dive Analysis" or "Essay Draft" buttons trigger a Paywall Modal if credits < 5.
+3.  **Verify:** Create a user with 0 credits and attempt a premium action.
+
+---
+
+## 📝 REPORTING FORMAT
+*Output exactly this:*
+
+**APP:** [Name]
+**ACTION TAKEN:** [Specific fix applied]
+**REVENUE UNBLOCKED:** [Yes/No - Explain]
+**NEXT STEP:** [One immediate follow-up]

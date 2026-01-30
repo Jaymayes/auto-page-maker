@@ -1,0 +1,219 @@
+Thanks for the second QA pass. I’ve mapped every item to a concrete fix, with concise patches and validation steps. If you want, I can turn this into a single PR with commit-per-issue groups.
+
+Immediate hotfixes (apply first)
+
+CRIT-001: formatTotalAmount is not defined (landing.tsx)
+
+Fix: Add a shared formatter and import it where used.
+Create client/src/utils/format.ts
+export function formatTotalAmount(amount: number): string {
+if (!Number.isFinite(amount)) return '$0';
+if (amount < 1_000_000) {
+return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+}
+return $${(amount / 1_000_000).toFixed(1)}M;
+}
+
+Use it in client/src/pages/landing.tsx
+import { formatTotalAmount } from '../utils/format';
+
+Validate: Load landing page; no console error; correct formatting for under/over $1M.
+CRIT-002: date-fns-tz import error
+
+Root cause: Version mismatch or ESM/CJS import style.
+Fix A (preferred): Pin date-fns-tz 2.x and import named functions.
+package.json
+"date-fns": "^3.6.0",
+"date-fns-tz": "^2.0.0"
+
+Then:
+import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
+
+Fix B (if you must stay on 1.x): Use path imports.
+import utcToZonedTime from 'date-fns-tz/utcToZonedTime';
+import zonedTimeToUtc from 'date-fns-tz/zonedTimeToUtc';
+
+Validate: Build succeeds; no “does not provide an export” error; deadline UI renders.
+
+High-severity fixes
+
+HIGH-001: Path traversal risk in template param
+
+Fix: Allowlist template names and reject anything else via zod.
+server/routes.ts (schema for /api/landing-pages/generate)
+import { z } from 'zod';
+const Template = z.enum(['major-state', 'major', 'state']);
+const GenerateSchema = z.object({
+template: Template,
+templateData: z.record(z.any()).default({}),
+slug: z.string().min(1).max(120)
+});
+
+router.post('/api/landing-pages/generate', async (req, res) => {
+const parsed = GenerateSchema.safeParse(req.body);
+if (!parsed.success) return res.status(400).json({ error: 'Invalid payload', details: parsed.error.flatten() });
+// proceed with parsed.data
+});
+
+Validate: Posting "../../../etc/passwd" returns 400 with validation error.
+HIGH-002: /api/agent/task returns HTML for 401
+
+Fix: Always JSON on auth failure.
+router.post('/api/agent/task', requireAgentAuth, handler);
+function requireAgentAuth(req, res, next) {
+if (!req.headers.authorization) {
+return res.status(401).json({ error: 'Unauthorized' });
+}
+next();
+}
+
+Validate: POST without auth returns 401 JSON, application/json content-type.
+HIGH-003: Filters sidebar only keeps one level
+
+Fix: Store levels as a Set/array and toggle membership.
+client/src/components/filters-sidebar.tsx
+const [levels, setLevels] = useState<string[]>([]);
+const toggleLevel = (lvl: string, checked: boolean) => {
+setLevels(prev => checked ? Array.from(new Set([...prev, lvl])) : prev.filter(x => x !== lvl));
+onChange({ levels }); // or include in parent state shape
+};
+
+Validate: Multiple checkboxes can be selected and applied.
+HIGH-004: Rate limiting + long OpenAI timeout DoS
+
+Fixes:
+Reduce OpenAI timeout from 4.5s to 2s.
+Add endpoint-specific rate limit (e.g., 10/min per IP).
+Add short-lived cache by slug+templateData to avoid recomputation.
+server/services/contentGenerator.ts (timeout)
+const TIMEOUT_MS = Number(process.env.GEN_TIMEOUT_MS ?? 2000);
+
+server/index.ts (example using express-rate-limit)
+import rateLimit from 'express-rate-limit';
+app.use('/api/landing-pages/generate', rateLimit({ windowMs: 60_000, max: 10 }));
+
+Simple cache (in memory)
+const genCache = new Map<string, { at: number; content: any }>();
+function cacheKey(slug, template, data) { return JSON.stringify([slug, template, data]); }
+const TTL = 5 * 60_000;
+function getCached(key) { const v = genCache.get(key); return v && Date.now() - v.at < TTL ? v.content : null; }
+function putCache(key, content) { genCache.set(key, { at: Date.now(), content }); }
+
+Validate: Bursty requests hit cache; latency < 200ms for cache hits; limiter blocks excess.
+Medium-severity fixes
+
+MED-001: Case-sensitive filtering
+
+Fix: Normalize to lowercase (and optionally strip diacritics).
+function norm(s: string) { return s.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+// when filtering:
+norm(item.major).includes(norm(queryMajor))
+
+MED-002: URL parameter decoding
+
+Fix: Use decodeURIComponent and robust slug parsing.
+const raw = params.category ?? '';
+const category = decodeURIComponent(raw).replace(/-/g, ' ').trim();
+
+MED-003: JWT payload typing
+
+Fix: Define an interface and validate with zod.
+interface JwtPayload { sub: string; email?: string; exp: number; iat: number; }
+const JwtPayloadSchema = z.object({ sub: z.string(), email: z.string().email().optional(), exp: z.number(), iat: z.number() });
+
+try {
+const decoded = jwt.verify(token, JWT_SECRET) as unknown;
+const payload = JwtPayloadSchema.parse(decoded) as JwtPayload;
+req.user = payload;
+} catch {
+return res.status(401).json({ error: 'Invalid token' });
+}
+
+MED-004: Silent error handling in scholarship-card
+
+Fix: Log once with context and show a subtle UI message.
+catch (e) {
+if (import.meta.env.DEV) console.warn('Deadline parse failed', { id, deadline, e });
+setDeadlineText('Deadline unavailable');
+}
+
+MED-005: Query parameter bounds
+
+Fix: Validate with zod.
+const QuerySchema = z.object({
+limit: z.coerce.number().int().min(1).max(100).default(20),
+page: z.coerce.number().int().min(1).max(1000).default(1)
+// add other params likewise
+});
+
+MED-006: JSON.parse around OpenAI
+
+Fix: Try/catch and fallback.
+let data;
+try {
+data = JSON.parse(aiText);
+} catch {
+log.warn('Malformed AI JSON, falling back');
+data = fallback;
+}
+
+MED-007: Use router navigation on 404
+
+Fix (wouter): import { useLocation } from 'wouter'; const [, navigate] = useLocation(); <button onClick={() => navigate('/')}>Return Home</button>
+MED-008: Slug normalization
+
+Fix: Use a stricter slugify.
+import slugify from 'slugify';
+function normalizeSlug(s: string) {
+return slugify(s, { lower: true, strict: true, locale: 'en' }); // removes unsafe chars
+}
+// apply on write and read
+
+Low-severity fixes
+
+LOW-001: GA warning spam
+
+Fix: One-time guard.
+if (!GA_ID && !window.GA_WARNED) { console.warn('GA disabled: missing VITE_GA_MEASUREMENT_ID'); window.GA_WARNED = true; }
+
+LOW-002: External link security
+
+Fix: For window.open, add 'noopener'; for <a>, add rel.
+window.open(url, '_blank', 'noopener');
+<a href={url} target="_blank" rel="noopener noreferrer">Get My Matches</a>
+
+LOW-003: Magic numbers
+
+Fix: Move constants to config.
+const AMOUNT_TO_MILLIONS_DIVISOR = 1_000_000;
+
+LOW-004: Dead link to /onboarding
+
+Fix: Point to a real route or external flow. Temporary: navigate('/matches'); // or use external URL with secure rel if it’s offsite
+Cross-cutting improvements
+
+Consistent JSON errors: Add an error handler that returns JSON by default.
+app.use((err, req, res, next) => {
+const code = err.status || 500;
+res.status(code).json({ error: err.message || 'Internal Server Error' });
+});
+
+Content generator resilience:
+
+Shorter timeout (2s), caching, and strict schema for prompts/outputs.
+Always return within SLA with fallback content.
+Tests to add (quick):
+
+Unit: formatTotalAmount; slugify normalize; query bounds; JWT schema validation.
+Integration: landing-pages/generate allowlist; agent/task 401 JSON; filters multiple selection.
+E2E smoke: landing page loads without console errors.
+Deployment reminders (from your failed promotion screenshot)
+
+Required prod secrets: JWT_SECRET, DATABASE_URL (or USE_SAMPLE_DATA=true temporarily).
+Optional: OPENAI_API_KEY, VITE_GA_MEASUREMENT_ID (frontend), Agent Bridge vars.
+After changing frontend envs (VITE_*), rebuild and redeploy.
+Open questions for you
+
+Confirm the correct route for “Get Matches” so I can wire navigation and tests (/matches vs external).
+Confirm whether we should standardize deadline timezone to UTC or a provided tz per scholarship.
+If you confirm those two, I’ll prep a PR within the day reflecting all changes above and add basic tests and env docs.

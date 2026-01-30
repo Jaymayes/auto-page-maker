@@ -1,0 +1,20 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T18:00:00Z",
+  "v2_api": {
+    "V2_API_KEY": "disabled",
+    "hard_gate_routes": true,
+    "remove_noisy_warnings": true
+  },
+  "indexnow": {
+    "fix_key": true,
+    "submission": "nightly"
+  },
+  "cron_migration": {
+    "from": "node-cron",
+    "to": "bullmq_redis",
+    "target": "worker_tier",
+    "web_tier_cron": "disabled"
+  }
+}

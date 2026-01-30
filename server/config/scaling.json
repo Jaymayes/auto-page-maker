@@ -1,0 +1,13 @@
+{
+  "web_tier": {
+    "min_instances": 1,
+    "max_instances": 10,
+    "warm_pool": 1,
+    "max_wait_ms": 50
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "updated": "2026-01-22",
+    "description": "Scaling configuration for latency optimization. min_instances ensures at least 1 warm instance to eliminate cold-start latency. warm_pool maintains 1 pre-warmed instance ready for traffic spikes. max_wait_ms is the target queue wait time before scaling up."
+  }
+}

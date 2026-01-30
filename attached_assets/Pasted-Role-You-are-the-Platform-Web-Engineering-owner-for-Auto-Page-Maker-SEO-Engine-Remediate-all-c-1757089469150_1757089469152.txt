@@ -1,0 +1,144 @@
+Role
+You are the Platform + Web Engineering owner for Auto Page Maker (SEO Engine). Remediate all critical blockers found by QA/E2E to achieve a production-ready state without risking SEO/CAC. Solutions must align with our 24/7 trust and defense-in-depth posture and be enforced via automated CI/CD gates before promotion to production  .
+
+Objectives (priority order)
+
+Eliminate SPA fallback SEO failure: unknown routes must return proper 404 (no dev artifacts)
+Remove development artifacts in prod responses (no /@vite/client, react-refresh, HMR)
+Implement canonical tags and Schema.org on landing pages
+Ensure sitemap/robots correctness and exclude non-existent/expired pages
+Provide a minimal, idempotent content seed to validate 10 slugs
+Tune rate limiting in staging so QA can validate expiry hygiene, while keeping prod strict
+Ship automated checks and CI/CD promotion gates for zero-regret releases
+Environment and inputs
+
+Canonical base URL: https://scholarmatch.com
+Slugs to validate (must exist in data for tests):
+art-scholarships-florida
+business-scholarships-massachusetts
+chicago-local-scholarships
+computer-science-scholarships-california
+engineering-scholarships-new-york
+liberal-arts-scholarships-washington
+medicine-scholarships-georgia
+no-essay-scholarships-2025
+nursing-scholarships-texas
+stem-scholarships-2025
+Workstream A — 404 Safety and SPA Fallback Control [CRITICAL]
+
+Problem: Invalid routes return 200 with SPA shell; dev artifacts exposed.
+Actions:
+Production routing:
+Only serve SPA for known-valid routes: /, /{slug} that exists in DB/registry, whitelisted static routes, and approved legacy patterns that resolve to real content.
+All other non-API routes return 404 with SEO-friendly HTML (noindex,nofollow), correct Content-Type, and Cache-Control: no-store.
+Content negotiation:
+If Accept includes application/json for unknown non-API routes, respond with JSON {error:"Not Found", status:404}.
+Dev middleware isolation:
+Attach Vite/HMR middleware strictly when ENVIRONMENT !== 'production'. In production, serve only prebuilt assets from /dist.
+Acceptance:
+100% of invalid paths return 404 (no dev artifacts); valid routes remain 200.
+Keyword scan shows no /@vite/client, react-refresh, or createHotContext in any production HTML.
+Workstream B — Production Build Hygiene [CRITICAL]
+
+Ensure NODE_ENV=production and ENVIRONMENT=production for build/runtime.
+Only serve from the Vite production build (no HMR). Integrity-check index.html to confirm absence of development scripts.
+Acceptance: All production HTML is free of dev references; cache-control policies correct for HTML vs static assets.
+Workstream C — Canonical and Structured Data [HIGH]
+
+Canonical tag:
+Insert a single <link rel="canonical" href="https://scholarmatch.com/{slug}"> on each landing page.
+JSON-LD:
+Include valid JSON-LD. Minimum: WebPage + Organization (sitewide). For scholarship pages, add Scholarship where data available: name, description, url, sponsor, applicationDeadline, eligibility, amount.
+Acceptance:
+Each of the 10 slugs renders one canonical tag and valid JSON-LD (linted).
+No duplicate or conflicting canonicals.
+Workstream D — Sitemap and Robots Integrity [HIGH]
+
+robots.txt:
+User-agent: *; Allow: /; Sitemap: https://scholarmatch.com/sitemap.xml (use canonical domain).
+For non-prod, ensure we do not expose indexable environments (e.g., Disallow: / or x-robots-tag headers).
+sitemap.xml:
+Include homepage and all valid landing pages; exclude unknown/expired content.
+lastmod in ISO‑8601; cache max-age ~3600.
+Acceptance:
+11 total entries for the 10 slugs + homepage in staging; zero stale/expired URLs; valid XML/namespace.
+Workstream E — Minimal Data Seed for QA [HIGH]
+
+Provide an idempotent seed script or admin task to create the 10 listed pages in staging/dev.
+Seed only non-PII test content with essential fields (title, description, slug, lastmod; optional sponsor, deadline).
+Acceptance:
+Running the seed twice produces no duplicates; sitemap reflects 10 entries.
+Workstream F — Legacy Route Handling and Redirects [HIGH]
+
+Supported legacy pattern: /scholarships/:category/:location resolves only when the pair exists. Otherwise 404.
+Where feasible, map old patterns to new slugs via 301 redirects (maintain link equity).
+Acceptance:
+Known pairs resolve 200 (or 301→200); unknown pairs return 404 (no SPA shell).
+Workstream G — Expiry Hygiene Testability and Rate Limits [MEDIUM]
+
+Keep production rate limits strict.
+For staging, allow QA header-based bypass or test user role to raise limits on admin expiry endpoints only.
+Acceptance:
+QA can read expiry endpoints without frequent 429 in staging; prod remains unchanged and strict.
+Workstream H — Caching and Headers [MEDIUM]
+
+HTML: Cache-Control: no-store for 404/410; standard for dynamic HTML as policy dictates.
+Static assets: immutable, long max-age + content hashing.
+Maintain existing security headers (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, CSP).
+Acceptance:
+Headers verified via curl; Lighthouse passes no caching errors for static assets.
+Automated tests and CI/CD gates (must pass before promotion)
+
+Suite A (Metadata):
+Assert canonical link presence and correctness per slug; run JSON-LD lint.
+Suite B (SPA/404):
+10 invalid paths return 404; HTML 404 contains noindex,nofollow; JSON 404 when Accept: application/json.
+Body scan for dev artifacts across all pages: none found.
+Suite C (Performance):
+TTFB median and P95 within target; confirm removing dev middleware does not regress metrics (record baseline).
+Suite D (Crawlability):
+robots.txt has expected directives; sitemap contains homepage + 10 slugs; excludes unknown/expired.
+Suite E (Conversion/instrumentation):
+Event beacons fire on page view and CTA clicks; no PII in payloads; UTM attribution preserved.
+Suite F (Expiry hygiene):
+For 1–2 expired fixtures: 404 (recent) and 410 (older) behaviors; excluded from sitemap.
+Suite G (Legacy):
+Known legacy pairs resolve; unknown legacy routes 404.
+Suite H (Headers):
+Security headers present on 200, 404, and 410 responses; cache policies correct.
+Promotion gates:
+CI runs Suites A–H; canary blocks promotion on any critical fail. This operationalizes quality at release time per our DevOps guidance .
+Keep alerting and SLO monitors active during canary; production must sustain SLOs and pass security checks to honor our 24/7 trust mandate .
+Technical notes (pseudocode-level)
+
+Prod router:
+if (isProd) { if (isApi(req)) next(); else if (isValidStatic(req)) serveStatic(); else if (isValidSlug(req.path) || isWhitelistedRoute(req.path) || isValidLegacy(req.path)) serveIndexHtmlFromDist(); else respond404(req); } else { attachViteDevMiddleware(); }
+respond404(req):
+if (wantsJson(req)) return res.status(404).json({error:"Not Found"});
+else return res.status(404) .set('Cache-Control','no-store') .send(renderSeo404Html({noindex: true, nofollow: true}));
+isValidSlug:
+Lookup in in-memory cache keyed by slug, hydrated from DB/registry; fallback to DB on miss; cache TTL short.
+Deliverables
+
+PR: “Auto Page Maker – Critical SEO Fix Pack v1.0”
+Seed script or admin command for 10 slugs in staging
+Updated docs: routing rules, metadata requirements, sitemap/robots policy, staging rate-limit test bypass
+CI evidence: test reports, Lighthouse summaries, curl header outputs, and a body-diff proving removal of dev artifacts
+Rollout and rollback
+
+Canary 10% for 30 minutes with synthetic probes:
+404 checks on invalid routes; sitemap correctness; metadata/JSON‑LD; dev artifact scan.
+Auto‑promote only if canary is clean; instant rollback if any 200 on unknown routes, dev artifacts detected, or sitemap integrity fails.
+Acceptance criteria for Go
+
+Suites A, B, D, G, H: 100% pass
+Suite C: TTFB/LCP within target bands on majority of slugs
+Suite E: Event beacons verified on sampled flows; no PII
+Suite F: Pass with available expired fixtures or documented N/A
+No dev artifacts in any prod response
+CI/CD promotion gates green, honoring the quality-at-velocity approach we require
+Notes
+
+Maintain strict separation of dev tooling from production to reduce attack surface and protect SEO/CAC.
+Keep continuous testing and alerting as first-class gates to preserve reliability and trust at scale
+End of prompt.

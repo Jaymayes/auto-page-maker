@@ -1,0 +1,77 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "sev_level": "SEV-1",
+  "effective_at": "2026-01-19T19:35:00Z",
+  "stability_hold": {
+    "duration_minutes": 15,
+    "window_end_utc": "2026-01-19T19:50:00Z",
+    "traffic_cap_during": 0
+  },
+  "restore_2pct_criteria": {
+    "all_must_pass": true,
+    "consecutive_minutes": 15,
+    "prove_by": "raw_logs",
+    "telemetry": {
+      "http_428_lines": 0,
+      "targets": ["scholarship_api", "A8"],
+      "acceptance_ratio_min": 0.99,
+      "queue_depth_max": 100,
+      "queue_trend": "flat",
+      "command_center": {
+        "emitter_mode": "local_spool",
+        "queue_size": 0,
+        "fallback_failed": 0,
+        "local_400_spool_errors": 0
+      }
+    },
+    "cpu_background": {
+      "event_loop_lag_p95_max_ms": 100,
+      "node_cron_web_disabled": true,
+      "missed_execution_lines": 0
+    },
+    "auth_provider": {
+      "provider_synthetic_p95_max_ms": 500,
+      "login_p95_max_ms": 200,
+      "auth_5xx": 0,
+      "policy_blocks_separate": true
+    },
+    "seo_probing": {
+      "sitemap_429_lines": 0,
+      "waf_block_active": true,
+      "metrics_p95_404_lines": 0,
+      "legacy_probes_disabled": true
+    },
+    "db": {
+      "db_p95_max_ms": 100,
+      "statement_timeouts": 0
+    }
+  },
+  "on_all_pass_at_1950": {
+    "traffic_cap": 0.02,
+    "mode": "pilot_only",
+    "telemetry_gateway_override": "ON",
+    "safety_lock": "ON",
+    "stripe_cap": "ON",
+    "begin_30min_acceptance_run": true,
+    "target_sev_transition": "SEV-1 → SEV-2"
+  },
+  "rollback_triggers": {
+    "any_auth_5xx": true,
+    "provider_p95_above_ms": 500,
+    "telemetry_acceptance_below": 0.95,
+    "telemetry_acceptance_window_min": 5,
+    "event_loop_lag_p95_above_ms": 300,
+    "event_loop_lag_duration_s": 30,
+    "event_loop_consecutive_samples": 2,
+    "db_p95_above_ms": 120,
+    "db_duration_min": 10,
+    "sitemap_429_recurrence": true,
+    "metrics_p95_404_recurrence": true
+  },
+  "rollback_action": {
+    "traffic_cap": 0,
+    "append_cir": true,
+    "include_evidence": true
+  }
+}

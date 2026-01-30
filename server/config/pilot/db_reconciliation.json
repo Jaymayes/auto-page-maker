@@ -1,0 +1,22 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "effective_at": "2026-01-19T18:00:00Z",
+  "slow_query_log": {
+    "enabled": true,
+    "threshold_ms": 80
+  },
+  "query_optimization": {
+    "add_missing_indexes": true,
+    "verify_prepared_statements": true,
+    "statement_timeout_seconds": 5
+  },
+  "reporting": {
+    "db_p95_raw": true,
+    "app_p95_end_to_end": true
+  },
+  "slo": {
+    "db_p95_max_ms": 100,
+    "sustained": true
+  }
+}

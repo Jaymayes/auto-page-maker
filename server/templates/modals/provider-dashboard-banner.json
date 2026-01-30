@@ -1,0 +1,43 @@
+{
+  "version": "1.0.0",
+  "banner_id": "oca_provider_banner",
+  "display_condition": "has_oca_submissions",
+  "style": "info",
+  "content": {
+    "heading": "One-Click Apply Submissions",
+    "description": "Some applications were submitted via One-Click Apply. Admin data was verified; essays were attested by students.",
+    "oca_tag": {
+      "text": "OCA",
+      "tooltip": "Prepared via Scholar AI Advisor OCA — Admin data verified; essay attested by student.",
+      "style": "badge-blue"
+    }
+  },
+  "actions": {
+    "view_audit_log": {
+      "text": "View OCA Audit Log",
+      "url": "/audit-log?oca=true",
+      "style": "link"
+    },
+    "report_issue": {
+      "text": "Report Issue",
+      "url": "/report-issue?source=oca_banner",
+      "style": "danger-link",
+      "microcopy": "Opens ticket with auto-disable on submit; shows what will happen next.",
+      "telemetry_event": "provider_issue_reported"
+    }
+  },
+  "report_issue_modal": {
+    "title": "Report an Issue with One-Click Apply",
+    "warning": "Submitting this report will immediately disable One-Click Apply while our team investigates. We will respond within 24 hours.",
+    "reason_options": [
+      {"value": "spam", "label": "Receiving spam or low-quality applications"},
+      {"value": "quality", "label": "Application quality concerns"},
+      {"value": "integrity", "label": "Suspected academic integrity violation"},
+      {"value": "unauthorized", "label": "Unauthorized submission"},
+      {"value": "other", "label": "Other (please describe)"}
+    ],
+    "required_fields": ["reason", "description"],
+    "submit_button": "Submit Report & Disable OCA",
+    "cancel_button": "Cancel"
+  }
+}

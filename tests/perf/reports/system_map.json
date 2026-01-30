@@ -1,0 +1,21 @@
+{
+  "run_id": "CEOSPRINT-20260123-EXEC-ZT3G-FIX-AUTH-009",
+  "timestamp": "2026-01-23T12:31:09Z",
+  "ecosystem": "Scholar AI Advisor",
+  "apps": {
+    "A1": {"name": "scholar-auth", "url": "https://scholar-auth-jamarrlmayes.replit.app", "status": "HEALTHY_BUT_REGISTRY_ISSUE", "issue": "Client registry missing /api/auth/callback URIs"},
+    "A2": {"name": "scholarship-api", "url": "https://scholarship-api-jamarrlmayes.replit.app", "status": "REQUIRES_API_KEY"},
+    "A3": {"name": "scholarship-agent", "url": "https://scholarship-agent-jamarrlmayes.replit.app", "status": "HEALTHY"},
+    "A4": {"name": "scholarship-sage", "url": "https://scholarship-sage-jamarrlmayes.replit.app", "status": "HEALTHY"},
+    "A5": {"name": "student-pilot", "url": "https://student-pilot-jamarrlmayes.replit.app", "status": "AUTH_MISSING", "issue": "/api/auth/login returns 404"},
+    "A6": {"name": "provider-register", "url": "https://provider-register-jamarrlmayes.replit.app", "status": "PKCE_MISSING", "issue": "Login redirect missing code_challenge"},
+    "A7": {"name": "auto-page-maker", "url": "https://auto-page-maker-jamarrlmayes.replit.app", "status": "HEALTHY"},
+    "A8": {"name": "auto-com-center", "url": "https://auto-com-center-jamarrlmayes.replit.app", "status": "HEALTHY"}
+  },
+  "auth_chain": {
+    "provider": "A1 (scholar-auth)",
+    "clients": ["A5", "A6"],
+    "protocol": "OAuth 2.0 + OIDC + PKCE S256",
+    "blockers": ["A1 client registry", "A5 missing routes", "A6 missing PKCE"]
+  }
+}

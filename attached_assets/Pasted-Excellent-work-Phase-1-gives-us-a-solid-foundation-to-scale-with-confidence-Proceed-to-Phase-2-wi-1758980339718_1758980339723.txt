@@ -1,0 +1,76 @@
+Excellent work. Phase 1 gives us a solid foundation to scale with confidence. Proceed to Phase 2, with the following executive objectives, guardrails, and acceptance criteria.
+
+Decision: APPROVED TO PROCEED TO PHASE 2 (with conditions)
+
+Strategic intent
+
+Tie QA outcomes directly to revenue levers: frictionless student journeys (B2C conversion, ARPU via credits), reliable provider flows (B2B 3% fee capture), and SEO performance (low-CAC growth via Auto Page Maker).
+Preserve our SLOs and security posture while closing compliance gaps that could block enterprise deals or institutional partnerships.
+Phase 2 scope directives
+
+Functional and Integration Coverage (revenue-critical)
+Must-cover paths:
+B2C: discovery → application drafting → credit purchase → submission → notification loop
+Monetization: credit checkout, subscription upgrade/downgrade, refunds/chargebacks, tax handling
+B2B: provider onboarding → listing creation → update flows → 3% platform fee capture
+SEO/Auto Page Maker: page generation, indexing signals, canonical tags, sitemaps
+External integrations: payment processor, email/SMS, analytics, auth (OIDC), storage/CDN
+Data boundaries: verify PII minimization and consent flows at every ingress/egress point
+2. Performance optimization (production-grade)
+
+Targets at Phase 2 exit:
+LCP ≤ 2.5s on p95 for top 20 SEO landing pages (mobile on median network)
+TTFB ≤ 150ms p95 (maintain current baseline)
+Frontend errors: <1% session error rate; JS long tasks mitigation documented
+Backend p95 latency ~120ms maintained; no SLO regressions
+Include a prioritized perf backlog with effort/impact estimates and quick wins shipped during Phase 2
+3. Security and compliance hardening
+
+Vulnerabilities: 0 open P1/P2 issues at exit; all P3s triaged with owners and dates
+Secrets: provision and rotate SHARED_SECRET and VITE_GA_MEASUREMENT_ID; add secret scanning gates
+Compliance uplift targets (evidence-based):
+FERPA ≥ 90%, COPPA ≥ 85%, GDPR ≥ 90% coverage with documented gaps and compensating controls
+Add DSR runbook (access/rectify/delete), data retention schedule, and vendor DPAs
+Auditable artifacts: updated SBOM diff, threat model updates for any new endpoints, pentest plan
+4. Observability and alerting for SLOs and growth KPIs
+
+Production-ready monitoring:
+Error budget policy for 99.9% uptime (burn-rate alerts: fast/slow)
+Traces/metrics/logs with golden signals (latency, errors, traffic, saturation)
+Growth telemetry (must be verifiable in dashboards):
+B2C: free→paid conversion, ARPU (credits), funnel drop-offs by page/source
+SEO: landing-page CTR, indexation, impressions, conversions attributed to Auto Page Maker
+B2B: provider activation rate, time-to-first-listing, fee capture reliability
+Acceptance criteria (Phase 2 exit gate)
+
+Test coverage:
+E2E: ≥ 40 critical user flows automated with Playwright; nightly runs green ≥ 95% for 7 consecutive days
+Integration tests for payments, auth, and analytics; mock contracts with schema validation
+Performance: LCP p95 ≤ 2.5s on targeted pages; no regression in TTFB/CLS
+Security/compliance: 0 P1/P2 vulns; compliance targets met or formal exceptions approved
+Telemetry: dashboards live for B2C/B2B/SEO with week-over-week tracking; alerting in place
+Runbooks: incident management, on-call rotations, and rollback procedures documented and tested
+Execution plan and timeline
+
+Duration: 2 weeks, with a midpoint executive check-in at end of Week 1
+Milestones:
+Day 3: Secrets provisioned; baseline Playwright suite running in CI; perf quick wins merged
+Day 7: 80% of critical flows automated; initial LCP improvements live; dashboards populated with real data
+Day 14: Exit review against acceptance criteria; go/no-go decision for Phase 3 prep
+Resourcing and constraints
+
+Budget: Use existing CI; if grid parallelization is needed, approve up to $500 for the phase
+Environments: ephemeral preview environments per PR; load tests in isolated staging
+Ownership: name single accountable owner for each of the following—E2E tests, performance, security, compliance, telemetry
+Open items to resolve in parallel (blockers if not addressed by Day 3)
+
+Provision SHARED_SECRET and VITE_GA_MEASUREMENT_ID
+Confirm legal review schedule for FERPA/COPPA/GDPR gap closure and DPA templates
+Deliverables to submit at Phase 2 exit
+
+Test coverage report and flake rate analysis
+Performance report with before/after deltas and prioritized backlog
+Vulnerability closure report and updated threat model
+Compliance evidence binder (policies, DPIA/ROPA excerpts, DSR runbook)
+Live KPI dashboards for B2C/B2B/SEO with definitions and owner assignments
+Confirm you’re aligned with these acceptance criteria and timeline. If yes, proceed with Phase 2 immediately and schedule the Week 1 check-in on my calendar with links to the live dashboards and CI runs.

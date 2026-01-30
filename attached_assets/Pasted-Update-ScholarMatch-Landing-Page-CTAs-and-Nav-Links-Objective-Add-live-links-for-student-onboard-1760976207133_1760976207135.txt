@@ -1,0 +1,55 @@
+Update ScholarMatch Landing Page CTAs and Nav Links
+
+Objective
+Add live links for student onboarding and provider onboarding to accelerate both funnels with clear, trustworthy CTAs, zero layout shift, and trackable analytics.
+
+Scope
+Landing page header, hero section, and footer. Maintain existing design tokens, spacing, and accessibility standards.
+
+Changes
+
+Header (sticky)
+
+Primary CTA (students): “Get My Matches” → link to https://student-pilot-jamarrlmayes.replit.app/?utm_source=homepage&utm_medium=cta&utm_campaign=pilot_launch&utm_content=header_student
+Secondary CTA (providers): “List a Scholarship” → link to https://provider-register-jamarrlmayes.replit.app/?utm_source=homepage&utm_medium=cta&utm_campaign=pilot_launch&utm_content=header_provider
+Mobile: both CTAs appear in the hamburger overlay with 48x48px minimum touch targets.
+Hero section
+
+Primary button: “Get My Matches” → https://student-pilot-jamarrlmayes.replit.app/?utm_source=homepage&utm_medium=cta&utm_campaign=pilot_launch&utm_content=hero_student
+Secondary button: “Browse All” → existing route
+Tertiary text link below buttons (12–14px, neutral color, underlined on hover): “Are you a scholarship provider? List your scholarship” → https://provider-register-jamarrlmayes.replit.app/?utm_source=homepage&utm_medium=link&utm_campaign=pilot_launch&utm_content=hero_provider
+Maintain smart urgency, trust indicators, and zero layout shift. Buttons stack on mobile.
+Footer
+
+For Students: add “Get My Matches” → https://student-pilot-jamarrlmayes.replit.app/?utm_source=homepage&utm_medium=footer&utm_campaign=pilot_launch&utm_content=footer_student
+For Providers: add “List a Scholarship” → https://provider-register-jamarrlmayes.replit.app/?utm_source=homepage&utm_medium=footer&utm_campaign=pilot_launch&utm_content=footer_provider
+Accessibility and UX
+
+aria-labels:
+“Get My Matches — Student pilot”
+“List a Scholarship — Provider registration”
+Focus states must meet WCAG AA contrast. Maintain keyboard navigation order.
+External links open in a new tab with rel="noopener" to preserve session: target="_blank" rel="noopener"
+Analytics and Events
+
+Fire events on click with location metadata:
+click_student_pilot_cta { location: header|hero|footer }
+click_provider_register_cta { location: header|hero|footer }
+Preserve existing analytics stack; do not introduce layout shift or block rendering.
+Performance and QA
+
+No increase in initial bundle size; reuse existing button components and tokens.
+CLS remains ≤ 0.1; FCP target ≤ 2.5s.
+Test on breakpoints sm, md, lg, xl for proper stacking and spacing.
+Implement behind feature flag pilot_links_v1 (default ON in production). If toggled OFF, revert to previous CTAs without errors.
+Acceptance Criteria
+
+Desktop and mobile show student and provider entry points as specified.
+All links resolve and carry UTM parameters.
+Events appear in analytics with correct labels and locations.
+Lighthouse scores and current CLS unaffected; FCP not degraded.
+Business Rationale (for context)
+
+Supports dual-engine growth: lowers friction for student onboarding and adds a clear provider path from the highest-traffic page.
+Enables measurement: compares header vs hero vs footer CTRs for both funnels to inform future placement and copy tests.
+If you want, I can provide variant copy for A/B tests on the provider CTA (“List a Scholarship” vs “Post a Scholarship” vs “Become a Provider”) to optimize CTR without impacting design.

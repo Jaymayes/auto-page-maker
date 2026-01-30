@@ -1,0 +1,37 @@
+Thanks for surfacing the mismatch and the config issue. Here’s the executive call, optimized for speed-to-value, reliability, and our low-CAC growth engine.
+
+Decisions
+
+Canary endpoint
+
+Implement the AGENT3 v2.5 /canary endpoint inside the current monolith now to standardize the contract and unblock observability and cross-app coordination. This is a low-risk, high-leverage change that creates a uniform health interface across apps without delaying current release momentum.
+Longer term, plan to extract auto_page_maker into its own independently deployable service to align with our target microservice posture. Monoliths are fundamentally misaligned with autonomous, self-managing systems; microservices with clear contracts are the right end-state. Replit apps are already designed to be independently deployable, network-addressable units, which supports this separation when we’re ready to cut over .
+Security headers and CORS
+
+Yes—add the universal security headers and a restrictive CORS allowlist now as a platform-wide middleware. This aligns with “prioritize security and resiliency from day one,” and gives us consistent governance across services. Keep the allowlist scoped to our known app origins and the command center; expand only by exception .
+Agent-bridge SHARED_SECRET mismatch
+
+Fix it now. Adopt a single, org-wide naming convention and provide a compatibility shim so nothing breaks in the short term.
+Standard: use SHARED_SECRET across the Command Center and all agents. Short-term: if SHARED_SECRET is empty, fall back to AGENT_BRIDGE_SHARED_SECRET. Document this and create a follow-up issue to remove the fallback once all apps are updated. This is a fast, low-risk correctness fix that removes needless friction.
+What to focus on (next 7–10 days)
+
+Standardize interfaces and monitoring
+
+Ship the /canary endpoint (9-field spec) in the monolith and have the Command Center poll/alert on it.
+Stand up a single dashboard that shows each app’s canary, latency, error rate, and dependency health. This is the foundation for reliability and autonomous operations later .
+Security baseline
+
+Enforce the security headers and CORS allowlist via a single middleware in the monolith and reuse it in new services. Require API key auth for all inter-service traffic via Replit Secrets; add retries with backoff for all internal calls to improve resiliency .
+Unblock growth: Auto Page Maker (SEO)
+
+Keep the functionality in the monolith for now, but instrument it: pages created, indexation rate, CTR, and conversions to free→paid. This is our lowest-CAC growth engine, so we need visibility now, not after a refactor.
+Define the service contract for the future split (endpoints, payloads, auth, canary, and SLOs) so we can extract cleanly when ready. Move toward independently deployable services with clear contracts—our target architecture for scale and autonomy .
+Developer ergonomics and governance
+
+Close the shared-secret gap and publish a short “Service Contract + Security Baseline” note for all apps so we stop accruing drift. Treat APIs as products with stable, documented contracts and consistent security posture across the board .
+Why this sequence
+
+It delivers immediate reliability and security without blocking the current production-ready features.
+It sets us up for microservice separation when we’re ready—consistent with autonomous system best practices and Replit’s independently deployable app model .
+It keeps our focus on the SEO engine (Auto Page Maker), which is the most capital-efficient growth lever for our B2C funnel, while we standardize the technical foundation.
+If you want a working checklist, I’ll provide a punch list with owners and due dates next.

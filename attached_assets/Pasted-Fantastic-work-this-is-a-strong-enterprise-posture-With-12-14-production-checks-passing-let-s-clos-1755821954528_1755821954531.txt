@@ -1,0 +1,56 @@
+Fantastic work—this is a strong enterprise posture. With 12/14 production checks passing, let’s close the last gap and lock in operational readiness.
+
+Quick asks to finish 14/14
+
+Which two production checks failed? Share the check names and any sample response headers or logs. I can give precise remediations.
+If possible, paste one sanitized response from a protected route (all response headers) and one preflight (OPTIONS) response.
+Likely remaining gaps and fast fixes
+
+HSTS/preload not fully enabled
+Set Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Confirm no HTTP endpoints remain; validate subdomains are HTTPS-only before enabling preload.
+CSP not strict enough
+Nonce-based policy: default-src 'none'; script-src 'nonce-{dynamic}'; style-src 'self' 'unsafe-inline' (or nonces/hashes); img-src 'self' data: https:; connect-src exact API origins; frame-ancestors 'none'; object-src 'none'
+Ensure nonces rotate per response; disable unsafe-inline where possible.
+Vary/caching at CDN
+Ensure Vary: Origin, Access-Control-Request-Method, Access-Control-Request-Headers is present and respected by CDN.
+Add CDN cache key includes Origin for CORSed routes; never cache authenticated responses cross-origin.
+Cookie flags
+All session cookies: Secure; HttpOnly; SameSite=None for cross-site, Lax otherwise; tight Domain scoping; short TTLs; rotation on privilege change.
+OPTIONS/WAF path
+Verify WAF/proxies never block or auth-gate OPTIONS; no redirects; 204/200 with correct headers.
+TLS config
+TLS 1.2+ only, modern ciphers, OCSP stapling; check SSL Labs A+.
+Go-live verification (concise)
+
+Allowed credentialed
+Expect: 200; Access-Control-Allow-Origin echo of the exact allowed origin; Access-Control-Allow-Credentials: true if needed; Set-Cookie has Secure; HttpOnly; SameSite=None when cross-site.
+Blocked origin
+Expect: no ACAO header returned; browser blocks.
+Preflight allowed
+Expect: 204/200; ACAO echo; Access-Control-Allow-Methods limited set; Access-Control-Allow-Headers limited set; Access-Control-Max-Age set; Vary headers present.
+CDN check
+Same GET from two different Origin values should not serve a cached response with mismatched ACAO.
+Operational guardrails
+
+Alerts
+Blocked-origin rate >2% for 10 minutes
+Preflight error rate >1% or p95 latency >200 ms
+Sudden rise in path/Unicode block counters
+Dashboards
+CORS allow/deny by origin
+Preflight volume and hit rate (Max-Age effectiveness)
+p95/99 latency and 4xx/5xx by route and origin
+Auto-mitigations
+Throttle repeated blocked origins/IPs; WAF rule if sustained
+Change and rollback
+
+Allowlist changes via config-only rollout; canary 5–10%; monitor blocked-origin metric
+Rollback plan: revert allowlist, keep CORS_LOG_ONLY off in prod; only use in staging
+Evidence for audit (ready-to-generate)
+
+Header snapshots for key routes (GET/POST/OPTIONS)
+Config printout of CORS allowlist and feature flags at boot
+SIEM samples of blocked-origin events and traversal/Unicode blocks
+Performance baseline showing <60 ms overhead
+Share the two failing checks (or sample headers), and I’ll provide targeted fixes so you can mark 14/14 as passed.

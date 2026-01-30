@@ -1,0 +1,166 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-10-27",
+  "sharedDirectives": {
+    "path": "docs/system-prompts/shared_directives.prompt",
+    "description": "Common directives for all eight Scholar AI Advisor services",
+    "requiredForAll": true
+  },
+  "services": [
+    {
+      "name": "Executive Command Center",
+      "app": "auto-com-center-jamarrlmayes.replit.app",
+      "promptFile": "executive_command_center.prompt",
+      "status": "deployed",
+      "priority": "critical",
+      "requiredEvents": [
+        "scheduler_job_run",
+        "kpi_missing_data",
+        "kpi_slo_breach",
+        "kpi_data_integrity_risk"
+      ],
+      "kpis": ["B2C", "B2B", "SEO", "SLO", "CAC"],
+      "notes": "Already instrumented and operational with daily KPI brief at 09:00 UTC"
+    },
+    {
+      "name": "Auto Page Maker",
+      "app": "auto-page-maker-jamarrlmayes.replit.app",
+      "promptFile": "auto_page_maker.prompt",
+      "status": "pending",
+      "priority": "high",
+      "requiredEvents": [
+        "page_published",
+        "sitemap_submitted",
+        "indexnow_submitted"
+      ],
+      "kpis": ["pages_live", "indexation_rate", "organic_sessions", "p95_latency"],
+      "instrumentationWeek": 2
+    },
+    {
+      "name": "Provider Register",
+      "app": "provider-register-jamarrlmayes.replit.app",
+      "promptFile": "provider_register.prompt",
+      "status": "pending",
+      "priority": "critical",
+      "requiredEvents": [
+        "provider_registered",
+        "provider_verified",
+        "provider_active",
+        "scholarship_posted",
+        "provider_churned"
+      ],
+      "kpis": ["active_providers", "3_percent_fee_revenue", "top_decile_concentration"],
+      "instrumentationWeek": 1,
+      "notes": "Required for B2B revenue visibility - CEO priority"
+    },
+    {
+      "name": "Scholarship API",
+      "app": "scholarship-api-jamarrlmayes.replit.app",
+      "promptFile": "scholarship_api.prompt",
+      "status": "pending",
+      "priority": "critical",
+      "requiredEvents": [
+        "scholarship_viewed",
+        "scholarship_saved",
+        "match_generated",
+        "application_started",
+        "application_submitted"
+      ],
+      "kpis": ["p95_latency", "cache_hit_ratio", "view_to_save", "save_to_apply"],
+      "instrumentationWeek": 1,
+      "notes": "Required for engagement funnel - CEO priority"
+    },
+    {
+      "name": "Scholarship Agent",
+      "app": "scholarship-agent-jamarrlmayes.replit.app",
+      "promptFile": "scholarship_agent.prompt",
+      "status": "pending",
+      "priority": "medium",
+      "requiredEvents": [
+        "campaign_launched",
+        "lead_acquired",
+        "conversion_attributed"
+      ],
+      "kpis": ["organic_leads", "lead_to_signup", "cac_over_time", "payback_period"],
+      "instrumentationWeek": 3
+    },
+    {
+      "name": "Student Pilot",
+      "app": "student-pilot-jamarrlmayes.replit.app",
+      "promptFile": "student_pilot.prompt",
+      "status": "pending",
+      "priority": "critical",
+      "requiredEvents": [
+        "student_signup",
+        "profile_completed",
+        "match_viewed",
+        "credit_purchased",
+        "credit_spent",
+        "application_submitted"
+      ],
+      "kpis": ["ctr_by_segment", "free_to_paid_conversion", "arpu_from_credits", "application_completion_rate"],
+      "instrumentationWeek": 1,
+      "notes": "Required for B2C revenue visibility - CEO priority"
+    },
+    {
+      "name": "Scholar Auth",
+      "app": "scholar-auth-jamarrlmayes.replit.app",
+      "promptFile": "scholar_auth.prompt",
+      "status": "pending",
+      "priority": "high",
+      "requiredEvents": [
+        "email_verified",
+        "consent_recorded",
+        "login_succeeded",
+        "login_failed"
+      ],
+      "kpis": ["login_success_rate", "auth_failure_rate", "email_verification_rate", "parental_consent_rate"],
+      "instrumentationWeek": 2
+    },
+    {
+      "name": "Scholarship Sage",
+      "app": "scholarship-sage-jamarrlmayes.replit.app",
+      "promptFile": "scholarship_sage.prompt",
+      "status": "pending",
+      "priority": "medium",
+      "requiredEvents": [
+        "recommendation_shown",
+        "recommendation_accepted",
+        "checklist_created",
+        "checklist_completed"
+      ],
+      "kpis": ["recommendation_accept_rate", "rec_to_application_start", "application_start_to_submit", "student_satisfaction_score"],
+      "instrumentationWeek": 3
+    }
+  ],
+  "deploymentPriority": {
+    "week1": [
+      "Student Pilot (B2C revenue)",
+      "Provider Register (B2B revenue)",
+      "Scholarship API (engagement funnel)"
+    ],
+    "week2": [
+      "Auto Page Maker (SEO metrics)",
+      "Scholar Auth (auth health)"
+    ],
+    "week3": [
+      "Scholarship Sage (AI effectiveness)",
+      "Scholarship Agent (attribution)"
+    ]
+  },
+  "ceoDirectives": {
+    "immediate": [
+      "Adopt this prompt pack assignment immediately",
+      "Use the file names provided in each service"
+    ],
+    "thisWeek": [
+      "Finish business event instrumentation in Student Pilot, Provider Register, and Scholarship API",
+      "These three unblock revenue visibility"
+    ],
+    "72Hours": [
+      "Configure Slack webhook in Executive Command Center",
+      "Run manual executive brief after instrumentation",
+      "Deliver first non-zero revenue report"
+    ]
+  }
+}

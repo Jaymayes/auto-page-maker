@@ -1,0 +1,85 @@
+{
+  "order_id": "SAA-EO-2026-01-19-01",
+  "run_id": "ZT3G-056",
+  "sev_level": "SEV-1",
+  "restart_sequence": ["A7", "A8", "A1", "A3", "A2", "A4", "A5", "A6"],
+  "per_app_steps": {
+    "step_1_quiesce": {
+      "capture_logs_seconds": 30,
+      "record": ["pid", "commit_sha", "build_artifact_sha", "manifest_digest"],
+      "capture_file_descriptors": true
+    },
+    "step_2_hard_stop": {
+      "kill_signal": "SIGKILL",
+      "stop_container": true,
+      "clear_web_cron": true,
+      "rebuild_from": "golden_path_manifest",
+      "inject_version_labels": true
+    },
+    "step_3_verify_green": {
+      "confirm_new_pid": true,
+      "confirm_new_commit_digest": true,
+      "health_markers": {
+        "http_200": true,
+        "functional_markers": true
+      },
+      "a1_specific": {
+        "db_connected": true,
+        "pool_utilization_max": 0.50
+      },
+      "synthetic": {
+        "target": "https_public_origin",
+        "follow_redirects": true,
+        "consecutive_passes": 2
+      },
+      "observability": {
+        "post_without_idempotency_key": true,
+        "expect_response": 202,
+        "queue_depth_declining": true,
+        "no_428s": true
+      }
+    }
+  },
+  "post_restart_probes": {
+    "telemetry_acceptance": {
+      "target_ratio": 0.99,
+      "consecutive_minutes": 15,
+      "http_428s": 0,
+      "queue_depth_target": 100,
+      "fallback_failed_lines": 0
+    },
+    "seo_suppression": {
+      "sitemap_429s": 0,
+      "duration_minutes": 30
+    },
+    "auth_health": {
+      "provider_p95_max_ms": 500,
+      "login_p95_max_ms": 200,
+      "auth_5xx": 0,
+      "policy_blocks_separate": true
+    },
+    "cpu_event_loop": {
+      "loop_lag_p95_max_ms": 100,
+      "node_cron_missed_web": 0
+    },
+    "db_latency": {
+      "db_p95_max_ms": 100,
+      "slow_query_log_threshold_ms": 80,
+      "statement_timeouts": 0
+    }
+  },
+  "rollback_conditions": {
+    "telemetry_acceptance_below": 0.95,
+    "rolling_window_minutes": 10,
+    "provider_p95_above_ms": 500,
+    "any_auth_5xx": true,
+    "action": "keep_b2c_0_append_cir"
+  },
+  "exit_restore": {
+    "all_probes_pass_minutes": 15,
+    "restore_traffic_cap": 0.02,
+    "continue_30min_acceptance": true,
+    "sev1_to_sev2": true,
+    "gate1_5pct": "NO_GO_until_24h_stable"
+  }
+}

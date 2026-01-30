@@ -1,0 +1,51 @@
+Acknowledged. Gate 0 package is accepted as the canonical, locked baseline. DRIs proceed with evidence collection exactly as specified; schedule remains unchanged.
+
+CEO directives and decision framework
+
+What I will require in the Thursday pre-read (8:00–10:00 PM)
+One-page executive summary: GO/NO-GO recommendation with quantified evidence and residual risks.
+Dashboard roll-up: live links, last-updated timestamps, and a single screenshot per dashboard with the key numbers highlighted.
+Exception log: any red/yellow status, owner, root cause, and dated mitigation plan.
+B2C/B2B revenue outlook: 6-week leading indicators tied to core KPIs (conversion to paid, ARPU, active providers, listings/week, time-to-first-listing, 3% fee trajectory).
+Finance: weekly burn ≤$60k, variance analysis, and open anomalies with owner.
+Responsible AI: guardrail and bias test summary with pass/fail counts and any open remediations.
+2. Clarifications and required actions today
+
+Map “7 Gate 0 criteria” to the 9 evidence categories: deliver a one-row-per-criterion mapping table and confirm how each rolls up to a GREEN/GO decision. Owner: PMO. Due: EOD today.
+Canary + rollback demo: ensure it is explicitly tracked within Engineering Reliability with success criteria and rollback SLOs. Owner: Eng Reliability DRI. Due: EOD today for plan; demo invite already on calendar.
+On-call evidence: confirm the two <5 min acks came from live production alerts (not synthetic), include timestamps and delta math in the artifact. Owner: SRE. Due: Thursday 6:00 PM.
+AI Quality Steward: confirm named steward, signed charter, and issue-handling SLA in artifact. Owner: AI Quality DRI. Due: EOD today.
+Legal readiness: confirm counsel engagement letter, FERPA/COPPA/TOS/Privacy workback schedule, and DPAs coverage list with counterparties. Owner: Legal. Due: Thursday 6:00 PM.
+3. Red lines that force NO-GO (binary)
+
+Any Sev-1 in the last 7 days or an unresolved Sev-2 with material student/provider impact.
+SLO breach on critical paths at decision time: P95 > 200ms or error rate > 2% for any major endpoint, or error budget burn > 75% for any service.
+SEO indexation < 60% without a credible RCA and validated remediation plan with measured uplift in-flight.
+Missing or inconclusive revenue instrumentation (no $0.01 end-to-end demo, or 3% provider fee not observable in dashboards).
+Incomplete Legal readiness on student data handling (FERPA/COPPA) or missing DPAs for any active provider integration.
+4. KPI focus and evidence expectations
+
+B2C growth: WAU/MAU, activation-to-subscription conversion, ARPU from credits, CAC split favoring organic/SEO. Show 7-day trends and variance vs plan.
+B2B growth: active providers, listings/week, time-to-first-listing ≤ 14 days, revenue captured via 3% fee.
+Reliability: uptime, P50/P95/P99 by major endpoint, error rate, MTTA/MTTR, error budget burn and freeze policy triggers.
+Finance: weekly burn ≤ $60k with 3σ anomaly alerts validated; call out any category >10% variance vs plan.
+Responsible AI: bias test coverage across demographics, academic dishonesty rejection tests, transparency surfacing, and model card sign-off workflow.
+5. Cadence, escalation, and ownership
+
+Risk checkpoint: 15-minute risk pulse Wednesday 5:00 PM with owners of any yellow/red. If any deliverable is at risk by Wednesday 5:00 PM, escalate to me with a mitigation plan and updated dates.
+Evidence hygiene: all links, screenshots, and attachments must live in the Gate 0 Evidence Collection section of the canonical artifact; include timestamps and “last verified by” initials on each item.
+Decision timeline: Thursday 10:30 PM must-fix comments if needed; Friday 30-minute Gate 0 decision remains binary.
+6. Specific asks by DRI
+
+SRE: attach paging route diagram and runbook excerpts used in the two live alerts; confirm on-call rotation through Week 4 with backups and contact info.
+Eng Reliability: publish current auto-blockers (P95 > 200ms, error > 2%, error budget > 75%) with issue IDs and expected resolution dates; include rollback demo plan and success checklist.
+Growth/SEO: provide Top 50 pages with GA4 + schema + canonical verification, 7-day indexation tracker, and RCA hypotheses if <60% with prioritized fixes (sitemaps, internal linking, crawl budget, CWV).
+Revenue Instrumentation: show $0.01 sandbox transaction trace with unique IDs across services, proof of 3σ anomaly alert firing, and 3% fee/ARPU observability screenshots with query definitions.
+AI Quality: submit bias test plan schedule and first-run results sample; attach academic dishonesty guardrail outputs and transparency copy to be shown to students.
+Legal: confirm milestone dates and counterparties for Privacy/TOS/FERPA/DPAs with explicit risk callouts and mitigations.
+7. Strategic reminder
+
+Our bias is to data-first, low-CAC growth via Auto Page Maker SEO. The GO decision depends on proving we can scale reliably, ethically, and profitably. Student value is the economic engine.
+If any ambiguity remains on the 7 criteria vs 9 categories, raise it today. I’ll hold the bar high: all criteria GREEN with quantitative evidence, or we enter Safe Mode for up to one week with DRI-owned remediation and daily standups, then re-review next Friday.
+
+Proceed.

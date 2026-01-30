@@ -1,0 +1,60 @@
+Phase 3 Authorization: APPROVED
+
+Rationale
+
+This directly advances our prime directive: faster Core Web Vitals → stronger SEO → lower CAC for Auto Page Maker pages → higher B2C conversions and monetization.
+TTFB and CLS are already in the green; FCP/LCP are our clear bottlenecks.
+Scope and Success Criteria (must all pass)
+
+Real-user Web Vitals (mobile, 75th percentile, 28-day window, top 40 SEO pages):
+FCP ≤ 1.8s
+LCP ≤ 2.5s
+CLS ≤ 0.05 (no regressions)
+TTFB ≤ 800ms (maintain)
+Lighthouse CI (mobile, lab baselines for the same pages in CI):
+FCP ≤ 1.8s, LCP ≤ 2.3s
+Performance score ≥ 90
+Budgets: JS ≤ 200KB gz, CSS ≤ 60KB gz, initial image bytes ≤ 300KB
+SEO and quality guardrails:
+0% loss of canonical tags, schema.org FinancialProduct, or sitemap coverage
+100% Playwright smoke tests remain green; 99.9% uptime; no security changes required
+Business impact (leading indicators; evaluate 2–4 weeks post-ship):
++15% organic traffic to the 40 landing pages
++1.5 pp lift in visit→signup rate from those pages
+Maintain or reduce infra cost per visit (no >5% increase in CDN/compute per 1,000 pageviews)
+Execution Plan (prioritized by ROI)
+
+LCP/FCP first
+Preload and set fetchpriority=high on the LCP resource per page.
+Convert hero images to WebP/AVIF, constrain dimensions, compress aggressively (<70KB target), and ensure responsive srcset/sizes.
+Inline critical CSS above-the-fold; defer non-critical CSS. Remove unused CSS (Purge/critical extraction).
+JavaScript and third-party control
+Route-level code splitting; remove unused polyfills.
+Defer/async any non-essential third-party scripts. Keep GA4 async and confirm minimal blocking. Delay non-critical tags until post-FCP.
+Fonts and connections
+Self-host WOFF2 only, limit weights, font-display: swap. Prefer system font stack on landing pages if acceptable to design.
+Preconnect to asset CDN and font origin.
+Caching and delivery
+Ensure Brotli, long-lived immutable cache for static assets, and image CDN transforms (width/quality) for AMP pages.
+Hydration/interaction cost (stretch if time allows)
+Reduce client-side hydration on static landing pages (islands/MPA approach where feasible).
+Measurement and Reporting
+
+RUM: Continue logging Web Vitals; segment by device, country, and page template. Add weekly executive dashboard with P75 FCP/LCP and conversion overlays for the 40 pages.
+Lighthouse CI: Gate merges on the budgets above.
+Google Search Console: Track Core Web Vitals “Good” status—target ≥80% of impressions “Good” within 28 days post-launch.
+Resourcing and Constraints
+
+Allocate 2 FTE front-end for a 2-week sprint, 0.5 FTE infra for CDN/caching.
+Approved budget: up to $300/month incremental CDN/optimization cost cap. Any overages require ROI justification tied to conversion lift.
+Timeline
+
+Week 1: Implement LCP/FCP quick wins (preload, hero optimization, critical CSS, third-party defers). Ship behind a 50% canary on the 40 SEO pages.
+Week 2: Bundle reductions, font optimization, caching/CDN tuning. Ramp canary to 100% contingent on RUM improvements meeting interim targets (FCP ≤ 2.2s, LCP ≤ 2.8s at P75).
+Week 4: Validate business impact metrics; decide on next tranche (remaining site templates).
+Risks and Guardrails
+
+Do not compromise accessibility or Responsible AI UX. No changes that obscure disclosures or mislead users.
+Maintain test coverage; no regressions to schema/canonical/sitemap.
+Rollback plan in place via feature flags if RUM metrics regress by >10%.
+Proceed. Send me the Week 1 plan-of-action ticket list and the current LCP element inventory for the 10 highest-traffic pages so I can spot-check priority alignment.

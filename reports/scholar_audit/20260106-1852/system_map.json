@@ -1,0 +1,118 @@
+{
+  "audit_timestamp": "2026-01-06T18:53:00Z",
+  "ecosystem_version": "1.0.0",
+  "services": [
+    {
+      "id": "A1",
+      "name": "scholar-auth",
+      "purpose": "Authentication and OIDC provider",
+      "url": "https://scholar-auth-jamarrlmayes.replit.app",
+      "health_endpoint": "/health",
+      "status": "OK",
+      "status_details": "auth_db slow (247ms)",
+      "dependencies": ["auth_db", "email_service", "jwks_signer", "oauth_provider", "clerk"],
+      "inbound_apis": ["/oidc/auth", "/oidc/token", "/oidc/me", "/oidc/jwks"],
+      "outbound_apis": ["clerk", "postmark"],
+      "auth_method": "OIDC/OAuth2",
+      "data_sinks": ["auth_db"],
+      "data_sources": ["replit_oauth"]
+    },
+    {
+      "id": "A2",
+      "name": "scholarship-api",
+      "purpose": "Scholarship data API",
+      "url": "https://scholarship-api-jamarrlmayes.replit.app",
+      "health_endpoint": "/health",
+      "status": "HEALTHY",
+      "dependencies": ["database", "a8_telemetry"],
+      "inbound_apis": ["/api/scholarships", "/health", "/ready"],
+      "outbound_apis": ["A8"],
+      "auth_method": "JWT/API-Key"
+    },
+    {
+      "id": "A3",
+      "name": "scholarship-agent",
+      "purpose": "AI scholarship matching agent",
+      "url": "https://scholarship-agent-jamarrlmayes.replit.app",
+      "health_endpoint": "/health",
+      "status": "HEALTHY",
+      "dependencies": ["application"],
+      "inbound_apis": ["/api/match", "/api/recommend"],
+      "outbound_apis": ["A2", "A4", "A8"],
+      "auth_method": "JWT"
+    },
+    {
+      "id": "A4",
+      "name": "scholarship-sage",
+      "purpose": "LLM/AI services for essays and content",
+      "url": "https://scholarship-sage-jamarrlmayes.replit.app",
+      "health_endpoint": "/health",
+      "status": "HEALTHY",
+      "dependencies": ["database", "openai", "scholarship_api"],
+      "inbound_apis": ["/api/essay", "/api/generate"],
+      "outbound_apis": ["OpenAI", "A2"],
+      "auth_method": "JWT"
+    },
+    {
+      "id": "A5",
+      "name": "student-pilot",
+      "purpose": "Student portal and dashboard",
+      "url": "https://student-pilot-jamarrlmayes.replit.app",
+      "health_endpoint": "/health",
+      "status": "OK",
+      "dependencies": ["database", "agent"],
+      "inbound_apis": ["/dashboard", "/profile", "/applications"],
+      "outbound_apis": ["A1", "A2", "A3"],
+      "auth_method": "OIDC via A1"
+    },
+    {
+      "id": "A6",
+      "name": "provider-register",
+      "purpose": "Scholarship provider registration and management",
+      "url": "https://provider-register-jamarrlmayes.replit.app",
+      "health_endpoint": "/health",
+      "status": "DOWN",
+      "status_code": 500,
+      "error": "Internal Server Error on all endpoints",
+      "dependencies": ["database", "stripe"],
+      "inbound_apis": ["/register", "/provider-register", "/dashboard"],
+      "outbound_apis": ["A1", "A2", "A8", "Stripe"],
+      "auth_method": "OIDC via A1"
+    },
+    {
+      "id": "A7",
+      "name": "auto-page-maker",
+      "purpose": "SEO and marketing page generation",
+      "url": "https://scholaraiadvisor.com",
+      "health_endpoint": "/health",
+      "status": "HEALTHY",
+      "dependencies": ["database", "email_provider", "jwks"],
+      "inbound_apis": ["/", "/browse", "/scholarships"],
+      "outbound_apis": ["A2", "A8", "SendGrid"],
+      "auth_method": "JWT/API-Key",
+      "notes": "Async health checks enabled, P95=67ms"
+    },
+    {
+      "id": "A8",
+      "name": "auto-com-center",
+      "purpose": "Command center, telemetry, and analytics",
+      "url": "https://auto-com-center-jamarrlmayes.replit.app",
+      "health_endpoint": "/health",
+      "status": "OK",
+      "dependencies": ["database", "event_store"],
+      "inbound_apis": ["/api/report", "/api/events", "/api/tiles"],
+      "outbound_apis": ["Slack", "email"],
+      "auth_method": "JWT/API-Key",
+      "notes": "Requires authentication for /api/report"
+    }
+  ],
+  "critical_issues": [
+    {
+      "id": "ISSUE-001",
+      "severity": "P0",
+      "service": "A6",
+      "description": "provider-register returning 500 on all endpoints",
+      "impact": "B2B revenue funnel blocked, provider registration unavailable"
+    }
+  ]
+}
