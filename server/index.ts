@@ -44,14 +44,22 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// WWW → Apex 301 Redirect: Canonical host enforcement for SEO
-// Redirects www.scholaraiadvisor.com → scholaraiadvisor.com to prevent indexing splits
+// CANONICAL HOST REDIRECT: Enforce single domain for SEO
+// Uses CANONICAL_HOST env var (default: no redirect if unset)
+// GoDaddy forwards apex → www, so we accept both or redirect to canonical
 app.use((req: Request, res: Response, next: NextFunction) => {
+  const canonicalHost = process.env.CANONICAL_HOST;
+  if (!canonicalHost) return next(); // No redirect if not configured
+
   const host = req.get('host') || '';
-  if (host.startsWith('www.')) {
-    const apexHost = host.replace(/^www\./, '');
+  // Skip Railway internal domains
+  if (host.includes('.railway.app') || host.includes('.railway.internal')) {
+    return next();
+  }
+
+  if (host !== canonicalHost) {
     const protocol = req.protocol || 'https';
-    const redirectUrl = `${protocol}://${apexHost}${req.originalUrl}`;
+    const redirectUrl = `${protocol}://${canonicalHost}${req.originalUrl}`;
     return res.redirect(301, redirectUrl);
   }
   next();
