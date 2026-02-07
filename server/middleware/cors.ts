@@ -58,7 +58,13 @@ export const corsEnforce = (req: Request, res: Response, next: NextFunction) => 
   try {
     const origin = req.headers.origin;
     const allowlist = ALLOWLIST();
-    
+
+    // Skip CORS checking for static assets - these are same-origin requests
+    // that don't need CORS validation (JS, CSS, images, fonts)
+    if (req.path.startsWith('/assets/') || req.path.startsWith('/images/') || req.path.endsWith('.ico')) {
+      return next();
+    }
+
     // Server-to-server requests (no Origin header) are allowed
     if (!origin) {
       console.log(`[CORS] Server-to-server request allowed: ${req.method} ${req.path} from IP: ${req.ip}`);
